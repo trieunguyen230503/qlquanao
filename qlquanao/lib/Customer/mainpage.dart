@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:qlquanao/HomePage.dart';
-import 'package:qlquanao/UserPage.dart';
+import 'package:qlquanao/Customer/fragment/HomePage.dart';
+import 'package:qlquanao/Customer/fragment/UserPage.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});

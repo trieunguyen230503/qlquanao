@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">qlquanao</string>
+    <string name="facebook_app_id">2579461872203910</string>
+    <string name="fb_login_protocol_scheme">fb1234</string>
+    <string name="facebook_client_token">7714bc57ee93e7fc9d6b7893bcec52f4</string>
+</resources>

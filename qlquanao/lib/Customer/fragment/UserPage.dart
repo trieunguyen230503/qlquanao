@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:qlquanao/Login.dart';
-import 'package:qlquanao/ProfilePage.dart';
+import 'package:qlquanao/utils/Login.dart';
+import 'package:qlquanao/utils/ProfilePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPage extends StatefulWidget {
@@ -165,15 +165,6 @@ class _UserPageState extends State<UserPage> {
                 Navigator.pushReplacement(context,
                     new MaterialPageRoute(builder: (context) => Login()));
               },
-              child: Container(
-                color: Colors.white70,
-                child: ListTile(
-                  //tileColor: Colors.grey,
-                  title: Text('LOGOUT'),
-                  trailing: Icon(Icons.keyboard_arrow_right),
-                  selectedTileColor: Colors.black,
-                ),
-              ),
             ),
           ],
         ),

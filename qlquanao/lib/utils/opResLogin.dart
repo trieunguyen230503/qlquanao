@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:qlquanao/Login.dart';
-import 'package:qlquanao/Register.dart';
+import 'package:qlquanao/utils/Login.dart';
+import 'package:qlquanao/Customer/Register/Register.dart';
 
 class OpResLogin extends StatefulWidget {
   const OpResLogin({super.key});

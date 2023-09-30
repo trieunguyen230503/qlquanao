@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1093077759158",
+    "project_id": "qlquanao",
+    "storage_bucket": "qlquanao.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1093077759158:android:af4baf4049b719fffde217",
+        "android_client_info": {
+          "package_name": "com.example.qlquanao"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHhwpSO8JR-yWHyumerYtmVZ5XH-JH5tU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

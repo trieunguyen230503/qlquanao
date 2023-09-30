@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mailer/smtp_server.dart';
-import 'package:qlquanao/ForgetPassword.dart';
-import 'package:qlquanao/RenewPassword.dart';
-import 'package:qlquanao/mainpage.dart';
+import 'package:qlquanao/Customer/GetNewPassword/ForgetPassword.dart';
+import 'package:qlquanao/Customer/GetNewPassword/RenewPassword.dart';
+import 'package:qlquanao/Customer/mainpage.dart';
 import 'package:mailer/mailer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math';
+
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class ConfirmPassword extends StatefulWidget {
   final String code;
@@ -20,6 +22,7 @@ class ConfirmPassword extends StatefulWidget {
 
 class _ConfirmPasswordState extends State<ConfirmPassword> {
   final codeconfirm = TextEditingController();
+  final confirmPasswordController = RoundedLoadingButtonController();
 
   @override
   Widget build(BuildContext context) {
@@ -48,14 +51,16 @@ class _ConfirmPasswordState extends State<ConfirmPassword> {
                     filled: true),
               ),
             ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: 50,
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-              margin: EdgeInsets.fromLTRB(0, 15, 0, 0),
-              child: ElevatedButton(
+            RoundedLoadingButton(
+                controller: confirmPasswordController,
+                color: Colors.black,
+                successColor: Colors.black,
+                width: MediaQuery.of(context).size.width * 0.8,
+                elevation: 0,
+                borderRadius: 25,
                 onPressed: () {
                   if (widget.code == codeconfirm.text) {
+                    confirmPasswordController.success();
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -65,19 +70,28 @@ class _ConfirmPasswordState extends State<ConfirmPassword> {
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Code is not correct')));
+                    confirmPasswordController.reset();
                   }
                 },
-                style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.black)),
-                child: const Text(
-                  'CONFIRM',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-              ),
-            ),
+                child: Wrap(
+                  children: const [
+                    Icon(
+                      Icons.login,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Text(
+                      'LOGIN',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500),
+                    )
+                  ],
+                )),
             InkWell(
               onTap: () {
                 Navigator.pushReplacement(context,

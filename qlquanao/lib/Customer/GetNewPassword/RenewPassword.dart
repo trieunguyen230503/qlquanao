@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:qlquanao/mainpage.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:qlquanao/Customer/mainpage.dart';
+import 'package:qlquanao/provider/internet_provider.dart';
+import 'package:qlquanao/provider/signin_provider.dart';
+import 'package:qlquanao/utils/next_screen.dart';
+import 'package:qlquanao/utils/snack_bar.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 
-import 'Login.dart';
-import 'database.dart';
+import '../../utils/Login.dart';
+import '../../database.dart';
 
 class RenewPassword extends StatefulWidget {
   final String email;
@@ -22,6 +29,8 @@ class _RenewPasswordState extends State<RenewPassword> {
 
   bool _obscureText = true;
   bool _obscureText1 = true;
+
+  final renewPassowrd = RoundedLoadingButtonController();
 
   @override
   Widget build(BuildContext context) {
@@ -99,26 +108,35 @@ class _RenewPasswordState extends State<RenewPassword> {
                   ),
                 ),
               ),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 50,
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                margin: EdgeInsets.fromLTRB(0, 15, 0, 0),
-                child: ElevatedButton(
+              RoundedLoadingButton(
+                  controller: renewPassowrd,
+                  successColor: Colors.black,
+                  color: Colors.black,
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  elevation: 0,
+                  borderRadius: 25,
                   onPressed: () {
                     updateData();
                   },
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.black)),
-                  child: const Text(
-                    'RENEW ',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                ),
-              ),
+                  child: Wrap(
+                    children: const [
+                      Icon(
+                        FontAwesomeIcons.check,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                      SizedBox(
+                        width: 15,
+                      ),
+                      Text(
+                        'Renew Password',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500),
+                      )
+                    ],
+                  )),
               InkWell(
                 onTap: () {
                   Navigator.pushReplacement(context,
@@ -139,33 +157,24 @@ class _RenewPasswordState extends State<RenewPassword> {
     );
   }
 
-  void updateData() {
+  void updateData() async {
     if (confirmpassword.text == password.text) {
       if (confirmpassword.text.length > 8) {
-        dbHelper
-            .updateStudent(widget.email.toString(), password.text.toString())
-            .then((check) {
-          if (check) {
-            // LoadingDialog.showLoadingDialog(context, "Vui lòng đợi...");
-            Fluttertoast.showToast(
-                msg: "Success",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.TOP,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Color.fromRGBO(125, 31, 31, 1.0),
-                textColor: Colors.white,
-                fontSize: 16.0);
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (context) => Login()));
-          }
-        });
+        final sp = context.read<SignInProvider>();
+        final ip = context.read<InternetProvider>();
+        await ip.checkInternetConnection();
+
+        sp.updateForgetPass(widget.email, password.text.toString());
+        openSnackbar(context, "Successful", Colors.green);
+        renewPassowrd.success();
+        nextScreen(context, MainPage());
       } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Password more 8')));
+        openSnackbar(context, "Password must be 8 character", Colors.red);
+        renewPassowrd.reset();
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Confirm password does not match')));
+      openSnackbar(context, "Password doesn't match", Colors.red);
+      renewPassowrd.reset();
     }
   }
 }
