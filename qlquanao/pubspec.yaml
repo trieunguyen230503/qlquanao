@@ -59,6 +59,9 @@ dependencies:
   facebook_app_events: ^0.14.0 # Hoặc phiên bản mới nhất
   facebook_login: ^0.2.0
   firebase_database: ^10.2.6
+  firebase_storage: ^11.2.8
+  image_picker: ^1.0.4
+  file_picker: ^5.5.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -209,7 +209,6 @@ class _RegisterState extends State<Register> {
         ),
       ),
     );
-    ;
   }
 
   Future register(BuildContext context, String mobile) async {

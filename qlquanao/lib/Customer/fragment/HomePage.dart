@@ -20,7 +20,6 @@ class _HomePageState extends State<HomePage> {
     return user;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

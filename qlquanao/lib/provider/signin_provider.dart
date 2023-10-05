@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
@@ -172,6 +176,7 @@ class SignInProvider extends ChangeNotifier {
         _password = " ";
         _phone = " ";
         _address = " ";
+        _role = 3;
         notifyListeners();
       } on FirebaseAuthException catch (e) {
         switch (e.code) {
@@ -476,5 +481,50 @@ class SignInProvider extends ChangeNotifier {
     //     print("Lỗi khi cập nhật: $e");
     //   }
     // }
+  }
+
+  Future<void> updateProfile(String email, String name, String phone,
+      String adress, PlatformFile? image) async {
+    DatabaseReference newpostKey = FirebaseDatabase.instance.ref("users/$_uid");
+
+    Map<String, dynamic> updateData;
+    final SharedPreferences s = await SharedPreferences.getInstance();
+
+    if (image != null) {
+      final path = 'avtuser/${image!.name}';
+      final file = File(image!.path!);
+      final ref = FirebaseStorage.instance.ref().child(path);
+      ref.putFile(file);
+
+      //Lấy link của hình ảnh
+      UploadTask? uploadtask = ref.putFile(file);
+      final snapshot = await uploadtask!.whenComplete(() {});
+      final urlDownload = await snapshot.ref.getDownloadURL();
+      updateData = {
+        'name': name,
+        'phone': phone,
+        'address': adress,
+        'image_url': urlDownload.toString(),
+      };
+      await s.setString('image_url', urlDownload!);
+    } else {
+      updateData = {
+        'name': name,
+        'phone': phone,
+        'address': adress,
+      };
+    }
+
+    //Update lại sharpreces
+    await s.setString('name', name!);
+    //await s.setString('email', _email!);
+    await s.setString("phone", phone!);
+    await s.setString('address', adress!);
+
+    await newpostKey.update(updateData).then((value) {
+      print("Thành công");
+    }).catchError((onError) {
+      print(onError);
+    });
   }
 }

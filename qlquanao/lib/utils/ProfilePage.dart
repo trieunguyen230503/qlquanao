@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qlquanao/Customer/mainpage.dart';
+import 'package:qlquanao/utils/ProfileCustome.dart';
 import 'package:qlquanao/utils/opResLogin.dart';
 import 'package:qlquanao/provider/signin_provider.dart';
 import 'package:qlquanao/utils/emailsender.dart';
@@ -36,6 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future getData() async {
     final sp = context.read<SignInProvider>();
     sp.getDataFromSharedPreference();
+    print(sp.imageUrl);
   }
 
   @override
@@ -87,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       height: 10,
                     ),
                     Text(
-                      "${sp.uid}",
+                      "${sp.address}",
                       style:
                           TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                     ),
@@ -98,12 +100,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text("Provider"),
+                        const Text("Phone"),
                         const SizedBox(
                           width: 5,
                         ),
                         Text(
-                          "${sp.provider}",
+                          "${sp.phone}",
                           style: TextStyle(
                               fontSize: 15, fontWeight: FontWeight.w500),
                         ),
@@ -135,7 +137,18 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: const Text(
                           "Change your password",
                           style: TextStyle(color: Colors.white),
-                        ))
+                        )),
+                    ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ProfileCustome()));
+                        },
+                        child: const Text(
+                          "Update your profile",
+                          style: TextStyle(color: Colors.white),
+                        )),
                   ],
                 ),
               );
