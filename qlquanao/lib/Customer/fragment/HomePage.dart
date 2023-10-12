@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:qlquanao/Customer/fragment/Page1.dart';
-import 'package:qlquanao/Customer/fragment/test1.dart';
 
 import '../../database.dart';
 import '../../model/User.dart';
