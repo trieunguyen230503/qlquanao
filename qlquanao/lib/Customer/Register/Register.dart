@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qlquanao/Customer/Register/ConfirmEmail.dart';
 import 'package:qlquanao/utils/Login.dart';
@@ -23,17 +25,37 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  DBHelper dbHelper = new DBHelper();
-
   final RoundedLoadingButtonController registerController =
       RoundedLoadingButtonController();
 
   final email = TextEditingController();
   final name = TextEditingController();
   final phone = TextEditingController();
+  final dob = TextEditingController();
+
   final password = TextEditingController();
   final confirmpassword = TextEditingController();
   final _scaffoldKey = GlobalKey<FormState>();
+
+  DateTime selectedDate = DateTime.now();
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      errorFormatText: 'Ngày không hợp lệ',
+      errorInvalidText: 'Ngày không hợp lệ',
+      initialEntryMode: DatePickerEntryMode.input,
+    );
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+        DateTime de = DateFormat("dd/MM/yyyy").parse(dob.text);
+      });
+    }
+  }
 
   bool _obscureText = true;
   bool _obscureText1 = true;
@@ -43,172 +65,195 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(
-            Icons.keyboard_arrow_left,
-            color: Colors.black,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(
+              Icons.keyboard_arrow_left,
+              color: Colors.black,
+            ),
+            // Đổi icon về
+            onPressed: () {
+              // Xử lý khi người dùng nhấn vào icon trở về
+            },
           ),
-          // Đổi icon về
-          onPressed: () {
-            // Xử lý khi người dùng nhấn vào icon trở về
-          },
+          backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
+          centerTitle: true,
+          title: const Text(
+            'REGISTER',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          ),
         ),
-        backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
-        centerTitle: true,
-        title: const Text(
-          'REGISTER',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-        ),
-      ),
-      body: Container(
-        child: Center(
-          child: Form(
-            key: _scaffoldKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
-                  child: TextFormField(
-                    controller: email,
-                    decoration: InputDecoration(
-                      hintText: "Enter your email",
-                      fillColor: Colors.grey[200],
-                      filled: true,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
-                  child: TextFormField(
-                    controller: name,
-                    decoration: InputDecoration(
-                      hintText: "Enter your name",
-                      fillColor: Colors.grey[200],
-                      filled: true,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
-                  child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    controller: phone,
-                    decoration: InputDecoration(
-                      hintText: "Enter Phone Number",
-                      fillColor: Colors.grey[200],
-                      filled: true,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
-                  child: TextFormField(
-                    obscureText: _obscureText,
-                    controller: confirmpassword,
-                    decoration: InputDecoration(
-                      suffixIcon: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _obscureText = !_obscureText;
-                          });
-                        },
-                        child: Icon(_obscureText
-                            ? Icons.visibility_off
-                            : Icons.visibility),
-                      ),
-                      hintText: 'Password',
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                    ),
-                  ),
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
-                  child: TextFormField(
-                    obscureText: _obscureText1,
-                    controller: password,
-                    decoration: InputDecoration(
-                      suffixIcon: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _obscureText1 = !_obscureText1;
-                          });
-                        },
-                        child: Icon(_obscureText1
-                            ? Icons.visibility_off
-                            : Icons.visibility),
-                      ),
-                      hintText: 'Confirm Password',
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                    ),
-                  ),
-                ),
-                RoundedLoadingButton(
-                    controller: registerController,
-                    successColor: Colors.black,
-                    color: Colors.black,
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    elevation: 0,
-                    borderRadius: 25,
-                    onPressed: () {
-                      register(context, phone.text.trim());
-                    },
-                    child: const Wrap(
-                      children: const [
-                        Icon(
-                          FontAwesomeIcons.registered,
-                          size: 20,
-                          color: Colors.white,
+        body: SingleChildScrollView(
+          child: Container(
+            child: Center(
+              child: Form(
+                key: _scaffoldKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                      child: TextFormField(
+                        controller: email,
+                        decoration: InputDecoration(
+                          hintText: "Enter your email",
+                          fillColor: Colors.grey[200],
+                          filled: true,
                         ),
-                        SizedBox(
-                          width: 15,
+                      ),
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                      child: TextFormField(
+                        controller: name,
+                        decoration: InputDecoration(
+                          hintText: "Enter your name",
+                          fillColor: Colors.grey[200],
+                          filled: true,
                         ),
-                        Text(
-                          'Sign in with Facebook',
-                          style: TextStyle(
+                      ),
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                      child: TextFormField(
+                        keyboardType: TextInputType.number,
+                        controller: phone,
+                        decoration: InputDecoration(
+                          hintText: "Enter Phone Number",
+                          fillColor: Colors.grey[200],
+                          filled: true,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                      child: TextFormField(
+                        keyboardType: TextInputType.datetime,
+                        controller: dob,
+                        decoration: InputDecoration(
+                            hintText: 'DateEnd',
+                            filled: true,
+                            fillColor: Colors.white,
+                            prefix: Container(
+                              width: 50,
+                              child: Icon(Icons.calendar_month),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.calendar_today),
+                              onPressed: () => _selectDate(context),
+                            )),
+                      ),
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                      child: TextFormField(
+                        obscureText: _obscureText,
+                        controller: confirmpassword,
+                        decoration: InputDecoration(
+                          suffixIcon: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _obscureText = !_obscureText;
+                              });
+                            },
+                            child: Icon(_obscureText
+                                ? Icons.visibility_off
+                                : Icons.visibility),
+                          ),
+                          hintText: 'Password',
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                      child: TextFormField(
+                        obscureText: _obscureText1,
+                        controller: password,
+                        decoration: InputDecoration(
+                          suffixIcon: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _obscureText1 = !_obscureText1;
+                              });
+                            },
+                            child: Icon(_obscureText1
+                                ? Icons.visibility_off
+                                : Icons.visibility),
+                          ),
+                          hintText: 'Confirm Password',
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                        ),
+                      ),
+                    ),
+                    RoundedLoadingButton(
+                        controller: registerController,
+                        successColor: Colors.black,
+                        color: Colors.black,
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        elevation: 0,
+                        borderRadius: 25,
+                        onPressed: () {
+                          register(context, phone.text.trim());
+                        },
+                        child: const Wrap(
+                          children: const [
+                            Icon(
+                              FontAwesomeIcons.registered,
+                              size: 20,
                               color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500),
-                        )
-                      ],
-                    )),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => Login()));
-                  },
-                  child: Container(
-                    margin: EdgeInsets.fromLTRB(0, 15, 0, 15),
-                    child: Text('Have account already ?',
-                        style: TextStyle(
-                          decoration: TextDecoration.underline,
+                            ),
+                            SizedBox(
+                              width: 15,
+                            ),
+                            Text(
+                              'Sign in with Facebook',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500),
+                            )
+                          ],
                         )),
-                  ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => Login()));
+                      },
+                      child: Container(
+                        margin: EdgeInsets.fromLTRB(0, 15, 0, 15),
+                        child: Text('Have account already ?',
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                            )),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Future register(BuildContext context, String mobile) async {
@@ -281,6 +326,7 @@ class _RegisterState extends State<Register> {
                   name: name.text.toString().trim(),
                   phone: phone.text.toString().trim(),
                   password: password.text.toString().trim(),
+                  dob: dob.text,
                 )));
   }
 

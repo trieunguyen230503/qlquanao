@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:qlquanao/model/User.dart';
 
 class SignInProvider extends ChangeNotifier {
   //instance of firebaseauth, facebook and google
@@ -68,9 +70,17 @@ class SignInProvider extends ChangeNotifier {
 
   String? get password => _password;
 
+  String? _dob;
+
+  String? get dob => _dob;
+
   int? _role;
 
   int? get role => _role;
+
+  List<Users>? _userCustomer;
+
+  List<Users>? get userCustomer => _userCustomer;
 
   SignInProvider() {
     checkSignInUser();
@@ -229,7 +239,27 @@ class SignInProvider extends ChangeNotifier {
     _role = data['role'];
   }
 
+  //Save dành cho user
   Future saveDateToFirestore() async {
+    final DatabaseReference r = FirebaseDatabase.instance.ref("users");
+    DatabaseReference newUser = r.push();
+    await newUser.set({
+      "name": _name,
+      "email": _email,
+      "uid": newUser.key,
+      "image_url": _imageUrl,
+      "provider": _provider,
+      "password": _password,
+      "phone": phone,
+      "dob": _dob,
+      "address": _address,
+      "role": 3,
+    });
+    notifyListeners();
+  }
+
+  //save dành cho staff
+  Future saveStaffToFireStore() async {
     final DatabaseReference r = FirebaseDatabase.instance.ref("users");
     DatabaseReference newUser = r.push();
     await newUser.set({
@@ -255,6 +285,8 @@ class SignInProvider extends ChangeNotifier {
     await s.setString('provider', _provider!);
     await s.setString("phone", _phone!);
     await s.setString('address', _address!);
+    await s.setString('dob', _dob!);
+
     await s.setString('password', _password!);
     await s.setInt('role', _role!);
     notifyListeners();
@@ -270,6 +302,7 @@ class SignInProvider extends ChangeNotifier {
     _provider = s.getString('provider');
     _phone = s.getString('phone');
     _address = s.getString('address');
+    _dob = s.getString('dob');
     _role = s.getInt('role');
     notifyListeners();
   }
@@ -373,12 +406,12 @@ class SignInProvider extends ChangeNotifier {
     final Map<dynamic, dynamic>? data = snapshot.value as Map?;
 
     final e = data?.values.first['email'];
+    //MÃ hóa mật khẩu
     final p = data?.values.first['password'];
-    print(e);
-    print(email);
+    String pass = sha512.convert(utf8.encode(password)).toString();
     print(p);
-    print(password);
-    if (e == email && p == password) {
+    print(pass);
+    if (e == email && p == pass) {
       print("Existing User");
       _uid = data?.values.first['uid'];
       _name = data?.values.first['name'];
@@ -386,6 +419,7 @@ class SignInProvider extends ChangeNotifier {
       _imageUrl = data?.values.first['image_url'];
       _provider = data?.values.first['provider'];
       _phone = data?.values.first['phone'];
+      _dob = data?.values.first['dob'];
       _password = data?.values.first['password'];
       _address = data?.values.first['address'];
       _role = data?.values.first['role'];
@@ -436,16 +470,34 @@ class SignInProvider extends ChangeNotifier {
   }
 
   //Crete account
-  void CreateNewAccount(email, name, password, mobile) {
+  void CreateNewAccount(email, name, password, mobile, dob) {
     _name = name;
     _email = email;
     _phone = mobile;
-    _password = password;
+    //MÃ hóa mật khẩu
+    _password = sha512.convert(utf8.encode(password.toString())).toString();
     _imageUrl = "https://cdn-icons-png.flaticon.com/512/1946/1946429.png";
     _provider = "PHONE";
     _uid = null;
     _address = "";
+    _dob = dob;
     _role = 3;
+    notifyListeners();
+  }
+
+  //Crete account
+  void CreateStaffAccount(email, name, phone, dob) {
+    _name = name;
+    _email = email;
+    _phone = _phone;
+    //MÃ hóa mật khẩu
+    _password = sha512.convert(utf8.encode(dob)).toString();
+    _imageUrl = "https://cdn-icons-png.flaticon.com/512/1946/1946429.png";
+    _provider = "PHONE";
+    _uid = null;
+    _dob = dob;
+    _address = "";
+    _role = 2;
     notifyListeners();
   }
 
@@ -484,7 +536,8 @@ class SignInProvider extends ChangeNotifier {
   }
 
   Future<void> updateProfile(String email, String name, String phone,
-      String adress, PlatformFile? image) async {
+      String adress, PlatformFile? image, String dob) async {
+    print(dob);
     DatabaseReference newpostKey = FirebaseDatabase.instance.ref("users/$_uid");
 
     Map<String, dynamic> updateData;
@@ -505,6 +558,7 @@ class SignInProvider extends ChangeNotifier {
         'phone': phone,
         'address': adress,
         'image_url': urlDownload.toString(),
+        'dob': dob
       };
       await s.setString('image_url', urlDownload!);
     } else {
@@ -512,6 +566,7 @@ class SignInProvider extends ChangeNotifier {
         'name': name,
         'phone': phone,
         'address': adress,
+        'dob': dob
       };
     }
 
@@ -520,11 +575,39 @@ class SignInProvider extends ChangeNotifier {
     //await s.setString('email', _email!);
     await s.setString("phone", phone!);
     await s.setString('address', adress!);
+    await s.setString('dob', dob!);
 
     await newpostKey.update(updateData).then((value) {
       print("Thành công");
     }).catchError((onError) {
       print(onError);
+    });
+  }
+
+  Future cleanUser() async {
+    _userCustomer = [];
+  }
+
+  Future getAccountUser() async {
+    final DatabaseReference getUser = FirebaseDatabase.instance.ref("users");
+    _userCustomer = <Users>[];
+    await getUser.onValue.listen((event) {
+      for (final child in event.snapshot.children) {
+        final Map<dynamic, dynamic>? data = child.value as Map?;
+        if (data != null) {
+          //print(data?["role"]);
+          if (data?["role"] == 3) {
+            _userCustomer?.add(Users(
+                data?["provider"],
+                data?["uid"],
+                data?["email"],
+                data?["image_url"],
+                data?["name"],
+                data?["phone"],
+                data?["address"]));
+          }
+        }
+      }
     });
   }
 }

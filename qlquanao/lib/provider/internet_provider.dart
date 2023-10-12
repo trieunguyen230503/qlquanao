@@ -16,7 +16,6 @@ class InternetProvider extends ChangeNotifier {
       _hasInternet = false;
     } else {
       _hasInternet = true;
-
       notifyListeners();
     }
   }

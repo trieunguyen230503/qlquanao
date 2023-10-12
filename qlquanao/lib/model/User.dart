@@ -1,16 +1,18 @@
-class User {
-  int? id;
-  final String UserName;
-  final String Password;
+class Users {
+  late final String provider;
 
-  User({this.id, required this.UserName, required this.Password});
+  late final String uid;
 
+  late final String email;
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'username': UserName,
-      'password': Password,
-    };
-  }
+  late final String imageUrl;
+
+  late final String name;
+
+  late final String phone;
+
+  late final String address;
+
+  Users(this.provider, this.uid, this.email, this.imageUrl, this.name,
+      this.phone, this.address);
 }

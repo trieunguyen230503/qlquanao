@@ -22,7 +22,6 @@ class RenewPassword extends StatefulWidget {
 }
 
 class _RenewPasswordState extends State<RenewPassword> {
-  DBHelper dbHelper = new DBHelper();
 
   final password = TextEditingController();
   final confirmpassword = TextEditingController();

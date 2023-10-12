@@ -357,6 +357,7 @@ class _LoginState extends State<Login> {
   void handleAfterSingIn() async {
     final SharedPreferences s = await SharedPreferences.getInstance();
     int? _role = s.getInt('role');
+    print(_role);
     if (_role == 1) {
       Future.delayed(const Duration(microseconds: 1000)).then((value) {
         nextScreenReplace(context, const MainPageAdmin());
