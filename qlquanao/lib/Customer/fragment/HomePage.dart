@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:qlquanao/Customer/fragment/Page1.dart';
+import 'package:qlquanao/Customer/fragment/test1.dart';
 
 import '../../database.dart';
 import '../../model/User.dart';
+import 'Page2.dart';
+import 'Page3.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,30 +26,48 @@ class _HomePageState extends State<HomePage> {
     return user;
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white70,
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        appBarTheme: AppBarTheme(),
       ),
-      body: FutureBuilder<List<User>?>(
-        future: _ShowData(),
-        builder: (context, snapshot) {
-          return ListView.builder(
-              itemCount: user.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: Text(
-                    user[index].id.toString(),
-                    style: TextStyle(color: Colors.black),
+      home: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize:
+                Size.fromHeight(MediaQuery.of(context).size.height * (1 / 8)),
+            child: AppBar(
+              backgroundColor: Colors.white ,
+
+              bottom: TabBar(
+                isScrollable: true,
+                indicatorColor: Colors.black,
+                labelColor: Colors.black,
+                tabs: [
+                  Tab(
+                    text: 'Page 1',
                   ),
-                  title: Text(user[index].UserName.toString() +
-                      " " +
-                      user[index].Password.toString()),
-                );
-              });
-        },
+                  Tab(
+                    text: 'Page 2',
+                  ),
+                  Tab(
+                    text: 'Page 3',
+                  ),
+                ],
+              ),
+            ),
+          ),
+          body: TabBarView(
+            children: [
+              Page1(),
+              Page2(),
+              Page3(),
+            ],
+          ),
+        ),
       ),
     );
   }
