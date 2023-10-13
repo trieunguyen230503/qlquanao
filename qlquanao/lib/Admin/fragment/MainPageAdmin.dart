@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:qlquanao/Admin/fragment/fragment/ManageAccount.dart';
+import 'package:qlquanao/Admin/fragment/fragment/account/ManageAccountStaff.dart';
 import 'package:qlquanao/Admin/fragment/fragment/ManageProduct.dart';
-import 'package:qlquanao/Admin/fragment/fragment/ManageRevenue.dart';
+import 'package:qlquanao/Admin/fragment/fragment/Revenue/ManageRevenue.dart';
+import 'package:qlquanao/Admin/fragment/fragment/Revenue/Revenue.dart';
+import 'package:qlquanao/Admin/fragment/fragment/account/MangeAccount.dart';
 import 'package:qlquanao/utils/ProfilePage.dart';
 
 class MainPageAdmin extends StatefulWidget {
@@ -13,8 +15,8 @@ class MainPageAdmin extends StatefulWidget {
 
 List<Widget> _widgetOptions = <Widget>[
   ManangeProduct(),
-  ManageRevenue(),
-  MangeAccount(),
+  Revenue(),
+  ManageAccount(),
   ProfilePage(),
 ];
 

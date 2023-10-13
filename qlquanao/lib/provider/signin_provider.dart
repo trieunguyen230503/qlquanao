@@ -269,9 +269,9 @@ class SignInProvider extends ChangeNotifier {
       "image_url": _imageUrl,
       "provider": _provider,
       "password": _password,
-      "phone": phone,
+      "phone": _phone,
       "address": _address,
-      "role": 3,
+      "role": _role,
     });
     notifyListeners();
   }
@@ -588,7 +588,7 @@ class SignInProvider extends ChangeNotifier {
     _userCustomer = [];
   }
 
-  Future getAccountUser() async {
+  Future getAccountStaff() async {
     final DatabaseReference getUser = FirebaseDatabase.instance.ref("users");
     _userCustomer = <Users>[];
     await getUser.onValue.listen((event) {
@@ -596,7 +596,7 @@ class SignInProvider extends ChangeNotifier {
         final Map<dynamic, dynamic>? data = child.value as Map?;
         if (data != null) {
           //print(data?["role"]);
-          if (data?["role"] == 3) {
+          if (data?["role"] == 2) {
             _userCustomer?.add(Users(
                 data?["provider"],
                 data?["uid"],

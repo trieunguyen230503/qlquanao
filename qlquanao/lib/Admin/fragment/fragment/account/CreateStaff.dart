@@ -4,9 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
-import '../../provider/internet_provider.dart';
-import '../../provider/signin_provider.dart';
-import '../../utils/snack_bar.dart';
+import '../../../../provider/internet_provider.dart';
+import '../../../../provider/signin_provider.dart';
+import '../../../../utils/snack_bar.dart';
 
 class CreateStaff extends StatefulWidget {
   const CreateStaff({super.key});
@@ -51,7 +51,7 @@ class _CreateStaffState extends State<CreateStaff> {
           backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
           centerTitle: true,
           title: const Text(
-            'REVENUE',
+            'CREATE',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ),
