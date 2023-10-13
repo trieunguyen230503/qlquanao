@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class Page1 extends StatefulWidget {
@@ -50,10 +51,19 @@ class _Page1State extends State<Page1> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Image> _slider = _sliderImages.map((image) => Image.asset(
-      image,
-      width: double.infinity,
-      fit: BoxFit.cover,
+    final List<Widget> _slider = _sliderImages.map((image) => Padding(
+      padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.height * 0.03),
+      child: Container(
+
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: Image.asset(
+            image,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
     )).toList();
 
     return Container(
@@ -61,10 +71,13 @@ class _Page1State extends State<Page1> {
         child: Column(
           children: <Widget>[
             Padding(
-              padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.width * 0.05,horizontal: MediaQuery.of(context).size.height * 0.02),
+              padding: EdgeInsets.symmetric(
+                vertical: MediaQuery.of(context).size.width * 0.05,
+                // horizontal: MediaQuery.of(context).size.height * 0.03,
+              ),
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height * (1/4),
+                height: MediaQuery.of(context).size.height * (1 / 4),
                 child: PageView(
                   scrollDirection: Axis.horizontal,
                   controller: _pageController,
@@ -100,4 +113,5 @@ class _Page1State extends State<Page1> {
       ),
     );
   }
+
 }
