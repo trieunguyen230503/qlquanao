@@ -39,8 +39,13 @@ class _HomePageState extends State<HomePage> {
             preferredSize:
                 Size.fromHeight(MediaQuery.of(context).size.height * (1 / 8)),
             child: AppBar(
-              backgroundColor: Colors.white ,
-
+              backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
+              centerTitle: true,
+              title: const Text(
+                'HOME',
+                style:
+                    TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+              ),
               bottom: TabBar(
                 isScrollable: true,
                 indicatorColor: Colors.black,

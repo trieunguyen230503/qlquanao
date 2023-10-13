@@ -59,6 +59,11 @@ dependencies:
   facebook_app_events: ^0.14.0 # Hoặc phiên bản mới nhất
   facebook_login: ^0.2.0
   firebase_database: ^10.2.6
+  firebase_storage: ^11.2.8
+  image_picker: ^1.0.4
+  file_picker: ^5.5.0
+  crypto: ^3.0.3
+  smooth_page_indicator: ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -87,6 +92,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/User.db
+    - assets/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
