@@ -15,13 +15,14 @@ class ConfirmEmail extends StatefulWidget {
   final String name;
   final String phone;
   final String password;
-
+  final String dob;
   ConfirmEmail(
       {required this.code,
       required this.email,
       required this.name,
       required this.phone,
-      required this.password});
+      required this.password,
+      required this.dob});
 
   @override
   State<ConfirmEmail> createState() => _ConfirmEmailState();
@@ -68,7 +69,7 @@ class _ConfirmEmailState extends State<ConfirmEmail> {
                   if (widget.code == codeconfirm.text) {
                     final sp = context.read<SignInProvider>();
                     sp.CreateNewAccount(widget.email, widget.name,
-                        widget.password, widget.phone);
+                        widget.password, widget.phone, widget.dob);
                     sp.saveDateToFirestore();
                     openSnackbar(context, "Successful", Colors.green);
                     confirmController.success();

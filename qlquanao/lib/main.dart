@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qlquanao/Admin/fragment/MainPageAdmin.dart';
 import 'package:qlquanao/provider/internet_provider.dart';
+import 'package:qlquanao/provider/revenue_provider.dart';
 import 'package:qlquanao/provider/signin_provider.dart';
 import 'package:qlquanao/utils/splashscreen.dart';
 
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => SignInProvider()),
+        ChangeNotifierProvider(create: (context) => RevenueProvider()),
         ChangeNotifierProvider(create: (context) => InternetProvider())
       ],
       child: MaterialApp(

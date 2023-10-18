@@ -133,8 +133,8 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                 builder: (context) => ConfirmPassword(
                     code: code, email: userName.text.toString())));
       } else {
-        openSnackbar(context, "Doesn't exist this email", Colors.red);
         emailController.reset();
+        openSnackbar(context, "Doesn't exist this email", Colors.red);
       }
     });
   }

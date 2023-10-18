@@ -22,7 +22,6 @@ class RenewPassword extends StatefulWidget {
 }
 
 class _RenewPasswordState extends State<RenewPassword> {
-  DBHelper dbHelper = new DBHelper();
 
   final password = TextEditingController();
   final confirmpassword = TextEditingController();
@@ -167,7 +166,7 @@ class _RenewPasswordState extends State<RenewPassword> {
         sp.updateForgetPass(widget.email, password.text.toString());
         openSnackbar(context, "Successful", Colors.green);
         renewPassowrd.success();
-        nextScreen(context, MainPage());
+        nextScreenReplace(context, MainPage());
       } else {
         openSnackbar(context, "Password must be 8 character", Colors.red);
         renewPassowrd.reset();

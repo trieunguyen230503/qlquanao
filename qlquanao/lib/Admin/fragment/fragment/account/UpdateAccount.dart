@@ -1,30 +1,21 @@
-import 'dart:io';
-import 'dart:math';
-import 'dart:typed_data';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:qlquanao/Admin/fragment/MainPageAdmin.dart';
-import 'package:qlquanao/utils/ProfilePage.dart';
-import 'package:qlquanao/utils/next_screen.dart';
-import 'package:qlquanao/utils/snack_bar.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
-import '../provider/signin_provider.dart';
+import '../../../../provider/signin_provider.dart';
 
-class ProfileCustome extends StatefulWidget {
-  const ProfileCustome({super.key});
+class UpdateAccount extends StatefulWidget {
+  final String uid;
+
+  UpdateAccount({required this.uid});
 
   @override
-  State<ProfileCustome> createState() => _ProfileCustomeState();
+  State<UpdateAccount> createState() => _UpdateAccountState();
 }
 
-class _ProfileCustomeState extends State<ProfileCustome> {
-  PlatformFile? pickedFile;
-
+class _UpdateAccountState extends State<UpdateAccount> {
   final email = TextEditingController();
   final name = TextEditingController();
   final phone = TextEditingController();
@@ -36,6 +27,26 @@ class _ProfileCustomeState extends State<ProfileCustome> {
       RoundedLoadingButtonController();
 
   DateTime selectedDate = DateTime.now();
+
+  Future<void> _ShowData() async {
+    final sp = context.read<SignInProvider>();
+    await sp.getUserForUpdate(widget.uid);
+
+    email.text = sp.email!;
+    name.text = sp.name!;
+    phone.text = sp.phone!;
+    address.text = sp.address!;
+    dob.text = sp.dob!;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _ShowData();
+
+    print(email.text);
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -51,28 +62,6 @@ class _ProfileCustomeState extends State<ProfileCustome> {
       setState(() {
         selectedDate = picked;
         dob.text = DateFormat("dd/MM/yyyy").format(selectedDate).toString();
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    final sp = context.read<SignInProvider>();
-    sp.getDataFromSharedPreference();
-    email.text = sp.email!;
-    name.text = sp.name!;
-    phone.text = sp.phone!;
-    address.text = sp.address!;
-    dob.text = sp.dob!;
-  }
-
-  Future<void> selectImage() async {
-    final result = await FilePicker.platform.pickFiles();
-    if (result != null) {
-      setState(() {
-        pickedFile = result.files.first;
       });
     }
   }
@@ -97,7 +86,7 @@ class _ProfileCustomeState extends State<ProfileCustome> {
         backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
         centerTitle: true,
         title: const Text(
-          'UPDATE YOUR PROFILE',
+          'UPDATE ACCOUNT',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),
@@ -108,40 +97,6 @@ class _ProfileCustomeState extends State<ProfileCustome> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Stack(
-                  children: [
-                    pickedFile != null
-                        ? ClipOval(
-                            child: Container(
-                            width: 120.0,
-                            height: 120.0,
-                            color: Colors.blue,
-                            child: Image.file(
-                              File(pickedFile!.path!),
-                              // Thay đổi đường dẫn hình ảnh của bạn ở đây
-                              fit: BoxFit.cover,
-                            ),
-                          ))
-                        : CircleAvatar(
-                            radius: 64,
-                            backgroundImage:
-                                NetworkImage(sp.imageUrl.toString()),
-                          ),
-                    Positioned(
-                      child: IconButton(
-                        onPressed: () async {
-                          await selectImage();
-                        },
-                        icon: const Icon(
-                          Icons.add_a_photo,
-                          color: Colors.black,
-                        ),
-                      ),
-                      bottom: -10,
-                      left: 80,
-                    ),
-                  ],
-                ),
                 SizedBox(
                   height: 50,
                 ),
@@ -153,11 +108,10 @@ class _ProfileCustomeState extends State<ProfileCustome> {
                   child: TextFormField(
                     controller: email,
                     decoration: InputDecoration(
-                      hintText: "Enter your email",
-                      fillColor: Colors.grey[200],
-                      filled: true,
-                      enabled: false
-                    ),
+                        hintText: "Enter email",
+                        fillColor: Colors.grey[200],
+                        filled: true,
+                        enabled: false),
                   ),
                 ),
                 Container(
@@ -168,7 +122,7 @@ class _ProfileCustomeState extends State<ProfileCustome> {
                   child: TextFormField(
                     controller: name,
                     decoration: InputDecoration(
-                      hintText: "Enter your name",
+                      hintText: "Enter name",
                       fillColor: Colors.grey[200],
                       filled: true,
                     ),
@@ -228,17 +182,10 @@ class _ProfileCustomeState extends State<ProfileCustome> {
                     elevation: 0,
                     borderRadius: 25,
                     onPressed: () async {
-                      await sp.updateProfile(email.text, name.text, phone.text,
-                          address.text, pickedFile, dob.text);
-                      if (sp.role == 3) {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ProfilePage()));
-                      } else if (sp.role == 2) {
-                      } else {
-                        nextScreenReplace(context, MainPageAdmin());
-                      }
+                      await sp.updateProfileAdmin(widget.uid, email.text,
+                          name.text, phone.text, address.text, null, dob.text);
+
+                      Navigator.pop(context);
                     },
                     child: const Wrap(
                       children: const [
@@ -251,7 +198,7 @@ class _ProfileCustomeState extends State<ProfileCustome> {
                           width: 15,
                         ),
                         Text(
-                          'Update your profile',
+                          'Update profile',
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 15,

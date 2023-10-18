@@ -23,12 +23,13 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     // TODO: implement initState
     final sp = context.read<SignInProvider>();
-
+    sp.getDataFromSharedPreference();
     super.initState();
     Timer(const Duration(seconds: 2), () {
       // sp.isSignedIn == false
       //     ? nextScreen(context, LoginScreen())
       //     : nextScreen(context, const HomeScreen());
+      print(sp.role);
       if (sp.role == 1) {
         nextScreenReplace(context, const MainPageAdmin());
       } else if (sp.role == 2) {

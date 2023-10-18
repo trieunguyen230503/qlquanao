@@ -48,23 +48,24 @@ class _Page1State extends State<Page1> {
     'assets/sl3.jpg',
   ];
 
-
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _slider = _sliderImages.map((image) => Padding(
-      padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.height * 0.03),
-      child: Container(
-
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
-          child: Image.asset(
-            image,
-            width: double.infinity,
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-    )).toList();
+    final List<Widget> _slider = _sliderImages
+        .map((image) => Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.height * 0.03),
+              child: Container(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.asset(
+                    image,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ))
+        .toList();
 
     return Container(
       child: SingleChildScrollView(
@@ -113,5 +114,4 @@ class _Page1State extends State<Page1> {
       ),
     );
   }
-
 }
