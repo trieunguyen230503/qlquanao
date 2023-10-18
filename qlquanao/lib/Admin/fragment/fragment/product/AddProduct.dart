@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:qlquanao/Admin/fragment/MainPageAdmin.dart';
 
 
 import 'ManageProduct.dart';
@@ -28,10 +29,36 @@ class _AddProductState extends State<AddProduct> {
   ImagePicker image = ImagePicker();
   var url;
   DatabaseReference? dbRef;
+  List<String> _item = [];
+
   @override
   void initState() {
     super.initState();
     dbRef = FirebaseDatabase.instance.ref().child('products');
+
+    fetchData();
+
+    print(_item.toString());
+  }
+
+  Future<List<String>> fetchData() async {
+    // Fetch data from Firebase
+    DataSnapshot snapshot = (await FirebaseDatabase.instance.ref().child('categories').once()) as DataSnapshot;
+
+    if (snapshot.value != null) {
+      Map<dynamic, dynamic> values = snapshot.value as Map;
+      // Loop through the retrieved data and add values where key is 'nameCate' to _item list
+      values.forEach((key, value) {
+        if (value is Map<dynamic, dynamic>) {
+          var nameCate = value['nameCate'];
+          if (nameCate != null) {
+            _item.add(nameCate);
+          }
+        }
+      });
+    }
+
+    return _item;
   }
 
   @override
@@ -140,6 +167,7 @@ class _AddProductState extends State<AddProduct> {
               height: 20,
             ),
 
+
             MaterialButton(
               height: 40,
               onPressed: () {
@@ -186,7 +214,9 @@ class _AddProductState extends State<AddProduct> {
         url = url;
       });
       if (url != null) {
+        String productKey = dbRef!.push().key.toString();
         Map<String, String> Product = {
+          'uid': productKey,
           'name': name.text,
           'price': price.text,
           'promoprice': promoPrice.text,
@@ -195,11 +225,11 @@ class _AddProductState extends State<AddProduct> {
           'url': url,
         };
 
-        dbRef!.push().set(Product).whenComplete(() {
+        dbRef!.child(productKey).set(Product).whenComplete(() {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => ManageProduct(),
+              builder: (_) => MainPageAdmin(),
             ),
           );
         });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qlquanao/Admin/fragment/fragment/category/ManageCategory.dart';
 import 'package:qlquanao/utils/ProfilePage.dart';
 
 import 'fragment/color/ManageColor.dart';
@@ -12,7 +13,7 @@ class MainPageAdmin extends StatefulWidget {
   State<MainPageAdmin> createState() => _MainPageAdminState();
 }
 
-List<Widget> _widgetOptions = <Widget>[ManageProduct(), ManageColor(), ManageSize() ,ProfilePage()];
+List<Widget> _widgetOptions = <Widget>[ManageProduct(), ManageColor(), ManageSize(), ManageCategory(), ProfilePage()];
 
 class _MainPageAdminState extends State<MainPageAdmin> {
   int _selectedIndex = 0;
@@ -37,6 +38,7 @@ class _MainPageAdminState extends State<MainPageAdmin> {
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'HOME'),
             BottomNavigationBarItem(icon: Icon(Icons.color_lens), label: 'COLOR'),
             BottomNavigationBarItem(icon: Icon(Icons.photo_size_select_small), label: 'SIZE'),
+            BottomNavigationBarItem(icon: Icon(Icons.category), label: 'CATEGORY'),
             BottomNavigationBarItem(
                 icon: Icon(Icons.card_membership_outlined),
                 label: 'MEMBERSHIP'),
