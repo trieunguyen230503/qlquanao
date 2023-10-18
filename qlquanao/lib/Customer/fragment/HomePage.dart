@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:qlquanao/Customer/Order/CartPage.dart';
 import 'package:qlquanao/Customer/fragment/Page1.dart';
 
 import '../../database.dart';
@@ -46,6 +47,16 @@ class _HomePageState extends State<HomePage> {
                 style:
                     TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
               ),
+              actions: [
+                IconButton(
+                  padding: EdgeInsets.only(right: 20),
+                  color: Colors.black,
+                  icon: Icon(Icons.shopping_cart), // Icon bạn muốn sử dụng
+                  onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => CartPage()));
+                  },
+                ),
+              ],
               bottom: TabBar(
                 isScrollable: true,
                 indicatorColor: Colors.black,

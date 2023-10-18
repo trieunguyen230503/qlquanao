@@ -1,8 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
-import 'package:qlquanao/Admin/fragment/fragment/AddProduct.dart';
-import 'package:qlquanao/Admin/fragment/fragment/addnote.dart';
+
 
 class ManangeProduct extends StatefulWidget {
 
@@ -45,12 +44,12 @@ class _HomeState extends State<Home> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.indigo[900],
         onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AddProduct(),
-            ),
-          );
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (_) => AddProduct(),
+          //   ),
+          // );
         },
         child: Icon(
           Icons.add,
