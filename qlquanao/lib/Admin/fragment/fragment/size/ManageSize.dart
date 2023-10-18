@@ -1,20 +1,19 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
-import 'package:qlquanao/Admin/fragment/fragment/AddProduct.dart';
-import 'package:qlquanao/Admin/fragment/fragment/addnote.dart';
 
-class ManangeProduct extends StatefulWidget {
+import 'AddSize.dart';
+
+class ManageSize extends StatefulWidget {
 
   @override
-  State<ManangeProduct> createState() => _ManangeProductState();
+  State<ManageSize> createState() => _ManageSizeState();
 }
 
-class _ManangeProductState extends State<ManangeProduct> {
+class _ManageSizeState extends State<ManageSize> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "todo app",
       theme: ThemeData(
         primaryColor: Colors.greenAccent[700],
       ),
@@ -39,7 +38,7 @@ class _HomeState extends State<Home> {
   var k;
   @override
   Widget build(BuildContext context) {
-    final ref = fb.ref().child('products');
+    final ref = fb.ref().child('sizes');
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -48,7 +47,7 @@ class _HomeState extends State<Home> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => AddProduct(),
+              builder: (_) => AddSize(),
             ),
           );
         },
@@ -58,7 +57,7 @@ class _HomeState extends State<Home> {
       ),
       appBar: AppBar(
         title: Text(
-          'Sản phẩm',
+          'Kích thuớc',
           style: TextStyle(
             fontSize: 30,
           ),
@@ -73,7 +72,7 @@ class _HomeState extends State<Home> {
           snapshot.value.toString(); // {subtitle: webfun, title: subscribe}
 
           g = v.replaceAll(
-              RegExp("{|}|name: |price: "), ""); // webfun, subscribe
+              RegExp("{|}|sizeName: |sizeDescription: "), ""); // webfun, subscribe
           g.trim();
 
           l = g.split(','); // [webfun,  subscribe}]
@@ -93,7 +92,7 @@ class _HomeState extends State<Home> {
                       controller: second,
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
-                        hintText: 'title',
+                        hintText: 'Kích thước',
                       ),
                     ),
                   ),
@@ -103,7 +102,7 @@ class _HomeState extends State<Home> {
                       controller: third,
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
-                        hintText: 'sub title',
+                        hintText: 'Mô tả',
                       ),
                     ),
                   ),
@@ -158,7 +157,7 @@ class _HomeState extends State<Home> {
                     },
                   ),
                   title: Text(
-                    l[1],
+                    l[0],
                     // 'dd',
                     style: TextStyle(
                       fontSize: 25,
@@ -166,7 +165,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   subtitle: Text(
-                    l[0],
+                    l[1],
                     // 'dd',
 
                     style: TextStyle(
@@ -184,12 +183,12 @@ class _HomeState extends State<Home> {
   }
 
   upd() async {
-    DatabaseReference ref1 = FirebaseDatabase.instance.ref("products/$k");
+    DatabaseReference ref1 = FirebaseDatabase.instance.ref("sizes/$k");
 
 // Only update the name, leave the age and address!
     await ref1.update({
-      "title": second.text,
-      "subtitle": third.text,
+      "sizeName": second.text,
+      "sizeDescription": third.text,
     });
     second.clear();
     third.clear();

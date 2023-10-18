@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:qlquanao/Customer/fragment/Page1.dart';
 
-import '../../database.dart';
-import '../../model/User.dart';
 import 'Page2.dart';
 import 'Page3.dart';
 
@@ -16,14 +14,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  DBHelper dbHelper = new DBHelper();
-  late List<User> user;
-
-  Future<List<User>> _ShowData() async {
-    await dbHelper.copyDB();
-    user = (await dbHelper.getUser());
-    return user;
-  }
 
   @override
   Widget build(BuildContext context) {
