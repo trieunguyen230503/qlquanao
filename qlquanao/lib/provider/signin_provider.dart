@@ -127,6 +127,7 @@ class SignInProvider extends ChangeNotifier {
         _password = " ";
         _phone = " ";
         _address = " ";
+        _dob = " ";
       } on FirebaseException catch (e) {
         switch (e.code) {
           case "account-exists-with-different-credential":
@@ -186,6 +187,7 @@ class SignInProvider extends ChangeNotifier {
         _password = " ";
         _phone = " ";
         _address = " ";
+        _dob = " ";
         _role = 3;
         notifyListeners();
       } on FirebaseAuthException catch (e) {
@@ -223,11 +225,27 @@ class SignInProvider extends ChangeNotifier {
     //     .then((DocumentSnapshot snapshot) => {
     //
     //         });
-    print(_uid);
+    print(uid);
     final ref = FirebaseDatabase.instance.ref();
     final snapshot = await ref.child('users/$_uid').get();
 
     final data = snapshot.value as Map<dynamic, dynamic>;
+
+    _name = data['name'];
+    _email = data['email'];
+    _imageUrl = data['image_url'];
+    _provider = data['provider'];
+    _phone = data['phone'];
+    _address = data['address'];
+    _password = data['password'];
+    _role = data['role'];
+  }
+
+  //Update account trong admin
+  Future getUserForUpdate(String? uid) async {
+    final ref = FirebaseDatabase.instance.ref();
+    final snapshot = await ref.child('users/$uid').get();
+    final data = await snapshot.value as Map<dynamic, dynamic>;
 
     _name = data['name'];
     _email = data['email'];
@@ -268,8 +286,9 @@ class SignInProvider extends ChangeNotifier {
       "uid": newUser.key,
       "image_url": _imageUrl,
       "provider": _provider,
-      "password": _password,
+      "password": _dob,
       "phone": _phone,
+      "dob": _dob,
       "address": _address,
       "role": _role,
     });
@@ -485,23 +504,61 @@ class SignInProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  //Crete account
-  void CreateStaffAccount(email, name, phone, dob) {
-    _name = name;
-    _email = email;
-    _phone = _phone;
-    //MÃ hóa mật khẩu
-    _password = sha512.convert(utf8.encode(dob)).toString();
-    _imageUrl = "https://cdn-icons-png.flaticon.com/512/1946/1946429.png";
-    _provider = "PHONE";
-    _uid = null;
-    _dob = dob;
-    _address = "";
-    _role = 2;
-    notifyListeners();
+  //Forget Password
+
+  //Create account Staff cho admin
+  Future CreateStaffAccount(email, name, phone, dob) async {
+    final ref = FirebaseDatabase.instance.ref("users");
+    final snapshot = await ref.orderByChild("email").equalTo(email).get();
+    //print(snapshot.value);
+    if (snapshot.exists) {
+      print("Existing User");
+      return true;
+    } else {
+      _name = name;
+      _email = email;
+      _phone = phone;
+      //MÃ hóa mật khẩu
+      _password = sha512.convert(utf8.encode(dob)).toString();
+      _imageUrl =
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1UNFMhuAA3TLkPbNSGyD8m5lNyDY2LHe3ig&usqp=CAU";
+      _provider = "PHONE";
+      _uid = null;
+      _dob = dob;
+      _address = "";
+      _role = 2;
+      notifyListeners();
+      print("New user");
+      return false;
+    }
   }
 
-  //Forget Password
+  //Create account Customer cho admin
+  Future CreateCustomerAccount(email, name, phone, dob) async {
+    final ref = FirebaseDatabase.instance.ref("users");
+    final snapshot = await ref.orderByChild("email").equalTo(email).get();
+    //print(snapshot.value);
+    if (snapshot.exists) {
+      print("Existing User");
+      return true;
+    } else {
+      _name = name;
+      _email = email;
+      _phone = phone;
+      //MÃ hóa mật khẩu
+      _password = sha512.convert(utf8.encode(dob)).toString();
+      _imageUrl = "https://cdn-icons-png.flaticon.com/512/4143/4143099.png";
+      _provider = "PHONE";
+      _uid = null;
+      _dob = dob;
+      _address = "";
+      _role = 3;
+      notifyListeners();
+      print("New user");
+      return false;
+    }
+  }
+
   Future<void> updateForgetPass(String email, String newValue) async {
     DatabaseReference newpostKey = FirebaseDatabase.instance.ref("users/$_uid");
     Map<String, dynamic> updateData = {
@@ -608,6 +665,68 @@ class SignInProvider extends ChangeNotifier {
           }
         }
       }
+    });
+  }
+
+  Future getAccountUser() async {
+    final DatabaseReference getUser = FirebaseDatabase.instance.ref("users");
+    _userCustomer = <Users>[];
+    await getUser.onValue.listen((event) {
+      for (final child in event.snapshot.children) {
+        final Map<dynamic, dynamic>? data = child.value as Map?;
+        if (data != null) {
+          //print(data?["role"]);
+          if (data?["role"] == 3) {
+            _userCustomer?.add(Users(
+                data?["provider"],
+                data?["uid"],
+                data?["email"],
+                data?["image_url"],
+                data?["name"],
+                data?["phone"],
+                data?["address"]));
+          }
+        }
+      }
+    });
+  }
+
+  Future<void> updateProfileAdmin(String uid, String email, String name,
+      String phone, String adress, PlatformFile? image, String dob) async {
+    print(uid);
+    DatabaseReference newpostKey = FirebaseDatabase.instance.ref("users/$uid");
+
+    Map<String, dynamic> updateData;
+
+    if (image != null) {
+      final path = 'avtuser/${image!.name}';
+      final file = File(image!.path!);
+      final ref = FirebaseStorage.instance.ref().child(path);
+      ref.putFile(file);
+
+      //Lấy link của hình ảnh
+      UploadTask? uploadtask = ref.putFile(file);
+      final snapshot = await uploadtask!.whenComplete(() {});
+      final urlDownload = await snapshot.ref.getDownloadURL();
+      updateData = {
+        'name': name,
+        'phone': phone,
+        'address': adress,
+        'image_url': urlDownload.toString(),
+        'dob': dob
+      };
+    } else {
+      updateData = {
+        'name': name,
+        'phone': phone,
+        'address': adress,
+        'dob': dob
+      };
+    }
+    await newpostKey.update(updateData).then((value) {
+      print("Thành công");
+    }).catchError((onError) {
+      print(onError);
     });
   }
 }

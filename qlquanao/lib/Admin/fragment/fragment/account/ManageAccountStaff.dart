@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qlquanao/Admin/fragment/fragment/account/CreateStaff.dart';
+import 'package:qlquanao/Admin/fragment/fragment/account/UpdateAccount.dart';
 import 'package:qlquanao/provider/signin_provider.dart';
+import 'package:qlquanao/utils/ProfileCustome.dart';
 import 'package:qlquanao/utils/next_screen.dart';
 
 import '../../../../model/User.dart';
@@ -42,11 +44,19 @@ class _MangeAccountState extends State<MangeAccountStaff> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        ElevatedButton(
-            onPressed: () {
-              nextScreen(context, CreateStaff());
-            },
-            child: Text('Create')),
+        SizedBox(
+          height: 20,
+        ),
+        Container(
+          child: ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.black),
+              ),
+              onPressed: () {
+                nextScreen(context, CreateStaff());
+              },
+              child: Text('Create')),
+        ),
         Container(
             width: MediaQuery.sizeOf(context).width,
             height: MediaQuery.sizeOf(context).height,
@@ -62,48 +72,76 @@ class _MangeAccountState extends State<MangeAccountStaff> {
                     return ListView.builder(
                         itemCount: user?.length,
                         itemBuilder: (context, index) {
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              InkWell(
-                                child: Container(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        child: CircleAvatar(
-                                          backgroundImage: NetworkImage(
-                                              user![index].imageUrl),
-                                          radius: 20,
+                          return Container(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                InkWell(
+                                  child: Container(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          child: CircleAvatar(
+                                            backgroundImage: NetworkImage(
+                                                user![index].imageUrl),
+                                            radius: 20,
+                                          ),
+                                          padding:
+                                              EdgeInsets.fromLTRB(20, 0, 20, 0),
                                         ),
-                                        padding:
-                                            EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                        Container(
+                                          child: Text(
+                                            user![index].name,
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          padding:
+                                              EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                          width: 100,
+                                        ),
+                                        Container(
+                                          child: Text(
+                                            user![index].phone,
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          padding:
+                                              EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                        ),
+                                      ],
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.black,
+                                        width: 2.0,
                                       ),
-                                      Container(
-                                        child: Text(user![index].name),
-                                        padding:
-                                            EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                        width: 100,
-                                      ),
-                                      Container(
-                                        child: Text(user![index].phone),
-                                        padding:
-                                            EdgeInsets.fromLTRB(10, 0, 0, 0),
-                                      ),
-                                    ],
+
+                                      //   gradient: LinearGradient(
+                                      //       begin: Alignment.topLeft,
+                                      //       end: Alignment.bottomRight,
+                                      //       colors: [
+                                      //         Color.fromRGBO(218, 135, 235, 1),
+                                      //         Color.fromRGBO(156, 129, 246, 1),
+                                      //       ]),
+                                    ),
+                                    margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                                    height: 80,
                                   ),
-                                  decoration: BoxDecoration(
-                                      border: Border(
-                                    bottom: BorderSide(color: Colors.grey),
-                                  )),
-                                  height: 80,
-                                ),
-                                onTap: () {},
-                              )
-                            ],
+                                  onTap: () {
+                                    nextScreen(context,
+                                        UpdateAccount(uid: user![index].uid));
+                                  },
+                                )
+                              ],
+                            ),
                           );
                         });
                   }

@@ -36,29 +36,51 @@ class RevenueProvider extends ChangeNotifier {
 
   List<Orders>? get order => _order;
 
+  int _countOrder = 0;
+
+  int? get countOrder => _countOrder;
+
   Future getRevenue(String dateStart, String dateEnd) async {
     DateTime ds = DateFormat("dd/MM/yyyy").parse(dateStart);
     DateTime de = DateFormat("dd/MM/yyyy").parse(dateEnd);
     _order = <Orders>[];
     final DatabaseReference myOrder = FirebaseDatabase.instance.ref("orders");
-    int count = 0;
-    print(dateStart);
-    print(dateEnd);
     await myOrder.onValue.listen((event) async {
       _total = 0;
+      _countOrder = 0;
       for (final child in event.snapshot.children) {
         final Map<dynamic, dynamic>? data = child.value as Map?;
         if (data != null) {
-          count++;
-          print(count);
           DateTime d = DateFormat("dd/MM/yyyy").parse(data['orderdate']);
           if ((d.isAfter(ds) || d.isAtSameMomentAs(ds)) &&
               (d.isBefore(de) || d.isAtSameMomentAs(de))) {
+            _countOrder = _countOrder + 1;
             int? t = await data['totalamount'];
             _total = await (_total ?? 0) + (t ?? 0);
             _order?.add(Orders(data["oderID"], data["UserID"],
                 data["orderdate"], data["totalamount"], data["status"]));
           }
+          print(_total);
+        }
+      }
+    });
+  }
+
+  Future getRevenueAll() async {
+    _order = <Orders>[];
+    final DatabaseReference myOrder = FirebaseDatabase.instance.ref("orders");
+    ;
+    await myOrder.onValue.listen((event) async {
+      _total = 0;
+      _countOrder = 0;
+      for (final child in event.snapshot.children) {
+        final Map<dynamic, dynamic>? data = child.value as Map?;
+        if (data != null) {
+          int? t = await data['totalamount'];
+          _total = await (_total ?? 0) + (t ?? 0);
+          _countOrder = await _countOrder + 1;
+          _order?.add(Orders(data["oderID"], data["UserID"], data["orderdate"],
+              data["totalamount"], data["status"]));
           print(_total);
         }
       }

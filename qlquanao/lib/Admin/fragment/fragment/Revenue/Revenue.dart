@@ -34,7 +34,7 @@ class _RevenueState extends State<Revenue> {
                 style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
               ),
               bottom: TabBar(
-                isScrollable: true,
+                isScrollable: false,
                 indicatorColor: Colors.black,
                 labelColor: Colors.black,
                 tabs: [

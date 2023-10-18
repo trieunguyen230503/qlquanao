@@ -33,7 +33,7 @@ class _ManageAccountState extends State<ManageAccount> {
                 style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
               ),
               bottom: TabBar(
-                isScrollable: true,
+                isScrollable: false,
                 indicatorColor: Colors.black,
                 labelColor: Colors.black,
                 tabs: [

@@ -4,27 +4,49 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
-import '../../../../provider/internet_provider.dart';
 import '../../../../provider/signin_provider.dart';
-import '../../../../utils/snack_bar.dart';
 
-class CreateStaff extends StatefulWidget {
-  const CreateStaff({super.key});
+class UpdateAccount extends StatefulWidget {
+  final String uid;
+
+  UpdateAccount({required this.uid});
 
   @override
-  State<CreateStaff> createState() => _CreateStaffState();
+  State<UpdateAccount> createState() => _UpdateAccountState();
 }
 
-class _CreateStaffState extends State<CreateStaff> {
-  final RoundedLoadingButtonController registerController =
-      RoundedLoadingButtonController();
-
+class _UpdateAccountState extends State<UpdateAccount> {
   final email = TextEditingController();
   final name = TextEditingController();
   final phone = TextEditingController();
+  final address = TextEditingController();
   final dob = TextEditingController();
 
+  final _scaffoldKey = GlobalKey<FormState>();
+  final RoundedLoadingButtonController updateController =
+      RoundedLoadingButtonController();
+
   DateTime selectedDate = DateTime.now();
+
+  Future<void> _ShowData() async {
+    final sp = context.read<SignInProvider>();
+    await sp.getUserForUpdate(widget.uid);
+
+    email.text = sp.email!;
+    name.text = sp.name!;
+    phone.text = sp.phone!;
+    address.text = sp.address!;
+    dob.text = sp.dob!;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _ShowData();
+
+    print(email.text);
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -46,20 +68,38 @@ class _CreateStaffState extends State<CreateStaff> {
 
   @override
   Widget build(BuildContext context) {
+    final sp = context.read<SignInProvider>();
+
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
-          centerTitle: true,
-          title: const Text(
-            'CREATE',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(
+            Icons.keyboard_arrow_left,
+            color: Colors.black,
           ),
+          // Đổi icon về
+          onPressed: () {
+            Navigator.pop(context);
+            // Xử lý khi người dùng nhấn vào icon trở về
+          },
         ),
-        body: Container(
-          child: Center(
+        backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
+        centerTitle: true,
+        title: const Text(
+          'UPDATE ACCOUNT',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+      ),
+      body: Container(
+        child: Center(
+          child: Form(
+            key: _scaffoldKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                SizedBox(
+                  height: 50,
+                ),
                 Container(
                   width: MediaQuery.of(context).size.width,
                   height: 50,
@@ -68,10 +108,10 @@ class _CreateStaffState extends State<CreateStaff> {
                   child: TextFormField(
                     controller: email,
                     decoration: InputDecoration(
-                      hintText: "Enter email",
-                      fillColor: Colors.grey[200],
-                      filled: true,
-                    ),
+                        hintText: "Enter email",
+                        fillColor: Colors.grey[200],
+                        filled: true,
+                        enabled: false),
                   ),
                 ),
                 Container(
@@ -109,6 +149,20 @@ class _CreateStaffState extends State<CreateStaff> {
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                   margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
                   child: TextFormField(
+                    controller: address,
+                    decoration: InputDecoration(
+                      hintText: "Enter address",
+                      fillColor: Colors.grey[200],
+                      filled: true,
+                    ),
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                  child: TextFormField(
                     keyboardType: TextInputType.datetime,
                     controller: dob,
                     decoration: InputDecoration(
@@ -121,14 +175,17 @@ class _CreateStaffState extends State<CreateStaff> {
                   ),
                 ),
                 RoundedLoadingButton(
-                    controller: registerController,
+                    controller: updateController,
                     successColor: Colors.black,
                     color: Colors.black,
                     width: MediaQuery.of(context).size.width * 0.8,
                     elevation: 0,
                     borderRadius: 25,
-                    onPressed: () {
-                      registerStaff(context);
+                    onPressed: () async {
+                      await sp.updateProfileAdmin(widget.uid, email.text,
+                          name.text, phone.text, address.text, null, dob.text);
+
+                      Navigator.pop(context);
                     },
                     child: const Wrap(
                       children: const [
@@ -141,7 +198,7 @@ class _CreateStaffState extends State<CreateStaff> {
                           width: 15,
                         ),
                         Text(
-                          'Register',
+                          'Update profile',
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 15,
@@ -152,46 +209,8 @@ class _CreateStaffState extends State<CreateStaff> {
               ],
             ),
           ),
-        ));
-  }
-
-  Future registerStaff(BuildContext context) async {
-    if (phone.text.isNotEmpty || name.text.isNotEmpty || dob.text.isNotEmpty) {
-      if (email.text.contains("@gmail.com")) {
-        if (phone.text.length == 10) {
-          final sp = context.read<SignInProvider>();
-          final ip = context.read<InternetProvider>();
-          await ip.checkInternetConnection();
-
-          if (ip.hasInternet == false) {
-            openSnackbar(context, "Check your internet connection", Colors.red);
-          } else {
-            sp.CreateStaffAccount(email.text, name.text, phone.text, dob.text)
-                .then((value) async {
-              if (value == false) {
-                await sp.saveStaffToFireStore();
-                registerController.success();
-                Navigator.pop(context);
-              } else {
-                openSnackbar(
-                    context, "This email is used for other staff", Colors.red);
-                registerController.reset();
-              }
-            });
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Your phone number must be 10 character')));
-          registerController.reset();
-        }
-      } else {
-        registerController.reset();
-        openSnackbar(context, "Fill correct format email", Colors.red);
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fill full information')));
-      registerController.reset();
-    }
+        ),
+      ),
+    );
   }
 }

@@ -61,7 +61,7 @@ class _ConfirmPasswordState extends State<ConfirmPassword> {
                 onPressed: () {
                   if (widget.code == codeconfirm.text) {
                     confirmPasswordController.success();
-                    Navigator.push(
+                    Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                             builder: (context) => RenewPassword(
@@ -84,7 +84,7 @@ class _ConfirmPasswordState extends State<ConfirmPassword> {
                       width: 15,
                     ),
                     Text(
-                      'LOGIN',
+                      'CONFIRM',
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 15,

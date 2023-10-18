@@ -27,7 +27,7 @@ class _OpResLoginState extends State<OpResLogin> {
                 style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.black)),
                 onPressed: () {
-                  Navigator.push(context,
+                  Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => Login()));
                 },
                 child: const Text(
@@ -46,7 +46,7 @@ class _OpResLoginState extends State<OpResLogin> {
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(Colors.white)),
                   onPressed: () {
-                    Navigator.push(context,
+                    Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) => Register()));
                   },
                   child: const Text(

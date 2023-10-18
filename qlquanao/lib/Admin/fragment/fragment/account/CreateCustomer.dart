@@ -8,14 +8,14 @@ import '../../../../provider/internet_provider.dart';
 import '../../../../provider/signin_provider.dart';
 import '../../../../utils/snack_bar.dart';
 
-class CreateStaff extends StatefulWidget {
-  const CreateStaff({super.key});
+class CreateCustomer extends StatefulWidget {
+  const CreateCustomer({super.key});
 
   @override
-  State<CreateStaff> createState() => _CreateStaffState();
+  State<CreateCustomer> createState() => _CreateCustomerState();
 }
 
-class _CreateStaffState extends State<CreateStaff> {
+class _CreateCustomerState extends State<CreateCustomer> {
   final RoundedLoadingButtonController registerController =
       RoundedLoadingButtonController();
 
@@ -166,7 +166,8 @@ class _CreateStaffState extends State<CreateStaff> {
           if (ip.hasInternet == false) {
             openSnackbar(context, "Check your internet connection", Colors.red);
           } else {
-            sp.CreateStaffAccount(email.text, name.text, phone.text, dob.text)
+            sp.CreateCustomerAccount(
+                    email.text, name.text, phone.text, dob.text)
                 .then((value) async {
               if (value == false) {
                 await sp.saveStaffToFireStore();

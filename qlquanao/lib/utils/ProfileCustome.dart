@@ -7,7 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:qlquanao/Admin/fragment/MainPageAdmin.dart';
 import 'package:qlquanao/utils/ProfilePage.dart';
+import 'package:qlquanao/utils/next_screen.dart';
+import 'package:qlquanao/utils/snack_bar.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 import '../provider/signin_provider.dart';
@@ -153,6 +156,7 @@ class _ProfileCustomeState extends State<ProfileCustome> {
                       hintText: "Enter your email",
                       fillColor: Colors.grey[200],
                       filled: true,
+                      enabled: false
                     ),
                   ),
                 ),
@@ -226,11 +230,15 @@ class _ProfileCustomeState extends State<ProfileCustome> {
                     onPressed: () async {
                       await sp.updateProfile(email.text, name.text, phone.text,
                           address.text, pickedFile, dob.text);
-
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ProfilePage()));
+                      if (sp.role == 3) {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ProfilePage()));
+                      } else if (sp.role == 2) {
+                      } else {
+                        nextScreenReplace(context, MainPageAdmin());
+                      }
                     },
                     child: const Wrap(
                       children: const [
