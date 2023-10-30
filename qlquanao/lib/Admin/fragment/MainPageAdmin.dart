@@ -45,9 +45,6 @@ class _MainPageAdminState extends State<MainPageAdmin> {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(icon: Icon(Icons.shop), label: 'ORDER'),
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'HOME'),
-            BottomNavigationBarItem(icon: Icon(Icons.color_lens), label: 'COLOR'),
-            BottomNavigationBarItem(icon: Icon(Icons.photo_size_select_small), label: 'SIZE'),
-            BottomNavigationBarItem(icon: Icon(Icons.category), label: 'CATEGORY'),
             BottomNavigationBarItem(
                 icon: Icon(Icons.area_chart), label: 'REVENUE'),
             BottomNavigationBarItem(
