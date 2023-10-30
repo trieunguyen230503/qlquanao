@@ -25,6 +25,8 @@ class _UpdateAccountState extends State<UpdateAccount> {
   final _scaffoldKey = GlobalKey<FormState>();
   final RoundedLoadingButtonController updateController =
       RoundedLoadingButtonController();
+  final RoundedLoadingButtonController deleteController =
+      RoundedLoadingButtonController();
 
   DateTime selectedDate = DateTime.now();
 
@@ -161,7 +163,7 @@ class _UpdateAccountState extends State<UpdateAccount> {
                   width: MediaQuery.of(context).size.width,
                   height: 50,
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                  margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
                   child: TextFormField(
                     keyboardType: TextInputType.datetime,
                     controller: dob,
@@ -184,8 +186,9 @@ class _UpdateAccountState extends State<UpdateAccount> {
                     onPressed: () async {
                       await sp.updateProfileAdmin(widget.uid, email.text,
                           name.text, phone.text, address.text, null, dob.text);
-
-                      Navigator.pop(context);
+                      await Future.delayed(Duration(seconds: 6), () {
+                        Navigator.pop(context);
+                      });
                     },
                     child: const Wrap(
                       children: const [
@@ -198,7 +201,59 @@ class _UpdateAccountState extends State<UpdateAccount> {
                           width: 15,
                         ),
                         Text(
-                          'Update profile',
+                          'Update information',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500),
+                        )
+                      ],
+                    )),
+                SizedBox(
+                  height: 20,
+                ),
+                RoundedLoadingButton(
+                    controller: deleteController,
+                    successColor: Colors.red,
+                    color: Colors.red,
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    elevation: 0,
+                    borderRadius: 25,
+                    onPressed: () async {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Do you want to remove this user ?'),
+                              content: Text(
+                                  'If you remove this users, you can not resotre'),
+                              actions: [
+                                TextButton(
+                                    onPressed: () async {
+                                      await sp.removeUser(widget.uid);
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text("Remove"))
+                              ],
+                            );
+                          });
+                      await Future.delayed(Duration(seconds: 6), () {
+                        deleteController.success();
+                        Navigator.pop(context);
+                      });
+                    },
+                    child: const Wrap(
+                      children: const [
+                        Icon(
+                          FontAwesomeIcons.deleteLeft,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                        SizedBox(
+                          width: 15,
+                        ),
+                        Text(
+                          'Delete information',
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 15,

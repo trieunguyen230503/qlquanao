@@ -1,8 +1,6 @@
-import 'dart:math';
+import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qlquanao/provider/revenue_provider.dart';
@@ -24,6 +22,10 @@ class _ManageRevenueState extends State<ManageRevenue> {
   int? revenue = 0;
   int? countBill = 0;
   List<Orders>? o = <Orders>[];
+  bool check = true;
+  double height = 0;
+
+  Timer? t;
 
   Future<void> _selectDate(BuildContext context, int check) async {
     final DateTime? picked = await showDatePicker(
@@ -59,13 +61,17 @@ class _ManageRevenueState extends State<ManageRevenue> {
 
   Future<void> _ShowData() async {
     final ep = context.read<RevenueProvider>();
-    await ep.getRevenueAll();
-
-    Future.delayed(Duration(seconds: 2), () {
+    if (check == true) {
+      await ep.getRevenueAll();
+    } else {
+      await ep.getRevenue(dateStart.text, dateEnd.text);
+    }
+    height = (o!.length * 70)!;
+    t = Timer(Duration(seconds: 2), () {
       setState(() {
         revenue = ep.total;
         countBill = ep.countOrder;
-        o = ep.order;
+        o = ep.order?.reversed.toList();
       });
     });
   }
@@ -74,6 +80,13 @@ class _ManageRevenueState extends State<ManageRevenue> {
   void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    t?.cancel();
   }
 
   @override
@@ -135,7 +148,7 @@ class _ManageRevenueState extends State<ManageRevenue> {
                     ],
                   )),
               SizedBox(
-                height: 15,
+                height: 20,
               ),
               TextFormField(
                 keyboardType: TextInputType.number,
@@ -151,7 +164,7 @@ class _ManageRevenueState extends State<ManageRevenue> {
                 readOnly: true,
               ),
               SizedBox(
-                height: 15,
+                height: 20,
               ),
               TextFormField(
                 keyboardType: TextInputType.number,
@@ -168,39 +181,60 @@ class _ManageRevenueState extends State<ManageRevenue> {
               SizedBox(
                 height: 20,
               ),
-              Container(
-                width: 75,
-                height: 45,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.black),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 75,
+                    height: 45,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.black),
+                      ),
+                      onPressed: () async {
+                        if (dateStart.text != null && dateEnd.text != null) {
+                          check = false;
+                        } else {
+                          openSnackbar(context, "Fill date", Colors.red);
+                        }
+                      },
+                      child: Text('Find'),
+                    ),
                   ),
-                  onPressed: () async {
-                    if (dateStart.text != null && dateEnd.text != null) {
-                      final ep = context.read<RevenueProvider>();
-                      await ep.getRevenue(dateStart.text, dateEnd.text);
-                      revenue = await ep.total;
-                      o = await ep.order;
-                      countBill = await ep.countOrder;
-
-                      setState(() {});
-                    } else {
-                      openSnackbar(context, "Fill date", Colors.red);
-                    }
-                  },
-                  child: Text('Find'),
-                ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                    width: 120,
+                    height: 45,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.orangeAccent),
+                      ),
+                      onPressed: () async {
+                        check = true;
+                        dateEnd.text = "";
+                        dateStart.text = "";
+                      },
+                      child: Text(
+                        'All the time',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(
-                height: 15,
+                height: 20,
               ),
               Container(
                 width: MediaQuery.sizeOf(context).width,
-                height: MediaQuery.sizeOf(context).height,
+                height: height,
                 child: FutureBuilder(
                     future: _ShowData(),
                     builder: (context, snapshot) {
-                      if (o?.length == 0) {
+                      if (o == []) {
                         return Container(
                           padding: EdgeInsets.all(20),
                           child: Image.network(
@@ -208,6 +242,7 @@ class _ManageRevenueState extends State<ManageRevenue> {
                         );
                       } else {
                         return ListView.builder(
+                            physics: NeverScrollableScrollPhysics(),
                             itemCount: o?.length,
                             itemBuilder: (context, index) {
                               return Center(

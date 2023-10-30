@@ -1,6 +1,9 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:qlquanao/Customer/fragment/HomePage.dart';
-import 'package:qlquanao/Customer/fragment/UserPage.dart';
+import 'package:qlquanao/Customer/Order/CartPage.dart';
+
+import 'Home/Home.dart';
+import 'Home/UserPage.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -9,7 +12,7 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-List<Widget> _widgetOptions = <Widget>[HomePage(), UserPage()];
+List<Widget> _widgetOptions = <Widget>[HomePage2(), CartPage(), UserPage()];
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
@@ -25,21 +28,31 @@ class _MainPageState extends State<MainPage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        // appBar: AppBar(
-        //   backgroundColor: Colors.white,
-        //   centerTitle: true,
-        // ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'HOME'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.card_membership_outlined), label: 'MEMBERSHIP'),
+        bottomNavigationBar: CurvedNavigationBar(
+          backgroundColor: Colors.transparent,
+          height: 50,
+          color: Colors.black,
+          index: _selectedIndex,
+          items: [
+            Icon(
+              Icons.home,
+              size: 30,
+              color: Colors.white,
+            ),
+            Icon(
+              Icons.shopping_cart,
+              size: 30,
+              color: Colors.white,
+            ),
+            Icon(
+              Icons.person,
+              size: 30,
+              color: Colors.white,
+            ),
           ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.black,
-          backgroundColor: Colors.white,
-          unselectedItemColor: Colors.grey,
-          onTap: _onItemTapped,
+          onTap: (index) {
+            _onItemTapped(index);
+          },
         ),
         body: _widgetOptions.elementAt(_selectedIndex),
       ),

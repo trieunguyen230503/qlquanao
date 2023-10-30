@@ -171,8 +171,14 @@ class _CreateCustomerState extends State<CreateCustomer> {
                 .then((value) async {
               if (value == false) {
                 await sp.saveStaffToFireStore();
+                openSnackbar(
+                    context,
+                    "Your data is loading, please wait for a second",
+                    Colors.orangeAccent);
+                await Future.delayed(Duration(seconds: 6), () {
+                  Navigator.pop(context);
+                });
                 registerController.success();
-                Navigator.pop(context);
               } else {
                 openSnackbar(
                     context, "This email is used for other staff", Colors.red);

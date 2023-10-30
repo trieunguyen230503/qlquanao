@@ -693,7 +693,6 @@ class SignInProvider extends ChangeNotifier {
 
   Future<void> updateProfileAdmin(String uid, String email, String name,
       String phone, String adress, PlatformFile? image, String dob) async {
-    print(uid);
     DatabaseReference newpostKey = FirebaseDatabase.instance.ref("users/$uid");
 
     Map<String, dynamic> updateData;
@@ -728,5 +727,10 @@ class SignInProvider extends ChangeNotifier {
     }).catchError((onError) {
       print(onError);
     });
+  }
+
+  Future removeUser(uid) async {
+    final DatabaseReference ref = FirebaseDatabase.instance.ref("users/$uid");
+    await ref.remove();
   }
 }

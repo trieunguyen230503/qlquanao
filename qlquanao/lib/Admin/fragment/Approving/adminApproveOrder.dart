@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:qlquanao/Admin/fragment/fragment/Revenue/ManageRevenue.dart';
 
-import 'MangeRevueProduct.dart';
+import 'ApprovedPage.dart';
+import 'ApprovingPage.dart';
 
-
-class Revenue extends StatefulWidget {
-  const Revenue({super.key});
+class ApproveOrderPage extends StatefulWidget {
+  const ApproveOrderPage({super.key});
 
   @override
-  State<Revenue> createState() => _RevenueState();
+  State<ApproveOrderPage> createState() => _ApproveOrderPageState();
 }
 
-class _RevenueState extends State<Revenue> {
+class _ApproveOrderPageState extends State<ApproveOrderPage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,7 +18,6 @@ class _RevenueState extends State<Revenue> {
       theme: ThemeData(
         appBarTheme: AppBarTheme(),
       ),
-
       home: DefaultTabController(
         length: 2,
         child: Scaffold(
@@ -30,19 +28,20 @@ class _RevenueState extends State<Revenue> {
               backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
               centerTitle: true,
               title: const Text(
-                'REVENUE',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                'Duyệt đơn đặt hàng',
+                style:
+                TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
               ),
               bottom: TabBar(
-                isScrollable: false,
+                isScrollable: true,
                 indicatorColor: Colors.black,
                 labelColor: Colors.black,
                 tabs: [
                   Tab(
-                    text: 'Period',
+                    text: 'Đơn đang đợi duyệt',
                   ),
                   Tab(
-                    text: 'Product',
+                    text: 'Đơn đã duyệt',
                   ),
                 ],
               ),
@@ -50,8 +49,8 @@ class _RevenueState extends State<Revenue> {
           ),
           body: TabBarView(
             children: [
-              ManageRevenue(),
-              MangeReveuneProduct(),
+              ApprovingPage(),
+              ApprovedPage(),
             ],
           ),
         ),

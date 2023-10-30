@@ -4,9 +4,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:qlquanao/Customer/Order/paymentPage.dart';
-import 'package:qlquanao/model/Product.dart';
+import 'package:provider/provider.dart';
+import 'package:qlquanao/Customer/Order/PaymentPage.dart';
+import 'package:qlquanao/model/Cart.dart';
 import 'package:firebase_database/firebase_database.dart';
+
+import '../../provider/signin_provider.dart';
+
+
+
+//Chưa cập nhật lại chỗ kiểm tra user nào đặt hàng
+
+
+
 
 
 String formatPrice(int price) {
@@ -14,7 +24,7 @@ String formatPrice(int price) {
   return formatter.format(price);
 }
 
-List<Product> selectedProducts = [];
+List<Cart> selectedProducts = [];
 
 int totalAmount = 0;
 
@@ -28,37 +38,53 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
 
-  List<Product> cartItems = [];
+  List<Cart> cartList = [];
 
   @override
   void initState() {
     super.initState();
+    selectedProducts.clear();
     getCartFromFirebase();
   }
 
+
+
   void getCartFromFirebase() async{
+    // Lấy id user đang đăng nhập
+    final sp = context.read<SignInProvider>();
+    sp.getDataFromSharedPreference();
+    String? uid = sp.uid;
+    if(uid == null){
+      uid = " ";
+    }
+
     // Khởi tạo tham chiếu đến cơ sở dữ liệu Firebase
     final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
 
     await databaseRef.onValue.listen((event) {
-      if(cartItems.isNotEmpty){
-        cartItems.clear();
+      if(cartList.isNotEmpty){
+        cartList.clear();
       }
 
       for (final child in event.snapshot.children) {
-        String name = child.child("product").child("name").value.toString();
-        String color = child.child("color").value.toString();
-        String size = child.child("size").value.toString();
-        String image = child.child("product").child("image").value.toString();
-        int price = int.parse(child.child("totalAmount").value.toString());
-        int quantity = int.parse(child.child("quantity").value.toString());
-        Product p = Product(name: name, image: image, color: color, size: size, price: price, quantity: quantity);
-          print(p.toString());
-          setState(() {
-            cartItems.add(p);
-          });
-          print(cartItems.length.toString());
+        String userID = child.child("userID").value.toString();
+
+        if(userID == "-Nf_mGcgG0xAWGoHfK9J"){
+          String idCart = child.child("idCart").value.toString();
+          String productID = child.child("productID").value.toString();
+          String productName = child.child("productName").value.toString();
+          String color = child.child("color").value.toString();
+          String size = child.child("size").value.toString();
+          String image = child.child("productImage").value.toString();
+          int price = int.parse(child.child("totalAmount").value.toString());
+          int quantity = int.parse(child.child("quantity").value.toString());
+          Cart p = Cart(idCart: idCart, productID: productID, productName: productName, image: image, color: color, size: size, price: price, quantity: quantity, userID: userID);
+          cartList.add(p);
+        }
       }
+      setState(() {
+        cartList = cartList.reversed.toList();
+      });
     }, onError: (error) {
       // Error.
     });
@@ -92,7 +118,7 @@ class _CartPageState extends State<CartPage> {
         children: [
           CartAppBar(),
           Container(
-            height: 700,
+            height: MediaQuery.of(context).size.height - 180,
             padding: EdgeInsets.only(top: 10, bottom: 70),
             decoration: BoxDecoration(
               color: Color(0xFFEDECF2),
@@ -102,9 +128,9 @@ class _CartPageState extends State<CartPage> {
               ),
             ),
             child: ListView.builder(
-                itemCount: cartItems.length,
+                itemCount: cartList.length,
                 itemBuilder: (context, index) {
-                  final product = cartItems[index];
+                  final cartItem = cartList[index];
                   return Container(
                     height: 110,
                     margin:
@@ -119,16 +145,16 @@ class _CartPageState extends State<CartPage> {
                         Checkbox(
                           checkColor: Colors.black,
                           activeColor: Colors.grey,
-                          value: selectedProducts.contains(product),
+                          value: selectedProducts.contains(cartItem),
                           onChanged: (bool? value) {
                             setState(() {
                               if (value != null) {
                                 if (value) {
-                                  if (!selectedProducts.contains(product)) {
-                                    selectedProducts.add(product);
+                                  if (!selectedProducts.contains(cartItem)) {
+                                    selectedProducts.add(cartItem);
                                   }
                                 } else {
-                                  selectedProducts.remove(product);
+                                  selectedProducts.remove(cartItem);
                                 }
                               }
                               totalAmount = 0;
@@ -143,7 +169,7 @@ class _CartPageState extends State<CartPage> {
                           height: 70,
                           width: 70,
                           margin: EdgeInsets.only(right: 10),
-                          child: Image.network(product.image),
+                          child: Image.network(cartItem.image),
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(vertical: 10),
@@ -152,9 +178,9 @@ class _CartPageState extends State<CartPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                (product.name.length > 15)
-                                    ? '${product.name.substring(0, 15)}...' // Hiển thị 'text...' nếu độ dài vượt quá length
-                                    : product.name,
+                                (cartItem.productName.length > 12)
+                                    ? '${cartItem.productName.substring(0, 12)}...' // Hiển thị 'text...' nếu độ dài vượt quá length
+                                    : cartItem.productName,
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -162,14 +188,14 @@ class _CartPageState extends State<CartPage> {
                                 ),
                               ),
                               Text(
-                                product.color + ", " + product.size,
+                                cartItem.color + ", " + cartItem.size,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Color(0xFF4C53A5),
                                 ),
                               ),
                               Text(
-                                formatPrice(product.price) + "đ",
+                                formatPrice(cartItem.price) + "đ",
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -188,7 +214,7 @@ class _CartPageState extends State<CartPage> {
                             MainAxisAlignment.spaceBetween,
                             children: [
                               GestureDetector(
-                                onTap: () => _deleteItemInCart(context, product),
+                                onTap: () => _deleteItemInCart(context, cartItem),
                                 child: Icon(
                                   Icons.delete,
                                   color: Colors.black26,
@@ -198,12 +224,12 @@ class _CartPageState extends State<CartPage> {
                                 children: [
                                   GestureDetector(
                                     onTap: (){
-                                      if(product.quantity > 1){
+                                      if(cartItem.quantity > 1){
                                         setState(() {
-                                          product.quantity--;
+                                          cartItem.quantity--;
                                           //Nếu người dùng ấn giảm sl trong lúc sp đã chọn thì giảm giá tổng
-                                          if(selectedProducts.contains(product)){
-                                            totalAmount -= product.price;
+                                          if(selectedProducts.contains(cartItem)){
+                                            totalAmount -= cartItem.price;
                                           }
                                         });
                                       }
@@ -211,7 +237,7 @@ class _CartPageState extends State<CartPage> {
                                     child: Container(
                                       padding: EdgeInsets.all(4),
                                       decoration: BoxDecoration(
-                                        color: product.quantity == 1 ? Colors.black12 : Colors.white,
+                                        color: cartItem.quantity == 1 ? Colors.black12 : Colors.white,
                                         borderRadius:
                                         BorderRadius.circular(20),
                                         boxShadow: [
@@ -232,7 +258,7 @@ class _CartPageState extends State<CartPage> {
                                     margin: EdgeInsets.symmetric(
                                         horizontal: 10),
                                     child: Text(
-                                      product.quantity.toString().trim(),
+                                      cartItem.quantity.toString().trim(),
                                       style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -242,10 +268,10 @@ class _CartPageState extends State<CartPage> {
                                   GestureDetector(
                                     onTap: (){
                                       setState(() {
-                                        product.quantity++;
+                                        cartItem.quantity++;
                                         //Nếu người dùng ấn tăng sl trong lúc sp đã chọn thì tăng thêm giá tổng
-                                        if(selectedProducts.contains(product)){
-                                          totalAmount += product.price;
+                                        if(selectedProducts.contains(cartItem)){
+                                          totalAmount += cartItem.price;
                                         }
                                       });
                                     },
@@ -286,8 +312,40 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  void _deleteItemInCart(BuildContext context, Product product) {
-    print("delete " + product.name);
+  void _deleteItemInCart(BuildContext context, Cart c) {
+    final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Xóa ${c.productName}?'),
+          content: const Text(
+              'Sản phẩm sẽ bị xóa khỏi giỏ hàng của bạn!'),
+          actions: [
+            TextButton(
+              onPressed: (){
+                Navigator.pop(context);
+              },
+                child: Text("Hủy")
+            ),
+            TextButton(
+                onPressed: (){
+                  Navigator.pop(context);
+                  setState(() {
+                    databaseRef.child(c.idCart).remove();
+                  });
+                },
+                child: Text("Đồng ý")
+            ),
+          ],
+          elevation: 20,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -387,7 +445,7 @@ class CartBottomNavBar extends StatelessWidget {
                   );
                 }
                 else{
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(danhSach: selectedProducts,)));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: selectedProducts,)));
                 }
               },
               child: Container(

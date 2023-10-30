@@ -1,16 +1,25 @@
 import 'dart:convert';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:qlquanao/model/Product.dart';
+import 'package:provider/provider.dart';
+import 'package:qlquanao/Customer/mainpage.dart';
+import 'package:qlquanao/model/Cart.dart';
+import 'package:qlquanao/model/Order.dart';
+import 'package:qlquanao/model/OrderItem.dart';
+
+import '../../provider/signin_provider.dart';
 
 
 
-String name = " ";
-String phone = " ";
-String address = " ";
+String nameNew = " ";
+String phoneNew = " ";
+String addressNew = " ";
 String detailAddress = " ";
+bool tempAddress = false;
 
 
 String formatPrice(int price) {
@@ -21,18 +30,23 @@ String formatPrice(int price) {
 int totalAmount = 0;
 
 class PaymentPage extends StatefulWidget {
-  final List<Product> danhSach;
+  final List<Cart> listProduct;
 
-  PaymentPage({required this.danhSach});
+  PaymentPage({required this.listProduct});
 
   @override
-  State<PaymentPage> createState() => _PaymentPageState(danhSach: danhSach);
+  State<PaymentPage> createState() => _PaymentPageState(listProduct: listProduct);
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  final List<Product> danhSach;
-  _PaymentPageState({required this.danhSach});
+  final List<Cart> listProduct;
+  _PaymentPageState({required this.listProduct});
   ScrollController _scrollController = ScrollController();
+  String? uid;
+  String? nameDefault;
+  String? phoneDefault;
+  String? addressDefault;
+
 
   int? groupValue = 1;
 
@@ -41,9 +55,17 @@ class _PaymentPageState extends State<PaymentPage> {
     // TODO: implement initState
     super.initState();
     totalAmount = 0;
-    for(var p in danhSach){
+    for(var p in listProduct){
       totalAmount += p.price * p.quantity;
     }
+
+    final sp = context.read<SignInProvider>();
+    sp.getDataFromSharedPreference();
+    uid = sp.uid;
+    // Kiểm tra nếu name = null hoặc = ' ' thì gán = <Trống>
+    nameDefault = (sp.name == null || sp.name!.trim().length != 0) ? '<Trống>' : sp.name!;
+    phoneDefault = (sp.phone == null || sp.phone!.trim().length != 0) ? '<Trống>' : sp.phone!;
+    addressDefault = (sp.address == null || sp.address!.trim().length != 0) ? '<Trống>' : sp.address!;
   }
 
   @override
@@ -89,8 +111,8 @@ class _PaymentPageState extends State<PaymentPage> {
                       ),
                       Spacer(),
                       InkWell(
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => AddressPage()));
+                        onTap: () async {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => AddressPage(listProduct: listProduct)));
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(right: 14),
@@ -106,30 +128,32 @@ class _PaymentPageState extends State<PaymentPage> {
                       ),
                     ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40),
-                    child: Text(
-                      "Lư Thái Qui  |  0888888888",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 40),
+                        child: Text(
+                          (tempAddress == false) ? "Tên: " + nameDefault! : "Tên: " + nameNew,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40, top: 6),
-                    child: Text(
-                      "10 QL22",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black,
+                      Text(
+                        (tempAddress == false) ? "  |  SĐT: " + phoneDefault! : "  |  SĐT: " + phoneNew,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 40, right: 15),
                     child: Text(
-                      "Tân Xuân, Hóc Môn, Thành phố Hồ Chí Minh",
+                      (tempAddress == false) ? "Địa chỉ: " + addressDefault! : "Địa chỉ: " + detailAddress + ", " + addressNew,
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.black,
@@ -164,9 +188,9 @@ class _PaymentPageState extends State<PaymentPage> {
                 child: ListView.builder(
                   controller: _scrollController,
                   shrinkWrap: true,
-                  itemCount: danhSach.length,
+                  itemCount: listProduct.length,
                   itemBuilder: (context, index) {
-                    final product = danhSach[index];
+                    final product = listProduct[index];
                     return Container(
                       height: 110,
                       margin: EdgeInsets.symmetric(horizontal: 14, vertical: 5),
@@ -190,7 +214,7 @@ class _PaymentPageState extends State<PaymentPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  product.name,
+                                  product.productName,
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -320,24 +344,61 @@ class _PaymentPageState extends State<PaymentPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      if(groupValue == 1){
-                        print("Thanh toán khi nhận hàng");
+                      if((nameDefault == "<Trống>" || phoneDefault == "<Trống>" || addressDefault == "<Trống>") && (nameNew == " " || phoneNew == " " || addressNew == " ")) {
+                        Fluttertoast.showToast(
+                            msg: "Vui lòng điền đầy đủ thông tin cá nhân!",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.TOP,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.black45,
+                            textColor: Colors.white,
+                            fontSize: 16.0
+                        );
+                        }
+                      else{
+                        if(groupValue == 1){
 
+                          final ref = FirebaseDatabase.instance.ref();
+
+                          //push order lên firebase
+                          final snapshotOrders = ref.child('orders');
+                          String? orderID = snapshotOrders.push().key;
+                          if(uid == null){
+                            uid = " ";
+                          }
+                          String uAddress = detailAddress + ", " + addressNew;
+                          DateTime now = DateTime.now();
+                          String orderDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+
+                          Orders order = Orders.full(orderID, uid, nameNew, phoneNew, uAddress, orderDate, totalAmount, false);
+                          snapshotOrders.child(orderID!).set(order.toJson());
+                          print("orderID: ${orderID}");
+
+
+                          //push orderItem lên firebase
+                          final snapshotOrderItem = ref.child('orderItem');
+                          for(var item in listProduct){
+                            String? orderItemID = snapshotOrders.push().key;
+                            OrderItem o = OrderItem.all(orderItemID, orderID, item.productID, item.productName, item.image, item.size, item.color, orderDate, item.quantity, item.price);
+                            snapshotOrderItem.child(orderItemID!).set(o.toJson());
+                          }
+
+                        }
+                        else if(groupValue == 2){
+
+                          Fluttertoast.showToast(
+                              msg: "Chưa hỗ trợ thanh toán momo",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.TOP,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.black45,
+                              textColor: Colors.white,
+                              fontSize: 16.0
+                          );
+                        }
+
+                        _showMyDialog();
                       }
-                      else if(groupValue == 2){
-                        print("Thanh toán qua Momo");
-
-
-                      }
-                      Fluttertoast.showToast(
-                          msg: "Đã đặt hàng",
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.TOP,
-                          timeInSecForIosWeb: 1,
-                          backgroundColor: Colors.black45,
-                          textColor: Colors.white,
-                          fontSize: 16.0
-                      );
                     },
                     child: Container(
                       margin: EdgeInsets.only(top: 16),
@@ -366,28 +427,74 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  void _OrderOnClick(BuildContext context) {
-    if(groupValue == 1){
-      print("Thanh toán khi nhận hàng");
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Image.asset('assets/order_success.png',
+                  width: 80,
+                  height: 80,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Text('Đặt hàng thành công',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                      ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 15),
+                  child: Text('Cảm ơn quý khách đã mua hàng! Bạn có thể theo dõi tình trạng đơn hàng trong trang cá nhân.',
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Đồng ý', style: TextStyle(fontSize: 18),),
+              onPressed: () {
+                final ref = FirebaseDatabase.instance.ref();
+                final snapshotCart = ref.child('cart').get();
+                final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
+                for(var c in listProduct){
+                  databaseRef.child(c.idCart).remove();
+                }
 
-    }
-    else if(groupValue == 2){
-      print("Thanh toán qua Momo");
-
-
-    }
-
+                Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
 
 
 class AddressPage extends StatefulWidget {
+  final List<Cart> listProduct;
+  AddressPage({required this.listProduct});
+
   @override
-  _addressPageState createState() => _addressPageState();
+  _addressPageState createState() => _addressPageState(listProduct: listProduct);
 }
 
 class _addressPageState extends State<AddressPage> {
+  final List<Cart> listProduct;
+  _addressPageState({required this.listProduct});
+
   String host = "https://vn-public-apis.fpo.vn/";
 
   List<dynamic> cityData = [];
@@ -586,15 +693,23 @@ class _addressPageState extends State<AddressPage> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    name = _textNameController.text;
-                    phone = _textPhoneController.text.trim();
-                    address = selectedWard + ", " + selectedDistrict + ", " + selectedCity;
+                    // _showConfirmDialog();
+                    tempAddress = true;
+
+                    // nameNew = _textNameController.text;
+                    // phoneNew = _textPhoneController.text.trim();
+                    // addressNew = selectedWard + ", " + selectedDistrict + ", " + selectedCity;
+                    // detailAddress = _textdetailAddressController.text;
+
+                    nameNew = _textNameController.text;
+                    phoneNew = _textPhoneController.text.trim();
+                    addressNew = selectedWard + ", " + selectedDistrict + ", " + selectedCity;
                     detailAddress = _textdetailAddressController.text;
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: listProduct)));
                   });
-                  Navigator.pop(context);
-                  print("name: " + name);
-                  print("phone: " + phone);
-                  print("address: " + address);
+                  print("name: " + nameNew);
+                  print("phone: " + phoneNew);
+                  print("address: " + addressNew);
                   print("deAdd: " + detailAddress);
                 },
                 child: Text('Xác nhận'),
@@ -603,6 +718,45 @@ class _addressPageState extends State<AddressPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _showConfirmDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text("Đặt làm mặc định?"),
+          content: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Text('Thông tin này sẽ tự động cập nhập vào thông tin cá nhân của tài khoản và đặt làm mặc định cho nhũng lần mua tiếp theo?',
+                style: TextStyle(
+                  fontSize: 20,
+                ),
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Chỉ tạm thời cho lần này', style: TextStyle(fontSize: 18),),
+              onPressed: () {
+                tempAddress = true;
+                Navigator.pop(context);
+              },
+            ),
+            Spacer(),
+            TextButton(
+              child: const Text('Đồng ý', style: TextStyle(fontSize: 18),),
+              onPressed: () {
+                tempAddress = false;
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

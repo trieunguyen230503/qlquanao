@@ -1,3 +1,5 @@
+import 'package:firebase_database/firebase_database.dart';
+
 class Orders {
   String? _oderID;
 
@@ -6,6 +8,18 @@ class Orders {
   String? _userID;
 
   String? get userID => _userID;
+
+  String? _userName;
+
+  String? get userName => _userName;
+
+  String? _phone;
+
+  String? get phone => _phone;
+
+  String? _address;
+
+  String? get address => _address;
 
   String? _orderDate;
 
@@ -21,4 +35,50 @@ class Orders {
 
   Orders(this._oderID, this._userID, this._orderDate, this._totalamount,
       this._status);
+
+  Orders.full(this._oderID, this._userID, this._userName, this._phone,
+      this._address, this._orderDate, this._totalamount, this._status);
+
+  Orders.fromSnapshot(DataSnapshot snapshot)
+      : _oderID = snapshot.child("orderID").value.toString(),
+        _userID = snapshot.child("userID").value.toString(),
+        _userName = snapshot.child("userName").value.toString(),
+        _phone = snapshot.child("userPhone").value.toString(),
+        _address = snapshot.child("address").value.toString(),
+        _orderDate = snapshot.child("orderDate").value.toString(),
+        _totalamount =
+            int.parse(snapshot.child("totalamount").value.toString()),
+        _status = bool.parse(snapshot.child("status").value.toString());
+
+  toJson() {
+    return {
+      'orderID': orderID,
+      'userID': userID,
+      'userName': userName,
+      'userPhone': phone,
+      'userAddress': address,
+      'orderDate': oderDate,
+      'totalamount': totalamount,
+      'status': status
+    };
+  }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return 'orderID: ' +
+        orderID! +
+        ' userID: ' +
+        userID! +
+        ' userName: ' +
+        userName! +
+        ' userPhone: ' +
+        phone! +
+        ' userAddress: ' +
+        address! +
+        ' orderDate: ' +
+        oderDate! +
+        ' totalamount: ' +
+        totalamount!.toString();
+  }
 }
