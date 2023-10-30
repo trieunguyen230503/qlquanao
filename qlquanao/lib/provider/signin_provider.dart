@@ -128,6 +128,7 @@ class SignInProvider extends ChangeNotifier {
         _phone = " ";
         _address = " ";
         _dob = " ";
+        _role = 3;
       } on FirebaseException catch (e) {
         switch (e.code) {
           case "account-exists-with-different-credential":

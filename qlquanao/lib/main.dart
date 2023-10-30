@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => InternetProvider())
       ],
       child: MaterialApp(
-        home: MainPageAdmin(),
+        home: SplashScreen(),
         debugShowCheckedModeBanner: false,
       ),
     );
