@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:qlquanao/Customer/mainpage.dart';
+import 'package:qlquanao/Admin/fragment/MainPageAdmin.dart';
 import 'package:qlquanao/provider/internet_provider.dart';
 import 'package:qlquanao/provider/revenue_provider.dart';
 import 'package:qlquanao/provider/signin_provider.dart';
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => InternetProvider())
       ],
       child: MaterialApp(
-        home: SplashScreen(),
+        home: MainPageAdmin(),
         debugShowCheckedModeBanner: false,
       ),
     );
