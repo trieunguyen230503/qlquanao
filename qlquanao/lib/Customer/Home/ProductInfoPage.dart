@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:qlquanao/model/Product.dart';
 
@@ -30,33 +31,122 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
   int quantity = 1;
   int price = 0;
 
-  List<String> sizes = [
-    "M",
-    "S",
-    "L",
-    "XL",
-    "XXL",
-  ];
+  List<String> listSizesId = [];
+  List<String> listClrsId = [];
+
+  List<String> sizes = [];
   String selectedSize = "";
 
-  List<String> clrs = [
-    "Trắng",
-    "Đen",
-    "Xanh lá mạ",
-    "Đỏ mộng mơ",
-  ];
+  List<String> clrs = [];
   String selectedColor = "";
+
+  PageController _pageController = PageController(initialPage: 0);
+  int _currentPage = 0;
+
+  List<String> _sliderImages = [];
+
+  void goToPage(int pageIndex) {
+    setState(() {
+      _currentPage = pageIndex;
+      _pageController.jumpToPage(pageIndex);
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     price = product.price!;
-    selectedSize = sizes[0];
-    selectedColor = clrs[0];
+    getProductSizeColorFromFirebase();
+  }
+
+  void getProductSizeColorFromFirebase() async {
+    final DatabaseReference databaseRef =
+        FirebaseDatabase.instance.ref("ProductSizeColor");
+
+    await databaseRef.onValue.listen((event) async {
+      if (listSizesId.isNotEmpty) {
+        listSizesId.clear();
+      }
+      if (listSizesId.isNotEmpty) {
+        listClrsId.clear();
+      }
+      if (sizes.isNotEmpty) {
+        sizes.clear();
+      }
+      if (clrs.isNotEmpty) {
+        clrs.clear();
+      }
+      if(_sliderImages.isNotEmpty){
+        _sliderImages.clear();
+      }
+
+      for (final snap in event.snapshot.children) {
+        String productID = snap.child("ProductID").value.toString();
+
+        if (productID == product.productId) {
+          String size = snap.child("SizeID").value.toString();
+          String color = snap.child("ColorID").value.toString();
+          String image = snap.child("url").value.toString();
+          listSizesId.add(size);
+          listClrsId.add(color);
+          _sliderImages.add(image);
+        }
+      }
+
+      final ref = FirebaseDatabase.instance.ref();
+
+      for (var c in listClrsId) {
+        final snapshot = await ref.child('Color/$c/Name').get();
+        String color = snapshot.value.toString();
+        setState(() {
+          clrs.add(color);
+        });
+      }
+
+      for (var s in listSizesId) {
+        final snapshot = await ref.child('Size/$s/Name').get();
+        String size = snapshot.value.toString();
+        setState(() {
+          sizes.add(size);
+        });
+      }
+
+      setState(() {
+        if (sizes.isNotEmpty && clrs.isNotEmpty) {
+          selectedSize = sizes[0];
+          selectedColor = clrs[0];
+        }
+      });
+    }, onError: (error) {
+      // Error.
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _slider = _sliderImages
+        .map((image) => Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.03),
+              child: Container(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    image,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ))
+        .toList();
+
     return Scaffold(
       backgroundColor: Color(0xFFEDECF2),
       body: Padding(
@@ -73,10 +163,37 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.all(16),
-                child: Image.network(
-                  product.image.toString(),
+                child: Container(
                   width: double.infinity,
                   height: MediaQuery.of(context).size.width - 32,
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentPage = index;
+                        selectedColor = clrs[index];
+                      });
+                    },
+                    children: _slider,
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Center(
+                child: Container(
+                  child: AnimatedSmoothIndicator(
+                    activeIndex: _currentPage,
+                    count: _slider.length,
+                    effect: const WormEffect(
+                      dotHeight: 10,
+                      dotWidth: 10,
+                      spacing: 5,
+                      dotColor: Color.fromRGBO(217, 217, 217, 1),
+                      activeDotColor: Color.fromRGBO(102, 102, 102, 1),
+                      paintStyle: PaintingStyle.fill,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -84,7 +201,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
               child: Arc(
                 edge: Edge.TOP,
                 arcType: ArcType.CONVEY,
-                height: 30,
+                height: 20,
                 child: Container(
                   width: double.infinity,
                   color: Colors.white,
@@ -93,7 +210,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                     child: Column(
                       children: [
                         Padding(
-                          padding: EdgeInsets.only(top: 60, bottom: 20),
+                          padding: EdgeInsets.only(top: 50, bottom: 20),
                           child: Container(
                             width: double.infinity,
                             child: Text(
@@ -126,7 +243,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                           child: Container(
                             width: double.infinity,
                             child: Text(
-                              "Chất liệu: ${product.material}",
+                              "Material: ${product.material}",
                               textAlign: TextAlign.justify,
                               style: TextStyle(
                                 fontSize: 16,
@@ -140,7 +257,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                           child: Row(
                             children: [
                               Text(
-                                "Màu sắc: ",
+                                "Color: ",
                                 style: TextStyle(
                                   fontSize: 18,
                                   color: Colors.black,
@@ -156,23 +273,30 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                   children: [
                                     for (int i = 0; i < clrs.length; i++)
                                       InkWell(
-                                        onTap: (){
+                                        onTap: () {
                                           setState(() {
                                             selectedColor = clrs[i];
+                                            goToPage(i);
                                           });
                                         },
                                         // thẻ IntrinsicWidth giúp tự tăng chiều dài phù hợp với Text
                                         child: IntrinsicWidth(
                                           child: Container(
                                             height: 30,
-                                            padding: EdgeInsets.symmetric(horizontal: 8),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 8),
                                             alignment: Alignment.center,
                                             decoration: BoxDecoration(
                                               color: Colors.white,
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: selectedColor == clrs[i] ? Colors.blueAccent : Colors.grey.withOpacity(0.5),
+                                                  color:
+                                                      selectedColor == clrs[i]
+                                                          ? Colors.blueAccent
+                                                          : Colors.grey
+                                                              .withOpacity(0.5),
                                                   spreadRadius: 2,
                                                   blurRadius: 8,
                                                 ),
@@ -200,7 +324,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                           child: Row(
                             children: [
                               Text(
-                                "Kích thước: ",
+                                "Size: ",
                                 style: TextStyle(
                                   fontSize: 18,
                                   color: Colors.black,
@@ -216,7 +340,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                   children: [
                                     for (int i = 0; i < sizes.length; i++)
                                       InkWell(
-                                        onTap: (){
+                                        onTap: () {
                                           setState(() {
                                             selectedSize = sizes[i];
                                           });
@@ -224,14 +348,20 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                         child: IntrinsicWidth(
                                           child: Container(
                                             height: 30,
-                                            padding: EdgeInsets.symmetric(horizontal: 10),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 10),
                                             alignment: Alignment.center,
                                             decoration: BoxDecoration(
                                               color: Colors.white,
-                                              borderRadius: BorderRadius.circular(30),
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
                                               boxShadow: [
                                                 BoxShadow(
-                                                  color: selectedSize == sizes[i] ? Colors.blueAccent : Colors.grey.withOpacity(0.5),
+                                                  color:
+                                                      selectedSize == sizes[i]
+                                                          ? Colors.blueAccent
+                                                          : Colors.grey
+                                                              .withOpacity(0.5),
                                                   spreadRadius: 2,
                                                   blurRadius: 8,
                                                 ),
@@ -255,20 +385,21 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(top: 18, bottom: 40, right: 10),
+                          padding:
+                              EdgeInsets.only(top: 18, bottom: 40, right: 10),
                           child: Row(
                             children: [
                               Spacer(),
                               Text(
-                                "Số lượng:   ",
+                                "Quantity:   ",
                                 style: TextStyle(
                                   fontSize: 20,
                                   color: Colors.black,
                                 ),
                               ),
                               GestureDetector(
-                                onTap: (){
-                                  if(quantity > 1){
+                                onTap: () {
+                                  if (quantity > 1) {
                                     setState(() {
                                       quantity--;
                                       //Nếu người dùng ấn giảm sl thì giảm giá tổng
@@ -279,9 +410,10 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                 child: Container(
                                   padding: EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: quantity == 1 ? Colors.black12 : Colors.white,
-                                    borderRadius:
-                                    BorderRadius.circular(20),
+                                    color: quantity == 1
+                                        ? Colors.black12
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.grey.withOpacity(0.5),
@@ -297,8 +429,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                 ),
                               ),
                               Container(
-                                margin: EdgeInsets.symmetric(
-                                    horizontal: 10),
+                                margin: EdgeInsets.symmetric(horizontal: 10),
                                 child: Text(
                                   quantity.toString().trim(),
                                   style: TextStyle(
@@ -308,7 +439,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                 ),
                               ),
                               GestureDetector(
-                                onTap: (){
+                                onTap: () {
                                   setState(() {
                                     quantity++;
                                     //Nếu người dùng ấn tăng slthì tăng thêm giá tổng
@@ -319,12 +450,10 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                   padding: EdgeInsets.all(8),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius:
-                                    BorderRadius.circular(20),
+                                    borderRadius: BorderRadius.circular(20),
                                     boxShadow: [
                                       BoxShadow(
-                                        color:
-                                        Colors.grey.withOpacity(0.5),
+                                        color: Colors.grey.withOpacity(0.5),
                                         spreadRadius: 1,
                                         blurRadius: 10,
                                       )
@@ -402,18 +531,26 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                   // });
 
                   String? idCart = snapshotCartItem.push().key;
-                  Cart c = Cart(idCart: idCart!, productID: product.productId!, productName: product.name!, image: product.image!, color: selectedColor, size: selectedSize, price: product.price!, quantity: quantity,
+                  Cart c = Cart(
+                      idCart: idCart!,
+                      productID: product.productId!,
+                      productName: product.name!,
+                      image: product.image!,
+                      color: selectedColor,
+                      size: selectedSize,
+                      price: product.price!,
+                      quantity: quantity,
                       userID: "-Nf_mGcgG0xAWGoHfK9J");
                   snapshotCartItem.child(idCart!).set(c.toJson());
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => CartPage()));
-
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => CartPage()));
                 },
                 icon: Icon(
                   CupertinoIcons.cart_badge_plus,
                   color: Colors.white,
                 ),
                 label: Text(
-                  "Thêm vào giỏ hàng",
+                  "Add to cart",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -448,7 +585,6 @@ class ItemAppBar extends StatefulWidget {
 class _ItemAppBarState extends State<ItemAppBar> {
   bool isFavorite = false;
 
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -470,9 +606,9 @@ class _ItemAppBarState extends State<ItemAppBar> {
           Padding(
             padding: EdgeInsets.only(left: 20),
             child: Text(
-              "Chi tiết sản phẩm",
+              "Product",
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -480,7 +616,7 @@ class _ItemAppBarState extends State<ItemAppBar> {
           ),
           Spacer(),
           InkWell(
-            onTap:(){
+            onTap: () {
               setState(() {
                 isFavorite = !isFavorite;
               });

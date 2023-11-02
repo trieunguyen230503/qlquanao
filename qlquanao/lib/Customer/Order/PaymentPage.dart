@@ -63,9 +63,9 @@ class _PaymentPageState extends State<PaymentPage> {
     sp.getDataFromSharedPreference();
     uid = sp.uid;
     // Kiểm tra nếu name = null hoặc = ' ' thì gán = <Trống>
-    nameDefault = (sp.name == null || sp.name!.trim().length != 0) ? '<Trống>' : sp.name!;
-    phoneDefault = (sp.phone == null || sp.phone!.trim().length != 0) ? '<Trống>' : sp.phone!;
-    addressDefault = (sp.address == null || sp.address!.trim().length != 0) ? '<Trống>' : sp.address!;
+    nameDefault = (sp.name == null || sp.name!.trim().length != 0) ? '<null>' : sp.name!;
+    phoneDefault = (sp.phone == null || sp.phone!.trim().length != 0) ? '<null>' : sp.phone!;
+    addressDefault = (sp.address == null || sp.address!.trim().length != 0) ? '<null>' : sp.address!;
   }
 
   @override
@@ -73,7 +73,7 @@ class _PaymentPageState extends State<PaymentPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Thanh toán",
+          "Payment",
           style: TextStyle(
             fontSize: 23,
             fontWeight: FontWeight.bold,
@@ -102,7 +102,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         ),
                       ),
                       Text(
-                        "Địa chỉ nhận hàng",
+                        "Delivery address",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -117,7 +117,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         child: Padding(
                           padding: const EdgeInsets.only(right: 14),
                           child: Text(
-                            "Thay đổi",
+                            "Change",
                             style: TextStyle(
                               fontSize: 16,
                               decoration: TextDecoration.underline,
@@ -134,7 +134,7 @@ class _PaymentPageState extends State<PaymentPage> {
                       Padding(
                         padding: const EdgeInsets.only(left: 40),
                         child: Text(
-                          (tempAddress == false) ? "Tên: " + nameDefault! : "Tên: " + nameNew,
+                          (tempAddress == false) ? "Name: " + nameDefault! : "Name: " + nameNew,
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.black,
@@ -142,7 +142,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         ),
                       ),
                       Text(
-                        (tempAddress == false) ? "  |  SĐT: " + phoneDefault! : "  |  SĐT: " + phoneNew,
+                        (tempAddress == false) ? "  |  Phone: " + phoneDefault! : "  |  Phone: " + phoneNew,
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.black,
@@ -153,7 +153,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   Padding(
                     padding: const EdgeInsets.only(left: 40, right: 15),
                     child: Text(
-                      (tempAddress == false) ? "Địa chỉ: " + addressDefault! : "Địa chỉ: " + detailAddress + ", " + addressNew,
+                      (tempAddress == false) ? "Address: " + addressDefault! : "Address: " + detailAddress + ", " + addressNew,
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.black,
@@ -170,7 +170,7 @@ class _PaymentPageState extends State<PaymentPage> {
             Padding(
               padding: EdgeInsets.only(top: 10, bottom: 15),
               child: Text(
-                "Danh sách sản phẩm",
+                "List of products",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -267,7 +267,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(25, 10, 10, 4),
                   child: Text(
-                      "Chọn phương thức thanh toán",
+                      "Select a payment method",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -285,7 +285,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         groupValue = value;
                       });
                     },
-                    title: Text("Thanh toán khi nhận hàng"),
+                    title: Text("Payment on delivery"),
                     activeColor: Colors.black45,
                     secondary: Icon(
                         Icons.attach_money
@@ -302,7 +302,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         groupValue = value;
                       });
                     },
-                    title: Text("Thanh toán qua Momo"),
+                    title: Text("Payment via Momo"),
                     activeColor: Colors.black45,
                     secondary: Image(
                       image: AssetImage('assets/momo_icon_horizontal_pink_RGB.png'),
@@ -326,7 +326,7 @@ class _PaymentPageState extends State<PaymentPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Tổng tiền:",
+                        "Total amount:",
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 22,
@@ -344,9 +344,9 @@ class _PaymentPageState extends State<PaymentPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      if((nameDefault == "<Trống>" || phoneDefault == "<Trống>" || addressDefault == "<Trống>") && (nameNew == " " || phoneNew == " " || addressNew == " ")) {
+                      if((nameDefault == "<null>" || phoneDefault == "<null>" || addressDefault == "<null>") && (nameNew == " " || phoneNew == " " || addressNew == " ")) {
                         Fluttertoast.showToast(
-                            msg: "Vui lòng điền đầy đủ thông tin cá nhân!",
+                            msg: "Please enter complete personal information!",
                             toastLength: Toast.LENGTH_SHORT,
                             gravity: ToastGravity.TOP,
                             timeInSecForIosWeb: 1,
@@ -387,7 +387,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         else if(groupValue == 2){
 
                           Fluttertoast.showToast(
-                              msg: "Chưa hỗ trợ thanh toán momo",
+                              msg: "Momo payment is not supported yet",
                               toastLength: Toast.LENGTH_SHORT,
                               gravity: ToastGravity.TOP,
                               timeInSecForIosWeb: 1,
@@ -409,7 +409,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        "Đặt hàng",
+                        "Order",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -442,7 +442,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
-                  child: Text('Đặt hàng thành công',
+                  child: Text('Order Success',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 22,
@@ -451,7 +451,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 15),
-                  child: Text('Cảm ơn quý khách đã mua hàng! Bạn có thể theo dõi tình trạng đơn hàng trong trang cá nhân.',
+                  child: Text('Thank you for your purchase! You can track your order status on your personal page.',
                     style: TextStyle(
                       fontSize: 18,
                     ),
@@ -462,7 +462,7 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Đồng ý', style: TextStyle(fontSize: 18),),
+              child: const Text('Yes', style: TextStyle(fontSize: 18),),
               onPressed: () {
                 final ref = FirebaseDatabase.instance.ref();
                 final snapshotCart = ref.child('cart').get();
@@ -552,7 +552,7 @@ class _addressPageState extends State<AddressPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Thông tin giao hàng",
+          "Shipment Details",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -573,7 +573,7 @@ class _addressPageState extends State<AddressPage> {
                 child: TextField(
                   controller: _textNameController,
                   decoration: InputDecoration(
-                    labelText: 'Nhập tên người nhận',
+                    labelText: 'Name',
                   ),
                 ),
               ),
@@ -582,7 +582,7 @@ class _addressPageState extends State<AddressPage> {
                 child: TextField(
                   controller: _textPhoneController,
                   decoration: InputDecoration(
-                    labelText: 'Nhập số điện thoại',
+                    labelText: 'Phone',
                   ),
                 ),
               ),
@@ -591,7 +591,7 @@ class _addressPageState extends State<AddressPage> {
                 child: DropdownMenu<String>(
                   width: 250,
                   initialSelection: selectedCity,
-                  hintText: "Chọn tỉnh/thành phố",
+                  hintText: "Select province/city",
                   // Văn bản mặc định khi không có giá trị nào được chọn
                   onSelected: (value) {
                     setState(() {
@@ -627,7 +627,7 @@ class _addressPageState extends State<AddressPage> {
                 child: DropdownMenu<String>(
                   width: 250,
                   initialSelection: selectedDistrict,
-                  hintText: "Chọn quận/huyện",
+                  hintText: "Select district",
                   // Văn bản mặc định khi không có giá trị nào được chọn
                   onSelected: (value) {
                     setState(() {
@@ -662,7 +662,7 @@ class _addressPageState extends State<AddressPage> {
                 child: DropdownMenu<String>(
                   width: 250,
                   initialSelection: selectedWard,
-                  hintText: "Chọn phường/xã",
+                  hintText: "Select ward",
                   // Văn bản mặc định khi không có giá trị nào được chọn
                   onSelected: (value) {
                     setState(() {
@@ -684,7 +684,7 @@ class _addressPageState extends State<AddressPage> {
                 child: TextField(
                   controller: _textdetailAddressController,
                   decoration: InputDecoration(
-                    labelText: 'Nhập địa chỉ chi tiết',
+                    labelText: 'Enter detailed address',
                   ),
                 ),
               ),
@@ -693,18 +693,12 @@ class _addressPageState extends State<AddressPage> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    // _showConfirmDialog();
-                    tempAddress = true;
+                    _showConfirmDialog();
 
                     // nameNew = _textNameController.text;
                     // phoneNew = _textPhoneController.text.trim();
                     // addressNew = selectedWard + ", " + selectedDistrict + ", " + selectedCity;
                     // detailAddress = _textdetailAddressController.text;
-
-                    nameNew = _textNameController.text;
-                    phoneNew = _textPhoneController.text.trim();
-                    addressNew = selectedWard + ", " + selectedDistrict + ", " + selectedCity;
-                    detailAddress = _textdetailAddressController.text;
                     Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: listProduct)));
                   });
                   print("name: " + nameNew);
@@ -712,7 +706,7 @@ class _addressPageState extends State<AddressPage> {
                   print("address: " + addressNew);
                   print("deAdd: " + detailAddress);
                 },
-                child: Text('Xác nhận'),
+                child: Text('Confirm'),
               ),
             ],
           ),
@@ -727,11 +721,11 @@ class _addressPageState extends State<AddressPage> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
-          title: Text("Đặt làm mặc định?"),
+          title: Text("Set as default address?"),
           content: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.only(top: 20),
-              child: Text('Thông tin này sẽ tự động cập nhập vào thông tin cá nhân của tài khoản và đặt làm mặc định cho nhũng lần mua tiếp theo?',
+              child: Text('This information will automatically be updated to your account\'s personal information and set as default for subsequent purchases?',
                 style: TextStyle(
                   fontSize: 20,
                 ),
@@ -740,18 +734,24 @@ class _addressPageState extends State<AddressPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Chỉ tạm thời cho lần này', style: TextStyle(fontSize: 18),),
+              child: const Text('Just this time', style: TextStyle(fontSize: 18),),
               onPressed: () {
                 tempAddress = true;
-                Navigator.pop(context);
+                nameNew = _textNameController.text;
+                phoneNew = _textPhoneController.text.trim();
+                addressNew = selectedWard + ", " + selectedDistrict + ", " + selectedCity;
+                detailAddress = _textdetailAddressController.text;
+                Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: listProduct)));
               },
             ),
             Spacer(),
             TextButton(
-              child: const Text('Đồng ý', style: TextStyle(fontSize: 18),),
+              child: const Text('Agree', style: TextStyle(fontSize: 18),),
               onPressed: () {
                 tempAddress = false;
-                Navigator.pop(context);
+                final user = context.read<SignInProvider>();
+                user.updateAddress(_textNameController.text, _textPhoneController.text.trim(), _textdetailAddressController.text + ", " + selectedWard + ", " + selectedDistrict + ", " + selectedCity);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: listProduct)));
               },
             ),
           ],

@@ -319,15 +319,15 @@ class _CartPageState extends State<CartPage> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Xóa ${c.productName}?'),
+          title: Text('Delete ${c.productName}?'),
           content: const Text(
-              'Sản phẩm sẽ bị xóa khỏi giỏ hàng của bạn!'),
+              'The product will be removed from your cart!'),
           actions: [
             TextButton(
               onPressed: (){
                 Navigator.pop(context);
               },
-                child: Text("Hủy")
+                child: Text("Cancel")
             ),
             TextButton(
                 onPressed: (){
@@ -336,7 +336,7 @@ class _CartPageState extends State<CartPage> {
                     databaseRef.child(c.idCart).remove();
                   });
                 },
-                child: Text("Đồng ý")
+                child: Text("Yes")
             ),
           ],
           elevation: 20,
@@ -382,7 +382,7 @@ class _CartAppBarState extends State<CartAppBar> {
           Padding(
             padding: EdgeInsets.only(left: 20),
             child: Text(
-              "Giỏ hàng",
+              "Cart",
               style: TextStyle(
                 fontSize: 23,
                 fontWeight: FontWeight.bold,
@@ -415,7 +415,7 @@ class CartBottomNavBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Tổng tiền:",
+                  "Total:",
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 22,
@@ -435,7 +435,7 @@ class CartBottomNavBar extends StatelessWidget {
               onTap: () {
                 if(selectedProducts.length == 0){
                   Fluttertoast.showToast(
-                      msg: "Chưa chọn sản phẩm",
+                      msg: "Please choose a product",
                       toastLength: Toast.LENGTH_SHORT,
                       gravity: ToastGravity.TOP,
                       timeInSecForIosWeb: 1,
@@ -457,7 +457,7 @@ class CartBottomNavBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  "Thanh toán",
+                  "Check out",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

@@ -642,6 +642,37 @@ class SignInProvider extends ChangeNotifier {
     });
   }
 
+  Future<void> updateAddress(String name, String phone,
+      String adress) async {
+    print(dob);
+    DatabaseReference newpostKey = FirebaseDatabase.instance.ref("users/$_uid");
+
+    Map<String, dynamic> updateData;
+    final SharedPreferences s = await SharedPreferences.getInstance();
+
+
+    updateData = {
+        'name': name,
+        'phone': phone,
+        'address': adress,
+        'dob': dob
+    };
+
+    //Update lại sharpreces
+    await s.setString('name', name!);
+    //await s.setString('email', _email!);
+    await s.setString("phone", phone!);
+    await s.setString('address', adress!);
+    await s.setString('dob', dob!);
+
+    await newpostKey.update(updateData).then((value) {
+      print("Thành công");
+    }).catchError((onError) {
+      print(onError);
+    });
+  }
+
+
   Future cleanUser() async {
     _userCustomer = [];
   }

@@ -101,7 +101,7 @@ class _HomePage2State extends State<HomePage2> {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  "-50%",
+                                  "-" +(100 - (productItem.promoPrice!/productItem.price! * 100).toInt()).toString() + "%",
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.white,
@@ -159,6 +159,19 @@ class _HomePage2State extends State<HomePage2> {
                                   alignment: Alignment.centerLeft,
                                   child: Text(
                                     formatPrice(productItem.price!) + "đ",
+                                    style: TextStyle(
+                                      decoration: TextDecoration.lineThrough,
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  alignment: Alignment.centerLeft,
+                                  padding: EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    formatPrice(productItem.promoPrice!) + "đ",
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -257,7 +270,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                     child: TextFormField(
                       decoration: InputDecoration(
                         border: InputBorder.none,
-                        hintText: "Tìm kiếm...",
+                        hintText: "Search...",
                       ),
                     ),
                   ),
@@ -338,7 +351,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
           margin: EdgeInsets.symmetric(vertical: 18, horizontal: 15),
           alignment: Alignment.centerLeft,
           child: Text(
-            "Tất cả sản phẩm",
+            "All products",
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,

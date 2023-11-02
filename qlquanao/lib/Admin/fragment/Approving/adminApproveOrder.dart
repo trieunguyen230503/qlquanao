@@ -28,7 +28,7 @@ class _ApproveOrderPageState extends State<ApproveOrderPage> {
               backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
               centerTitle: true,
               title: const Text(
-                'Duyệt đơn đặt hàng',
+                'Browse orders',
                 style:
                 TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
               ),
@@ -38,10 +38,10 @@ class _ApproveOrderPageState extends State<ApproveOrderPage> {
                 labelColor: Colors.black,
                 tabs: [
                   Tab(
-                    text: 'Đơn đang đợi duyệt',
+                    text: 'Awaiting approval',
                   ),
                   Tab(
-                    text: 'Đơn đã duyệt',
+                    text: 'Approved',
                   ),
                 ],
               ),

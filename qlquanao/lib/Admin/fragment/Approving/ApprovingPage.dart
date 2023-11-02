@@ -58,7 +58,7 @@ class _ApprovingPageState extends State<ApprovingPage> {
     Widget myWidget;
 
     if (orderList.isEmpty) {
-      myWidget = Center(child: Text("Không có đơn nào đang đợi!"));
+      myWidget = Center(child: Text("There are no orders"));
     } else {
       myWidget = ListView.builder(
           itemCount: orderList.length,
@@ -109,14 +109,14 @@ class _ApprovingPageState extends State<ApprovingPage> {
                       Text(
                         (orderItem.userName!.length > 20)
                             ? '${orderItem.userName!.substring(0, 20)}...' // Hiển thị 'text...' nếu độ dài vượt quá length
-                            : "Tên KH: " + orderItem.userName!,
+                            : "Customer: " + orderItem.userName!,
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.black38,
                         ),
                       ),
                       Text(
-                        "Địa chỉ: " + orderItem!.address.toString(),
+                        "Address: " + orderItem!.address.toString(),
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.black38,

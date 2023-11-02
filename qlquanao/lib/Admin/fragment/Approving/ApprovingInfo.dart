@@ -69,7 +69,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Chi tiết đơn hàng",
+          "Product",
           style: TextStyle(
             fontSize: 23,
             fontWeight: FontWeight.bold,
@@ -98,7 +98,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                         ),
                       ),
                       Text(
-                        "Thông tin người đặt",
+                        "Customer information",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -110,7 +110,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                   Padding(
                     padding: const EdgeInsets.only(left: 40),
                     child: Text(
-                      "Lư Thái Qui  |  0888888888",
+                      "Name: " + order.userName! + "  |  Phone: " + order.phone!,
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.black,
@@ -118,19 +118,9 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 40, top: 6),
+                    padding: const EdgeInsets.only(left: 40, top: 6, right: 15),
                     child: Text(
-                      "10 QL22",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40, right: 15),
-                    child: Text(
-                      "Tân Xuân, Hóc Môn, Thành phố Hồ Chí Minh",
+                      "Address: " + order.address!,
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.black,
@@ -147,7 +137,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
             Padding(
               padding: EdgeInsets.only(top: 10, bottom: 15),
               child: Text(
-                "Danh sách sản phẩm",
+                "List of products",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -199,7 +189,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                                   ),
                                 ),
                                 Text(
-                                  "Màu: " + item.productColor! + ",     " + "Size: " + item.productSize!,
+                                  "Color: " + item.productColor! + ",     " + "Size: " + item.productSize!,
                                   style: TextStyle(
                                     fontSize: 18,
                                     color: Colors.black,
@@ -220,7 +210,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                                       ),
                                     ),
                                     Text(
-                                      "              Số lượng: " +
+                                      "              Quantity: " +
                                           item.quantity.toString().trim(),
                                       style: TextStyle(
                                         fontSize: 16,
@@ -231,7 +221,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                                   ],
                                 ),
                                 Text(
-                                  "Số lượng hàng trong kho: 1" , // Nhớ + 1 nếu đã trừ lúc khách hàng đặt hàng, khi từ chối duyệt thì +1 lại trong database
+                                  "Quantity in stock: 1" , // Nhớ + 1 nếu đã trừ lúc khách hàng đặt hàng, khi từ chối duyệt thì +1 lại trong database
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.black,
@@ -252,7 +242,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
               child: Row(
                 children: [
                   Text(
-                    "Tổng hóa đơn: ",
+                    "Total Amount: ",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -283,7 +273,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                       foregroundColor: MaterialStateProperty.all(Colors.red),
                       side: MaterialStateProperty.all(BorderSide(color: Colors.red)),
                     ),
-                    child: Text("Từ chối",
+                    child: Text("Refuse",
                       style: TextStyle(
                         fontSize: 16,
                       ),
@@ -298,7 +288,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                       foregroundColor: MaterialStateProperty.all(Colors.green),
                       side: MaterialStateProperty.all(BorderSide(color: Colors.green)),
                     ),
-                    child: Text("Đồng ý",
+                    child: Text("Agree",
                       style: TextStyle(
                         fontSize: 16,
                       ),
