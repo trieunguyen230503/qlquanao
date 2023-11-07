@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qlquanao/Customer/Home/OrderHistoryPage.dart';
 import 'package:qlquanao/utils/Login.dart';
 import 'package:qlquanao/utils/ProfilePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -81,7 +82,9 @@ class _UserPageState extends State<UserPage> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => OrderHistoryPage()));
+                  },
                   child: Container(
                     padding: EdgeInsets.fromLTRB(15, 20, 15, 0),
                     child: Center(

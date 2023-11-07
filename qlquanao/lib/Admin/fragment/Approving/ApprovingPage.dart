@@ -19,7 +19,6 @@ class ApprovingPage extends StatefulWidget {
 
 class _ApprovingPageState extends State<ApprovingPage> {
   List<Orders> orderList = [];
-  int codeOrder = 0;
 
   @override
   void initState() {

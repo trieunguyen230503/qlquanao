@@ -11,13 +11,7 @@ import 'package:firebase_database/firebase_database.dart';
 
 import '../../provider/signin_provider.dart';
 
-
-
 //Chưa cập nhật lại chỗ kiểm tra user nào đặt hàng
-
-
-
-
 
 String formatPrice(int price) {
   final formatter = NumberFormat("#,###");
@@ -28,7 +22,6 @@ List<Cart> selectedProducts = [];
 
 int totalAmount = 0;
 
-
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
 
@@ -37,7 +30,6 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-
   List<Cart> cartList = [];
 
   @override
@@ -47,48 +39,66 @@ class _CartPageState extends State<CartPage> {
     getCartFromFirebase();
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    cartList.clear();
+  }
 
-
-  void getCartFromFirebase() async{
+  void getCartFromFirebase() async {
     // Lấy id user đang đăng nhập
     final sp = context.read<SignInProvider>();
     sp.getDataFromSharedPreference();
     String? uid = sp.uid;
-    if(uid == null){
+    if (uid == null) {
       uid = " ";
     }
 
     // Khởi tạo tham chiếu đến cơ sở dữ liệu Firebase
     final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
 
-    await databaseRef.onValue.listen((event) {
-      if(cartList.isNotEmpty){
-        cartList.clear();
-      }
-
-      for (final child in event.snapshot.children) {
-        String userID = child.child("userID").value.toString();
-
-        if(userID == "-Nf_mGcgG0xAWGoHfK9J"){
-          String idCart = child.child("idCart").value.toString();
-          String productID = child.child("productID").value.toString();
-          String productName = child.child("productName").value.toString();
-          String color = child.child("color").value.toString();
-          String size = child.child("size").value.toString();
-          String image = child.child("productImage").value.toString();
-          int price = int.parse(child.child("totalAmount").value.toString());
-          int quantity = int.parse(child.child("quantity").value.toString());
-          Cart p = Cart(idCart: idCart, productID: productID, productName: productName, image: image, color: color, size: size, price: price, quantity: quantity, userID: userID);
-          cartList.add(p);
+    if (!mounted) {
+      return;
+    }
+    databaseRef.onValue.listen((event) {
+        if (cartList.isNotEmpty) {
+          cartList.clear();
         }
-      }
-      setState(() {
-        cartList = cartList.reversed.toList();
-      });
+
+        for (final child in event.snapshot.children) {
+          String userID = child.child("userID").value.toString();
+
+          if (userID == "-Nf_mGcgG0xAWGoHfK9J") {
+            String idCart = child.child("idCart").value.toString();
+            String productID = child.child("productID").value.toString();
+            String productName = child.child("productName").value.toString();
+            String color = child.child("color").value.toString();
+            String size = child.child("size").value.toString();
+            String image = child.child("productImage").value.toString();
+            int price = int.parse(child.child("totalAmount").value.toString());
+            int quantity = int.parse(child.child("quantity").value.toString());
+            Cart p = Cart(
+                idCart: idCart,
+                productID: productID,
+                productName: productName,
+                image: image,
+                color: color,
+                size: size,
+                price: price,
+                quantity: quantity,
+                userID: userID);
+            cartList.add(p);
+          }
+        }
+        if(!mounted)
+          return;
+        setState(() {
+          cartList = cartList.reversed.toList();
+        });
     }, onError: (error) {
       // Error.
     });
-
 
     // final databaseRef = FirebaseDatabase.instance.ref("cart");
     // databaseRef.onChildAdded.listen((event) {
@@ -109,7 +119,6 @@ class _CartPageState extends State<CartPage> {
     //   // this comment and if so remove it.
     // });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -133,8 +142,7 @@ class _CartPageState extends State<CartPage> {
                   final cartItem = cartList[index];
                   return Container(
                     height: 110,
-                    margin:
-                    EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    margin: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -147,24 +155,25 @@ class _CartPageState extends State<CartPage> {
                           activeColor: Colors.grey,
                           value: selectedProducts.contains(cartItem),
                           onChanged: (bool? value) {
-                            setState(() {
-                              if (value != null) {
-                                if (value) {
-                                  if (!selectedProducts.contains(cartItem)) {
-                                    selectedProducts.add(cartItem);
+                            if (mounted) {
+                              setState(() {
+                                if (value != null) {
+                                  if (value) {
+                                    if (!selectedProducts.contains(cartItem)) {
+                                      selectedProducts.add(cartItem);
+                                    }
+                                  } else {
+                                    selectedProducts.remove(cartItem);
                                   }
-                                } else {
-                                  selectedProducts.remove(cartItem);
                                 }
-                              }
-                              totalAmount = 0;
-                              for(var p in selectedProducts){
-                                totalAmount += (p.price * p.quantity);
-                              }
-                            });
+                                totalAmount = 0;
+                                for (var p in selectedProducts) {
+                                  totalAmount += (p.price * p.quantity);
+                                }
+                              });
+                            }
                           },
                         ),
-
                         Container(
                           height: 70,
                           width: 70,
@@ -210,11 +219,11 @@ class _CartPageState extends State<CartPage> {
                           padding: EdgeInsets.symmetric(vertical: 5),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               GestureDetector(
-                                onTap: () => _deleteItemInCart(context, cartItem),
+                                onTap: () =>
+                                    _deleteItemInCart(context, cartItem),
                                 child: Icon(
                                   Icons.delete,
                                   color: Colors.black26,
@@ -223,12 +232,13 @@ class _CartPageState extends State<CartPage> {
                               Row(
                                 children: [
                                   GestureDetector(
-                                    onTap: (){
-                                      if(cartItem.quantity > 1){
+                                    onTap: () {
+                                      if (cartItem.quantity > 1) {
                                         setState(() {
                                           cartItem.quantity--;
                                           //Nếu người dùng ấn giảm sl trong lúc sp đã chọn thì giảm giá tổng
-                                          if(selectedProducts.contains(cartItem)){
+                                          if (selectedProducts
+                                              .contains(cartItem)) {
                                             totalAmount -= cartItem.price;
                                           }
                                         });
@@ -237,9 +247,10 @@ class _CartPageState extends State<CartPage> {
                                     child: Container(
                                       padding: EdgeInsets.all(4),
                                       decoration: BoxDecoration(
-                                        color: cartItem.quantity == 1 ? Colors.black12 : Colors.white,
-                                        borderRadius:
-                                        BorderRadius.circular(20),
+                                        color: cartItem.quantity == 1
+                                            ? Colors.black12
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.grey.withOpacity(0.5),
@@ -255,8 +266,8 @@ class _CartPageState extends State<CartPage> {
                                     ),
                                   ),
                                   Container(
-                                    margin: EdgeInsets.symmetric(
-                                        horizontal: 10),
+                                    margin:
+                                        EdgeInsets.symmetric(horizontal: 10),
                                     child: Text(
                                       cartItem.quantity.toString().trim(),
                                       style: TextStyle(
@@ -266,11 +277,12 @@ class _CartPageState extends State<CartPage> {
                                     ),
                                   ),
                                   GestureDetector(
-                                    onTap: (){
+                                    onTap: () {
                                       setState(() {
                                         cartItem.quantity++;
                                         //Nếu người dùng ấn tăng sl trong lúc sp đã chọn thì tăng thêm giá tổng
-                                        if(selectedProducts.contains(cartItem)){
+                                        if (selectedProducts
+                                            .contains(cartItem)) {
                                           totalAmount += cartItem.price;
                                         }
                                       });
@@ -279,12 +291,10 @@ class _CartPageState extends State<CartPage> {
                                       padding: EdgeInsets.all(4),
                                       decoration: BoxDecoration(
                                         color: Colors.white,
-                                        borderRadius:
-                                        BorderRadius.circular(20),
+                                        borderRadius: BorderRadius.circular(20),
                                         boxShadow: [
                                           BoxShadow(
-                                            color:
-                                            Colors.grey.withOpacity(0.5),
+                                            color: Colors.grey.withOpacity(0.5),
                                             spreadRadius: 1,
                                             blurRadius: 10,
                                           )
@@ -320,24 +330,24 @@ class _CartPageState extends State<CartPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Delete ${c.productName}?'),
-          content: const Text(
-              'The product will be removed from your cart!'),
+          content: const Text('The product will be removed from your cart!'),
           actions: [
             TextButton(
-              onPressed: (){
-                Navigator.pop(context);
-              },
-                child: Text("Cancel")
-            ),
-            TextButton(
-                onPressed: (){
+                onPressed: () {
                   Navigator.pop(context);
+                },
+                child: Text("Cancel")),
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  if (!mounted) {
+                    return; // Đảm bảo widget vẫn còn trong cây widget
+                  }
                   setState(() {
                     databaseRef.child(c.idCart).remove();
                   });
                 },
-                child: Text("Yes")
-            ),
+                child: Text("Yes")),
           ],
           elevation: 20,
           shape: RoundedRectangleBorder(
@@ -349,10 +359,6 @@ class _CartPageState extends State<CartPage> {
   }
 }
 
-
-
-
-
 class CartAppBar extends StatefulWidget {
   const CartAppBar({super.key});
 
@@ -361,7 +367,6 @@ class CartAppBar extends StatefulWidget {
 }
 
 class _CartAppBarState extends State<CartAppBar> {
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -396,13 +401,7 @@ class _CartAppBarState extends State<CartAppBar> {
   }
 }
 
-
-
-
-
-
 class CartBottomNavBar extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -433,7 +432,7 @@ class CartBottomNavBar extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                if(selectedProducts.length == 0){
+                if (selectedProducts.length == 0) {
                   Fluttertoast.showToast(
                       msg: "Please choose a product",
                       toastLength: Toast.LENGTH_SHORT,
@@ -441,11 +440,14 @@ class CartBottomNavBar extends StatelessWidget {
                       timeInSecForIosWeb: 1,
                       backgroundColor: Colors.black45,
                       textColor: Colors.white,
-                      fontSize: 16.0
-                  );
-                }
-                else{
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: selectedProducts,)));
+                      fontSize: 16.0);
+                } else {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PaymentPage(
+                                listProduct: selectedProducts,
+                              )));
                 }
               },
               child: Container(
@@ -471,5 +473,4 @@ class CartBottomNavBar extends StatelessWidget {
       ),
     );
   }
-
 }

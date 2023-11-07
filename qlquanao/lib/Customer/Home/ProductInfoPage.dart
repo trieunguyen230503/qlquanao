@@ -30,6 +30,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
 
   int quantity = 1;
   int price = 0;
+  String idCart = "";
 
   List<String> listSizesId = [];
   List<String> listClrsId = [];
@@ -104,25 +105,31 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
       for (var c in listClrsId) {
         final snapshot = await ref.child('Color/$c/Name').get();
         String color = snapshot.value.toString();
-        setState(() {
-          clrs.add(color);
-        });
+        if(mounted){
+          setState(() {
+            clrs.add(color);
+          });
+        }
       }
 
       for (var s in listSizesId) {
         final snapshot = await ref.child('Size/$s/Name').get();
         String size = snapshot.value.toString();
-        setState(() {
-          sizes.add(size);
-        });
+        if(mounted){
+          setState(() {
+            sizes.add(size);
+          });
+        }
       }
 
-      setState(() {
-        if (sizes.isNotEmpty && clrs.isNotEmpty) {
-          selectedSize = sizes[0];
-          selectedColor = clrs[0];
-        }
-      });
+      if(mounted){
+        setState(() {
+          if (sizes.isNotEmpty && clrs.isNotEmpty) {
+            selectedSize = sizes[0];
+            selectedColor = clrs[0];
+          }
+        });
+      }
     }, onError: (error) {
       // Error.
     });
@@ -169,10 +176,12 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                   child: PageView(
                     controller: _pageController,
                     onPageChanged: (index) {
-                      setState(() {
-                        _currentPage = index;
-                        selectedColor = clrs[index];
-                      });
+                      if(mounted){
+                        setState(() {
+                          _currentPage = index;
+                          selectedColor = clrs[index];
+                        });
+                      }
                     },
                     children: _slider,
                   ),
@@ -503,45 +512,44 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                     color: Colors.black),
               ),
               ElevatedButton.icon(
-                onPressed: () {
+                onPressed: () async {
                   final ref = FirebaseDatabase.instance.ref();
                   final snapshotCartItem = ref.child('cart');
-                  bool check = false;
+                  bool check = await checkProductIsUnit(product.productId!);
 
-                  // snapshotCartItem.onValue.listen((event) {
-                  //   for (final child in event.snapshot.children) {
-                  //     Cart cart = Cart.fromSnapshot(child);
-                  //     if(cart.productID == product.productID && cart.color == selectedColor && cart.size == selectedSize){
-                  //       check = true;
-                  //       cart.quantity += quantity;
-                  //       snapshotCartItem.child(cart.idCart).set(cart.toJson());
-                  //       break;
-                  //     }
-                  //   }
-                  //   if(check == false){
-                  //     print("Không trùng");
-                  //     String? idCart = snapshotCartItem.push().key;
-                  //     Cart c = Cart(idCart: idCart!, productID: product.productID!, productName: product.name!, image: product.image!, color: selectedColor, size: selectedSize, price: product.price!,
-                  //         userID: "-Nf_mGcgG0xAWGoHfK9J");
-                  //     snapshotCartItem.child(idCart!).set(c.toJson());
-                  //     Navigator.push(context, MaterialPageRoute(builder: (context) => CartPage()));
-                  //   }
-                  // }, onError: (error) {
-                  //   print(error);
-                  // });
+                  // Future.delayed(Duration(seconds: 3),(){}); //delay 3s
 
-                  String? idCart = snapshotCartItem.push().key;
-                  Cart c = Cart(
-                      idCart: idCart!,
-                      productID: product.productId!,
-                      productName: product.name!,
-                      image: product.image!,
-                      color: selectedColor,
-                      size: selectedSize,
-                      price: product.price!,
-                      quantity: quantity,
-                      userID: "-Nf_mGcgG0xAWGoHfK9J");
-                  snapshotCartItem.child(idCart!).set(c.toJson());
+                  if(check == false){
+                    String? idCart = snapshotCartItem.push().key;
+                    Cart c = Cart(
+                        idCart: idCart!,
+                        productID: product.productId!,
+                        productName: product.name!,
+                        image: product.image!,
+                        color: selectedColor,
+                        size: selectedSize,
+                        price: product.price!,
+                        quantity: quantity,
+                        userID: "-Nf_mGcgG0xAWGoHfK9J");
+                    snapshotCartItem.child(idCart!).set(c.toJson());
+                    print("thêm ko trùng");
+
+                  }
+                  else{
+                    Cart c = Cart(
+                        idCart: idCart,
+                        productID: product.productId!,
+                        productName: product.name!,
+                        image: product.image!,
+                        color: selectedColor,
+                        size: selectedSize,
+                        price: product.price!,
+                        quantity: quantity,
+                        userID: "-Nf_mGcgG0xAWGoHfK9J");
+                    snapshotCartItem.child(idCart).update(c.toJson());
+                    print("thêm trùng");
+                  }
+
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => CartPage()));
                 },
@@ -573,6 +581,30 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
       ),
     );
   }
+
+  Future<bool> checkProductIsUnit(String productID) async {
+    bool check = false;
+    final ref = FirebaseDatabase.instance.ref();
+    final snapshotCartItem = ref.child('cart');
+    await snapshotCartItem.onValue.listen((event){
+      for (final child in event.snapshot.children) {
+        Cart cart = Cart.fromSnapshot(child);
+        if(cart.productID == productID && cart.color == selectedColor && cart.size == selectedSize){
+          // cart.quantity += quantity;
+          // snapshotCartItem.child(cart.idCart).update(cart.toJson());
+          quantity = cart.quantity++;
+          idCart = cart.idCart;
+          check = true;
+          print("trùng");
+          break;
+        }
+      }
+    }, onError: (error) {
+      print(error);
+    });
+    return check;
+  }
+
 }
 
 class ItemAppBar extends StatefulWidget {

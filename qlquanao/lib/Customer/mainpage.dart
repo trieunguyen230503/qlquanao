@@ -12,7 +12,7 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-List<Widget> _widgetOptions = <Widget>[HomePage2(), CartPage(), UserPage()];
+List<Widget> _widgetOptions = <Widget>[HomePage2(), UserPage()];
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
@@ -36,11 +36,6 @@ class _MainPageState extends State<MainPage> {
           items: [
             Icon(
               Icons.home,
-              size: 30,
-              color: Colors.white,
-            ),
-            Icon(
-              Icons.shopping_cart,
               size: 30,
               color: Colors.white,
             ),
