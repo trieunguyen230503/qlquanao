@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_paypal_checkout/flutter_paypal_checkout.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -47,6 +48,7 @@ class _PaymentPageState extends State<PaymentPage> {
   String? phoneDefault;
   String? addressDefault;
 
+  List<Map<String, dynamic>> listProductForMap = [];
 
   int? groupValue = 1;
 
@@ -58,14 +60,27 @@ class _PaymentPageState extends State<PaymentPage> {
     for(var p in listProduct){
       totalAmount += p.price * p.quantity;
     }
+    listProductForMap = toMapList(listProduct);
 
     final sp = context.read<SignInProvider>();
     sp.getDataFromSharedPreference();
     uid = sp.uid;
     // Kiểm tra nếu name = null hoặc = ' ' thì gán = <Trống>
-    nameDefault = (sp.name == null || sp.name!.trim().length != 0) ? '<null>' : sp.name!;
-    phoneDefault = (sp.phone == null || sp.phone!.trim().length != 0) ? '<null>' : sp.phone!;
-    addressDefault = (sp.address == null || sp.address!.trim().length != 0) ? '<null>' : sp.address!;
+    nameDefault = (sp.name == null || sp.name!.trim().length == 0) ? '<null>' : sp.name!;
+    phoneDefault = (sp.phone == null || sp.phone!.trim().length == 0) ? '<null>' : sp.phone!;
+    addressDefault = (sp.address == null || sp.address!.trim().length == 0) ? '<null>' : sp.address!;
+  }
+
+  List<Map<String, dynamic>> toMapList (List<Cart> c){
+    List<Map<String, dynamic>> productsAsMap = c.map((product) {
+      return {
+        "name": product.productName,
+        "quantity": product.quantity,
+        "price": product.price,
+        "currency": "USD"
+      };
+    }).toList();
+    return productsAsMap;
   }
 
   @override
@@ -302,12 +317,12 @@ class _PaymentPageState extends State<PaymentPage> {
                         groupValue = value;
                       });
                     },
-                    title: Text("Payment via Momo"),
+                    title: Text("Payment via Paypal"),
                     activeColor: Colors.black45,
                     secondary: Image(
-                      image: AssetImage('assets/momo_icon_horizontal_pink_RGB.png'),
-                      height: 48,
-                      width: 48,
+                      image: AssetImage('assets/paypal_logo.png'),
+                      height: 50,
+                      width: 50,
                     )
                   ),
                 ),
@@ -363,9 +378,7 @@ class _PaymentPageState extends State<PaymentPage> {
                           //push order lên firebase
                           final snapshotOrders = ref.child('orders');
                           String? orderID = snapshotOrders.push().key;
-                          if(uid == null){
-                            uid = " ";
-                          }
+
                           String uAddress = detailAddress + ", " + addressNew;
                           DateTime now = DateTime.now();
                           String orderDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
@@ -384,20 +397,65 @@ class _PaymentPageState extends State<PaymentPage> {
                           }
 
                         }
-                        else if(groupValue == 2){
+                        else if(groupValue == 2) {
 
-                          Fluttertoast.showToast(
-                              msg: "Momo payment is not supported yet",
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.TOP,
-                              timeInSecForIosWeb: 1,
-                              backgroundColor: Colors.black45,
-                              textColor: Colors.white,
-                              fontSize: 16.0
-                          );
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => PaypalCheckout(
+                              sandboxMode: true,
+                              clientId: "AQqddvU4gqYASZShn4Ky2MMHYfI1Vz0c6IoJHJ08qG9QiLg6pzBk-SGZ1TtErD1eZtoiRvgmiyKWpLRY",
+                              secretKey: "ENUgjfPZ2KM-Tfh2_VC1K_UCcJOa8hwgxedM2QmnuYAiowRAOCRBLEFDEum3cBT-ZSJ5WyNoZQGxZtTo",
+                              returnURL: "success.snippetcoder.com",
+                              cancelURL: "cancel.snippetcoder.com",
+                              transactions: [
+                                {
+                                  "amount": {
+                                    "total": '${totalAmount}',
+                                    "currency": "USD",
+                                    "details": {
+                                      "subtotal": '${totalAmount}',
+                                      "shipping": '0',
+                                      "shipping_discount": 0
+                                    }
+                                  },
+                                  "description": "The payment transaction description.",
+                                  // "payment_options": {
+                                  //   "allowed_payment_method":
+                                  //       "INSTANT_FUNDING_SOURCE"
+                                  // },
+                                  "item_list": {
+                                    "items": listProductForMap,
+
+                                    // shipping address is not required though
+                                    //   "shipping_address": {
+                                    //     "recipient_name": "Raman Singh",
+                                    //     "line1": "Delhi",
+                                    //     "line2": "",
+                                    //     "city": "Delhi",
+                                    //     "country_code": "IN",
+                                    //     "postal_code": "11001",
+                                    //     "phone": "+00000000",
+                                    //     "state": "Texas"
+                                    //  },
+                                  }
+                                }
+                              ],
+                              note: "Contact us for any questions on your order.",
+                              onSuccess: (Map params) async {
+                                print("onSuccess: $params");
+                              },
+                              onError: (error) {
+                                print("onError: $error");
+                                Navigator.pop(context);
+                              },
+                              onCancel: () {
+                                print('cancelled:');
+                              },
+                            ),
+                          ));
+
                         }
 
-                        _showMyDialog();
+                        // _showMyDialog();
                       }
                     },
                     child: Container(

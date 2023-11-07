@@ -100,21 +100,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(
                     height: 100,
                   ),
-                  InkWell(
-                    child: Container(
-                      color: Colors.white70,
-                      child: ListTile(
-                        //tileColor: Colors.grey,
-                        title: Text('SIGNOUT'),
-                        trailing: Icon(Icons.keyboard_arrow_right),
-                        selectedTileColor: Colors.black,
-                      ),
-                    ),
-                    onTap: () {
-                      sp.userSignout();
-                      nextScreenReplace(context, const MainPage());
-                    },
-                  ),
+
                   InkWell(
                     child: Container(
                       color: Colors.white70,
@@ -159,6 +145,24 @@ class _ProfilePageState extends State<ProfilePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => ProfileCustome()));
+                    },
+                  ),
+                  InkWell(
+                    child: Container(
+                      color: Colors.white70,
+                      child: ListTile(
+                        //tileColor: Colors.grey,
+                        title: Text('SIGNOUT'),
+                        trailing: Icon(Icons.keyboard_arrow_right),
+                        selectedTileColor: Colors.black,
+                      ),
+                    ),
+                    onTap: () async {
+                      await sp.userSignout();
+                      nextScreenReplace(context, const MainPage());
+
+                      // Future.delayed(Duration(seconds: 2),(){
+                      // });
                     },
                   ),
                 ],
