@@ -99,8 +99,8 @@ class _ManageRevenueState extends State<ManageRevenue> {
   @override
   Widget build(BuildContext context) {
     // Định dạng tiền tệ sử dụng NumberFormat
-    NumberFormat currencyFormatter =
-        NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
+    NumberFormat currencyFormatterUSD =
+    NumberFormat.currency(locale: 'en_US', symbol: '\$');
 
     return Scaffold(
         backgroundColor: Colors.white,
@@ -133,7 +133,7 @@ class _ManageRevenueState extends State<ManageRevenue> {
                       Container(
                         padding: EdgeInsets.fromLTRB(45, 0, 0, 0),
                         child: Text(
-                          "TOTAL:   ${currencyFormatter.format(revenue)}",
+                          "TOTAL:   ${currencyFormatterUSD.format(revenue)}",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
@@ -301,7 +301,7 @@ class _ManageRevenueState extends State<ManageRevenue> {
                                       Expanded(
                                           child: Container(
                                         child: Text(
-                                          "${currencyFormatter.format(o![index].totalamount)}",
+                                          "${currencyFormatterUSD.format(o![index].totalamount)}",
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold),

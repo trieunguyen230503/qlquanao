@@ -87,8 +87,10 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
       await ep.getProductSizeColorRevenueByTime(
           dateStart.text, dateEnd.text, pID);
     }
-    productSizeColorlist = ep.productSizeColorlist;
     height = productSizeColorlist!.length * 120;
+    setState(() {
+      productSizeColorlist = ep.productSizeColorlist;
+    });
   }
 
   @override
@@ -108,8 +110,9 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
 
   @override
   Widget build(BuildContext context) {
-    NumberFormat currencyFormatter =
-        NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
+    NumberFormat currencyFormatterUSD =
+        NumberFormat.currency(locale: 'en_US', symbol: '\$');
+
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
@@ -310,7 +313,7 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
                               Container(
                                 width: 120,
                                 child: Text(
-                                  "${currencyFormatter.format(productSizeColorlist![index].price)}",
+                                  "${currencyFormatterUSD.format(productSizeColorlist![index].price)}",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),

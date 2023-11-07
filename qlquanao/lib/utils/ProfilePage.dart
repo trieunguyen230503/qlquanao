@@ -105,21 +105,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       color: Colors.white70,
                       child: ListTile(
                         //tileColor: Colors.grey,
-                        title: Text('SIGNOUT'),
-                        trailing: Icon(Icons.keyboard_arrow_right),
-                        selectedTileColor: Colors.black,
-                      ),
-                    ),
-                    onTap: () {
-                      sp.userSignout();
-                      nextScreenReplace(context, const MainPage());
-                    },
-                  ),
-                  InkWell(
-                    child: Container(
-                      color: Colors.white70,
-                      child: ListTile(
-                        //tileColor: Colors.grey,
                         title: Text('CHANGE PASSWORD'),
                         trailing: Icon(Icons.keyboard_arrow_right),
                         selectedTileColor: Colors.black,
@@ -159,6 +144,21 @@ class _ProfilePageState extends State<ProfilePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => ProfileCustome()));
+                    },
+                  ),
+                  InkWell(
+                    child: Container(
+                      color: Colors.white70,
+                      child: ListTile(
+                        //tileColor: Colors.grey,
+                        title: Text('SIGNOUT'),
+                        trailing: Icon(Icons.keyboard_arrow_right),
+                        selectedTileColor: Colors.black,
+                      ),
+                    ),
+                    onTap: () {
+                      sp.userSignout();
+                      nextScreenReplace(context, const MainPage());
                     },
                   ),
                 ],

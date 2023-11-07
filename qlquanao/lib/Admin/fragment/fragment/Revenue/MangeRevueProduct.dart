@@ -112,8 +112,8 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
   @override
   Widget build(BuildContext context) {
     // Định dạng tiền tệ sử dụng NumberFormat
-    NumberFormat currencyFormatter =
-        NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
+    NumberFormat currencyFormatterUSD =
+        NumberFormat.currency(locale: 'en_US', symbol: '\$');
     return Scaffold(
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
@@ -145,7 +145,7 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
                       Container(
                         padding: EdgeInsets.fromLTRB(45, 0, 0, 0),
                         child: Text(
-                          "TOTAL:   ${currencyFormatter.format(revenue)}",
+                          "TOTAL:   ${currencyFormatterUSD.format(revenue)}",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
@@ -319,7 +319,7 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
                                       Expanded(
                                           child: Container(
                                         child: Text(
-                                          "${currencyFormatter.format(p![index].totalRevue)}",
+                                          "${currencyFormatterUSD.format(p![index].totalRevue)}",
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold),

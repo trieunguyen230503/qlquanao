@@ -31,7 +31,7 @@ class _ProfileCustomeState extends State<ProfileCustome> {
   final phone = TextEditingController();
   final address = TextEditingController();
   final dob = TextEditingController();
-
+  String? uid;
   final _scaffoldKey = GlobalKey<FormState>();
   final RoundedLoadingButtonController updateController =
       RoundedLoadingButtonController();
@@ -62,6 +62,7 @@ class _ProfileCustomeState extends State<ProfileCustome> {
     super.initState();
     final sp = context.read<SignInProvider>();
     sp.getDataFromSharedPreference();
+    uid = sp.uid;
     email.text = sp.email!;
     name.text = sp.name!;
     phone.text = sp.phone!;
@@ -229,7 +230,7 @@ class _ProfileCustomeState extends State<ProfileCustome> {
                       elevation: 0,
                       borderRadius: 25,
                       onPressed: () async {
-                        await sp.updateProfile(email.text, name.text,
+                        await sp.updateProfile(uid!,email.text, name.text,
                             phone.text, address.text, pickedFile, dob.text);
                         if (sp.role == 3) {
                           Navigator.pushReplacement(
