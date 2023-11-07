@@ -31,7 +31,7 @@ class RevenueProvider extends ChangeNotifier {
 
   bool? get status => _status;
 
-  int? _total = 0;
+  int _total = 0;
 
   int? get total => _total;
 
@@ -59,10 +59,14 @@ class RevenueProvider extends ChangeNotifier {
 
   List<ProductSizeColor>? get productSizeColorlist => _productSizeColorlist;
 
+  bool check = false;
+  int count = 0;
+
   Future getRevenue(String dateStart, String dateEnd) async {
+    _order = <Orders>[];
+
     DateTime ds = DateFormat("dd/MM/yyyy").parse(dateStart);
     DateTime de = DateFormat("dd/MM/yyyy").parse(dateEnd);
-    _order = <Orders>[];
     final DatabaseReference myOrder = FirebaseDatabase.instance.ref("orders");
     await myOrder.onValue.listen((event) async {
       _total = 0;
@@ -74,30 +78,58 @@ class RevenueProvider extends ChangeNotifier {
           DateTime d = DateFormat("yyyy-MM-dd").parse(date[0]);
           if ((d.isAfter(ds) || d.isAtSameMomentAs(ds)) &&
               (d.isBefore(de) || d.isAtSameMomentAs(de))) {
-            _order?.add(Orders(data["oderID"], data["UserID"],
-                data["orderDate"], data["totalamount"], data["status"]));
             if (data['status'] == true) {
+              _order?.add(Orders(
+                  data["oderID"],
+                  data["UserID"],
+                  data["orderDate"],
+                  data["totalamount"],
+                  "Đã duyệt",
+                  data['userName']));
               _countOrder = _countOrder + 1;
               int? t = await data['totalamount'];
               _total = await (_total ?? 0) + (t ?? 0);
+            } else {
+              _order?.add(Orders(
+                  data["oderID"],
+                  data["UserID"],
+                  data["orderDate"],
+                  data["totalamount"],
+                  "",
+                  data['userName']));
             }
           }
-          print(_total);
         }
       }
     });
   }
 
+  Future clearRevenue() async {
+    _order = <Orders>[];
+  }
+
   Future getRevenueAll() async {
     _order = <Orders>[];
+
     final DatabaseReference myOrder = FirebaseDatabase.instance.ref("orders");
     await myOrder.onValue.listen((event) async {
       _total = 0;
       _countOrder = 0;
       for (final child in event.snapshot.children) {
         final Map<dynamic, dynamic>? data = child.value as Map?;
-        _order?.add(Orders(data?["oderID"], data?["UserID"], data?["orderDate"],
-            data?["totalamount"], data?["status"]));
+        if (data?["status"] == true) {
+          _order?.add(Orders(
+              data?["oderID"],
+              data?["UserID"],
+              data?["orderDate"],
+              data?["totalamount"],
+              "Đã duyệt",
+              data?['userName']));
+        } else {
+          _order?.add(Orders(data?["oderID"], data?["UserID"],
+              data?["orderDate"], data?["totalamount"], "", data?['userName']));
+        }
+        print(data?['totalamount']);
         if (data != null && data['status'] == true) {
           int? t = await data['totalamount'];
           _total = await (_total ?? 0) + (t ?? 0);
@@ -121,6 +153,11 @@ class RevenueProvider extends ChangeNotifier {
             totalRevue: 0));
       }
     });
+  }
+
+  Future cleanProductRevenue() async {
+    _productList = <Product>[];
+    _orderItemList = null;
   }
 
   Future getOrderItemAll() async {
@@ -161,22 +198,22 @@ class RevenueProvider extends ChangeNotifier {
 
   Future getProductRevenue() async {
     for (int i = 0; i < _productList!.length; i++) {
-      _productList?[i].totalRevue = 0;
+      _productList?[i].totalRevue = await 0;
     }
-    int k = 0;
+    _total = await 0;
+    int k = await 0;
     final DatabaseReference myOrder = FirebaseDatabase.instance.ref("Product");
     await myOrder.onValue.listen((event) async {
       for (final child in event.snapshot.children) {
         final Map<dynamic, dynamic>? data = child.value as Map?;
         for (int j = 0; j < _orderItemList!.length; j++) {
-          print(data?["ProductID"]);
-          print(_orderItemList?[j].productID);
-          if (data?["ProductID"] == _orderItemList?[j].productID) {
-            print("ok");
+          if (data?["ProductID"] == _orderItemList?[j].productID &&
+              k < productList!.length) {
             _productList?[k].totalRevue =
                 await (_productList?[k].totalRevue ?? 0) +
                     (_orderItemList?[j].subTotal ?? 0);
             print(_productList?[k].totalRevue);
+            _total += _orderItemList![j].subTotal!;
           }
         }
         k++;
@@ -185,6 +222,11 @@ class RevenueProvider extends ChangeNotifier {
   }
 
   Future getProductRevenueByTime(String DateStart, String DateEnd) async {
+    for (int i = 0; i < _productList!.length; i++) {
+      _productList?[i].totalRevue = 0;
+    }
+    _total = 0;
+
     DateTime ds = DateFormat("dd/MM/yyyy").parse(DateStart);
     DateTime de = DateFormat("dd/MM/yyyy").parse(DateEnd);
 
@@ -199,10 +241,14 @@ class RevenueProvider extends ChangeNotifier {
           DateTime d = DateFormat("yyyy-MM-dd").parse(date[0]);
           if ((d.isAfter(ds) || d.isAtSameMomentAs(ds)) &&
               (d.isBefore(de) || d.isAtSameMomentAs(de))) {
-            if (data?["ProductID"] == _orderItemList?[j].productID) {
+            if (data?["ProductID"] == _orderItemList?[j].productID &&
+                k < productList!.length) {
+              //print(date[0]);
+
               _productList?[k].totalRevue =
                   await (_productList?[k].totalRevue ?? 0) +
                       (_orderItemList?[j].subTotal ?? 0);
+              _total += _orderItemList![j].subTotal!;
             }
           }
         }
@@ -211,103 +257,222 @@ class RevenueProvider extends ChangeNotifier {
     });
   }
 
-  Future getProductSizeColor(productID) async {
-    _productSizeColorlist = <ProductSizeColor>[];
-    final DatabaseReference myOrder =
-        FirebaseDatabase.instance.ref("ProductSizeColor");
-    await myOrder.onValue.listen((event) async {
-      for (final child in event.snapshot.children) {
-        final Map<dynamic, dynamic>? data = child.value as Map?;
-        if (data?["ProductID"] == productID) {
-          _productSizeColorlist?.add(ProductSizeColor(
-              productID: data?['ProductID'],
-              sizeID: data?['SizeID'],
-              colorID: data?['ColorID'],
-              price: 0,
-              quantity: data?['Quantity']));
-        }
-      }
-      print(_productSizeColorlist!.length);
-    });
+  Future<String> getNameById(String id, String node) async {
+    DatabaseReference ref = FirebaseDatabase.instance.ref('$node/$id/Name');
+    DatabaseEvent event = await ref.once();
+    String s = event.snapshot.value.toString();
+    return s.toString();
   }
 
-  Future getProductSizeColorRevenue() async {
-    final DatabaseReference myOrderItem =
-        FirebaseDatabase.instance.ref("orderItem");
-    final DatabaseReference myOrder = FirebaseDatabase.instance.ref("orders");
+  Future getProductSizeColor(productID) async {
+    if (_productSizeColorlist == null) {
+      _productSizeColorlist = await <ProductSizeColor>[];
+      final DatabaseReference myOrder =
+          await FirebaseDatabase.instance.ref("ProductSizeColor");
+      print(productID);
+      await myOrder.onValue.listen((event) async {
+        for (final child in event.snapshot.children) {
+          final Map<dynamic, dynamic>? data = child.value as Map?;
+          if (data?["ProductID"] == productID) {
+            String getSize = await getNameById(data?['SizeID'], 'Size');
+            String getColor = await getNameById(data?['ColorID'], 'Color');
+            _productSizeColorlist?.add(ProductSizeColor(
+                productID: data?['ProductID'],
+                sizeID: getSize,
+                colorID: getColor,
+                price: 0,
+                quantity: data?['Quantity'],
+                url: data?['url']));
+          }
+        }
+      });
+    }
+  }
+
+  Future cleanProductSizeColor() async {
+    _productSizeColorlist = await null;
+  }
+
+  Future getProductSizeColorRevenue(String? pid) async {
+    // for (int i = 0; i < productSizeColorlist!.length; i++) {
+    //   productSizeColorlist?[i].price = 0;
+    // }
+
+    final Query myOrder = await FirebaseDatabase.instance
+        .ref("orders")
+        .orderByChild('status')
+        .equalTo(true);
 
     await myOrder.onValue.listen((event) async {
       for (final child in event.snapshot.children) {
         final Map<dynamic, dynamic>? dataOrder = child.value as Map?;
-        if (dataOrder != null && dataOrder["status"] == true) {
-          await myOrderItem.onValue.listen((event) async {
-            for (final child in event.snapshot.children) {
-              final Map<dynamic, dynamic>? data = child.value as Map?;
-              if (dataOrder["orderID"] == data?["orderID"]) {
-                for (int j = 0; j < _productSizeColorlist!.length; j++) {
-                  //Nếu như trùng với biến thể của OrderItem thì thêm vào và đồng thời cộng số tiền doanh thu lên
-                  if (_productSizeColorlist?[j].productID ==
-                          data?['productID'] &&
-                      _productSizeColorlist?[j].colorID ==
-                          data?['productColor'] &&
-                      _productSizeColorlist?[j].sizeID ==
-                          data?['productSize']) {
-                    _productSizeColorlist?[j].price =
-                        ((_productSizeColorlist?[j].price ?? 0) +
-                            (data?['subTotal'] ?? 0)) as int?;
-                  }
+
+        final Query myOrderItem = await FirebaseDatabase.instance
+            .ref("orderItem")
+            .orderByChild('orderID')
+            .equalTo(dataOrder?["orderID"]);
+        await myOrderItem.onValue.listen((event) async {
+          for (final child1 in event.snapshot.children) {
+            final Map<dynamic, dynamic>? data = child1.value as Map?;
+            final Query productSizeColor = await FirebaseDatabase.instance
+                .ref("ProductSizeColor")
+                .orderByChild('ProductID')
+                .equalTo(pid);
+            int k = 0;
+            await productSizeColor.onValue.listen((event) async {
+              for (final child2 in event.snapshot.children) {
+                final Map<dynamic, dynamic>? dataProductSizeColor =
+                    child2.value as Map?;
+                // print(data?['productID']);
+                // print(dataProductSizeColor?['ProductID']);
+                // print(dataProductSizeColor?['SizeID']);
+                // print(dataProductSizeColor?['SizeID']);
+                // print(data?['productColor']);
+                // print(dataProductSizeColor?['ColorID']);
+
+                String getSize =
+                    await getNameById(dataProductSizeColor?['SizeID'], 'Size');
+                String getColor = await getNameById(
+                    dataProductSizeColor?['ColorID'], 'Color');
+                if (k < productSizeColorlist!.length &&
+                    data?['productID'] == dataProductSizeColor?['ProductID'] &&
+                    data?['productSize'] == getSize &&
+                    data?['productColor'] == getColor) {
+                  // print(dataProductSizeColor?['ProductID']);
+                  // print(_productSizeColorlist?[k].productID);
+                  // print(getSize);
+                  // print(_productSizeColorlist?[k].sizeID);
+                  // print(getColor);
+                  // print(_productSizeColorlist?[k].colorID);
+                  int subtotal = await data?['subTotal'] ?? 0;
+                  _productSizeColorlist?[k].price =
+                      await ((_productSizeColorlist?[k].price)! + subtotal)!;
+                  print(_productSizeColorlist?[k].price);
                 }
+                await k++;
               }
-            }
-          });
-        }
+            });
+          }
+        });
       }
     });
   }
 
   Future getProductSizeColorRevenueByTime(
-      String DateStart, String DateEnd) async {
+      String DateStart, String DateEnd, String? pid) async {
     DateTime ds = DateFormat("dd/MM/yyyy").parse(DateStart);
     DateTime de = DateFormat("dd/MM/yyyy").parse(DateEnd);
+    // for (int i = 0; i < _productSizeColorlist!.length; i++) {
+    //   _productSizeColorlist?[i].price = 0;
+    // }
 
-    final DatabaseReference myOrder = FirebaseDatabase.instance.ref("orders");
-
-    final DatabaseReference myOrderItem =
-        FirebaseDatabase.instance.ref("orderItem");
+    final Query myOrder = await FirebaseDatabase.instance
+        .ref("orders")
+        .orderByChild('status')
+        .equalTo(true);
 
     await myOrder.onValue.listen((event) async {
       for (final child in event.snapshot.children) {
         final Map<dynamic, dynamic>? dataOrder = child.value as Map?;
-        if (dataOrder != null && dataOrder["status"] == true) {
-          await myOrderItem.onValue.listen((event) async {
-            for (final child in event.snapshot.children) {
-              final Map<dynamic, dynamic>? data = child.value as Map?;
 
-              if (data?["orderID"] == dataOrder["orderID"]) {
-                List<String>? date = data?['orderDate'].toString().split(" ");
-                DateTime d = DateFormat("yyyy-MM-dd").parse(date![0]);
+        final Query myOrderItem = await FirebaseDatabase.instance
+            .ref("orderItem")
+            .orderByChild('orderID')
+            .equalTo(dataOrder?["orderID"]);
+        await myOrderItem.onValue.listen((event) async {
+          for (final child1 in event.snapshot.children) {
+            final Map<dynamic, dynamic>? data = child1.value as Map?;
+            List<String>? date = data?['orderDate'].toString().split(" ");
+            DateTime d = DateFormat("yyyy-MM-dd").parse(date![0]);
 
-                if ((d.isAfter(ds) || d.isAtSameMomentAs(ds)) &&
-                    (d.isBefore(de) || d.isAtSameMomentAs(de))) {
-                  for (int j = 0; j < _productSizeColorlist!.length; j++) {
-                    //Nếu như trùng với biến thể của OrderItem thì thêm vào và đồng thời cộng số tiền doanh thu lên
-                    if (_productSizeColorlist?[j].productID ==
-                            data?['productID'] &&
-                        _productSizeColorlist?[j].colorID ==
-                            data?['productColor'] &&
-                        _productSizeColorlist?[j].sizeID ==
-                            data?['productSize']) {
-                      _productSizeColorlist?[j].price =
-                          ((_productSizeColorlist?[j].price ?? 0) +
-                              (data?['subTotal'] ?? 0)) as int?;
-                    }
+            if ((d.isAfter(ds) || d.isAtSameMomentAs(ds)) &&
+                (d.isBefore(de) || d.isAtSameMomentAs(de))) {
+              final Query productSizeColor = await FirebaseDatabase.instance
+                  .ref("ProductSizeColor")
+                  .orderByChild('ProductID')
+                  .equalTo(pid);
+              int k = 0;
+              await productSizeColor.onValue.listen((event) async {
+                for (final child2 in event.snapshot.children) {
+                  final Map<dynamic, dynamic>? dataProductSizeColor =
+                      child2.value as Map?;
+                  // print(data?['productID']);
+                  // print(dataProductSizeColor?['ProductID']);
+                  // print(dataProductSizeColor?['SizeID']);
+                  // print(dataProductSizeColor?['SizeID']);
+                  // print(data?['productColor']);
+                  // print(dataProductSizeColor?['ColorID']);
+
+                  String getSize = await getNameById(
+                      dataProductSizeColor?['SizeID'], 'Size');
+                  String getColor = await getNameById(
+                      dataProductSizeColor?['ColorID'], 'Color');
+                  if (k < productSizeColorlist!.length &&
+                      data?['productID'] ==
+                          dataProductSizeColor?['ProductID'] &&
+                      data?['productSize'] == getSize &&
+                      data?['productColor'] == getColor) {
+                    // print(dataProductSizeColor?['ProductID']);
+                    // print(_productSizeColorlist?[k].productID);
+                    // print(getSize);
+                    // print(_productSizeColorlist?[k].sizeID);
+                    // print(getColor);
+                    // print(_productSizeColorlist?[k].colorID);
+                    int subtotal = await data?['subTotal'] ?? 0;
+                    _productSizeColorlist?[k].price =
+                        await ((_productSizeColorlist?[k].price)! + subtotal)!;
+                    print(_productSizeColorlist?[k].price);
                   }
+                  await k++;
                 }
-              }
+              });
             }
-          });
-        }
+          }
+        });
       }
     });
+
+    // final DatabaseReference myOrderItem =
+    //     await FirebaseDatabase.instance.ref("orderItem");
+    //
+    // final DatabaseReference myOrder =
+    //     await FirebaseDatabase.instance.ref("orders");
+    //
+    // await myOrder.onValue.listen((event) async {
+    //   for (final child in event.snapshot.children) {
+    //     final Map<dynamic, dynamic>? dataOrder = child.value as Map?;
+    //     if (dataOrder?["status"] == true) {
+    //       await myOrderItem.onValue.listen((event) async {
+    //         for (final child1 in event.snapshot.children) {
+    //           final Map<dynamic, dynamic>? data = child1.value as Map?;
+    //           if (data?["orderID"] == dataOrder?["orderID"]) {
+    //             List<String>? date = data?['orderDate'].toString().split(" ");
+    //             DateTime d = DateFormat("yyyy-MM-dd").parse(date![0]);
+    //
+    //             if ((d.isAfter(ds) || d.isAtSameMomentAs(ds)) &&
+    //                 (d.isBefore(de) || d.isAtSameMomentAs(de))) {
+    //               print("đã vô");
+    //
+    //               for (int j = 0; j < _productSizeColorlist!.length; j++) {
+    //                 //Nếu như trùng với biến thể của OrderItem thì thêm vào và đồng thời cộng số tiền doanh thu lên
+    //                 if (_productSizeColorlist?[j].productID ==
+    //                         data?['productID'] &&
+    //                     _productSizeColorlist?[j].colorID ==
+    //                         data?['productColor'] &&
+    //                     _productSizeColorlist?[j].sizeID ==
+    //                         data?['productSize']) {
+    //                   _productSizeColorlist?[j].price =
+    //                       await ((_productSizeColorlist?[j].price ?? 0) +
+    //                           (data?['subTotal'] ?? 0)) as int?;
+    //                   print(_productSizeColorlist?[j].price);
+    //                 }
+    //               }
+    //             }
+    //           }
+    //         }
+    //       });
+    //     }
+    //   }
+    // });
   }
 }

@@ -27,7 +27,7 @@ class _ManageRevenueState extends State<ManageRevenue> {
 
   Timer? t;
 
-  Future<void> _selectDate(BuildContext context, int check) async {
+  Future<void> _selectDate(BuildContext context, int checkOrder) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
@@ -40,7 +40,7 @@ class _ManageRevenueState extends State<ManageRevenue> {
     if (picked != null) {
       setState(() {
         selectedDate = picked;
-        if (check == 1) {
+        if (checkOrder == 1) {
           dateStart.text =
               DateFormat('dd/MM/yyyy').format(selectedDate).toString();
         } else {
@@ -55,25 +55,32 @@ class _ManageRevenueState extends State<ManageRevenue> {
               context, "Date end must be higher than date start", Colors.red);
           dateEnd.text = "";
         }
+        if (dateStart.text != null && dateEnd.text != null) {
+          t?.cancel();
+          check = false;
+        }
       });
     }
   }
 
   Future<void> _ShowData() async {
     final ep = context.read<RevenueProvider>();
+    //ep.clearRevenue();
     if (check == true) {
       await ep.getRevenueAll();
     } else {
       await ep.getRevenue(dateStart.text, dateEnd.text);
     }
-    height = (o!.length * 70)!;
-    t = Timer(Duration(seconds: 2), () {
+    height = (o!.length * 100)!;
+
+    t = Timer(Duration(seconds: 3), () {
       setState(() {
         revenue = ep.total;
         countBill = ep.countOrder;
         o = ep.order?.reversed.toList();
       });
     });
+    print(o?.length);
   }
 
   @override
@@ -94,6 +101,7 @@ class _ManageRevenueState extends State<ManageRevenue> {
     // Định dạng tiền tệ sử dụng NumberFormat
     NumberFormat currencyFormatter =
         NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
+
     return Scaffold(
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
@@ -185,24 +193,22 @@ class _ManageRevenueState extends State<ManageRevenue> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 75,
-                    height: 45,
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.black),
-                      ),
-                      onPressed: () async {
-                        if (dateStart.text != null && dateEnd.text != null) {
-                          check = false;
-                        } else {
-                          openSnackbar(context, "Fill date", Colors.red);
-                        }
-                      },
-                      child: Text('Find'),
-                    ),
-                  ),
+                  // Container(
+                  //   width: 75,
+                  //   height: 45,
+                  //   child: ElevatedButton(
+                  //     style: ButtonStyle(
+                  //       backgroundColor:
+                  //           MaterialStateProperty.all(Colors.black),
+                  //     ),
+                  //     onPressed: () async {
+                  //        else {
+                  //         openSnackbar(context, "Fill date", Colors.red);
+                  //       }
+                  //     },
+                  //     child: Text('Find'),
+                  //   ),
+                  // ),
                   Container(
                     margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                     width: 120,
@@ -210,16 +216,19 @@ class _ManageRevenueState extends State<ManageRevenue> {
                     child: ElevatedButton(
                       style: ButtonStyle(
                         backgroundColor:
-                            MaterialStateProperty.all(Colors.orangeAccent),
+                            MaterialStateProperty.all(Colors.black),
                       ),
                       onPressed: () async {
-                        check = true;
-                        dateEnd.text = "";
-                        dateStart.text = "";
+                        setState(() {
+                          check = true;
+                          dateEnd.text = "";
+                          dateStart.text = "";
+                          t?.cancel();
+                        });
                       },
                       child: Text(
                         'All the time',
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
@@ -234,11 +243,13 @@ class _ManageRevenueState extends State<ManageRevenue> {
                 child: FutureBuilder(
                     future: _ShowData(),
                     builder: (context, snapshot) {
-                      if (o == []) {
+                      if (o!.isEmpty) {
                         return Container(
+                          width: 50,
+                          height: 50,
                           padding: EdgeInsets.all(20),
                           child: Image.network(
-                              'https://static.thenounproject.com/png/4143644-200.png'),
+                              'https://thumbs.dreamstime.com/b/no-data-illustration-vector-concept-websites-landing-pages-mobile-applications-posters-banners-209459339.jpg'),
                         );
                       } else {
                         return ListView.builder(
@@ -247,7 +258,7 @@ class _ManageRevenueState extends State<ManageRevenue> {
                             itemBuilder: (context, index) {
                               return Center(
                                 child: Container(
-                                  height: 50,
+                                  height: 80,
                                   margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
@@ -265,18 +276,28 @@ class _ManageRevenueState extends State<ManageRevenue> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      Expanded(
-                                          child: Container(
+                                      Container(
                                         child: Text(
                                           o![index].oderDate.toString(),
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold),
                                         ),
-                                        width: 20,
+                                        width: 110,
                                         padding:
                                             EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                      )),
+                                      ),
+                                      Container(
+                                        child: Text(
+                                          o![index].userName.toString(),
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        width: 70,
+                                        padding:
+                                            EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                      ),
                                       Expanded(
                                           child: Container(
                                         child: Text(
@@ -292,7 +313,7 @@ class _ManageRevenueState extends State<ManageRevenue> {
                                       Expanded(
                                           child: Container(
                                         child: Text(
-                                          o![index].status.toString(),
+                                          o![index].confirm.toString(),
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold),

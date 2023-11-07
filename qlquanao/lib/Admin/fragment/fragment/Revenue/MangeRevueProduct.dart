@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qlquanao/Admin/fragment/fragment/Revenue/DetailRevenueProduct.dart';
+import 'package:qlquanao/Customer/Home/Home.dart';
 import 'package:qlquanao/model/OrderItem.dart';
 import 'package:qlquanao/model/Product.dart';
 import 'package:qlquanao/provider/revenue_provider.dart';
@@ -24,7 +25,7 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
   final TextEditingController dateEnd = TextEditingController();
 
   DateTime selectedDate = DateTime.now();
-  int? revenue = 0;
+  int revenue = 0;
   int? countProduct = 0;
 
   //Doanh thu của từng sản phẩm
@@ -37,7 +38,7 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
   double height = 0;
   Timer? t;
 
-  Future<void> _selectDate(BuildContext context, int check) async {
+  Future<void> _selectDate(BuildContext context, int checkOrder) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
@@ -50,7 +51,7 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
     if (picked != null) {
       setState(() {
         selectedDate = picked;
-        if (check == 1) {
+        if (checkOrder == 1) {
           dateStart.text =
               DateFormat('dd/MM/yyyy').format(selectedDate).toString();
         } else {
@@ -65,34 +66,40 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
               context, "Date end must be higher than date start", Colors.red);
           dateEnd.text = "";
         }
+        if (dateStart.text != null && dateEnd.text != null) {
+          t?.cancel();
+          check = false;
+        }
       });
     }
   }
 
   Future<void> _ShowData() async {
     final ep = context.read<RevenueProvider>();
-
+    //await ep.cleanProductRevenue();
+    await ep.getProductAll();
+    await ep.getOrderItemAll();
     if (check == true) {
-      await ep.getRevenueAll();
-      await ep.getProductAll();
-      await ep.getOrderItemAll();
       await ep.getProductRevenue();
     } else {
-      await ep.getRevenueAll();
-      await ep.getProductAll();
-      await ep.getOrderItemAll();
       await ep.getProductRevenueByTime(dateStart.text, dateEnd.text);
     }
-    height = (p!.length * 70)!;
-    t = Timer(Duration(seconds: 2), () {
+    height = (p!.length * 100)!;
+    t = Timer(Duration(seconds: 3), () {
       setState(() {
-        revenue = ep.total;
         countProduct = ep.productList?.length;
+        revenue = ep.total!;
         //sản phẩm
         p = ep.productList;
         totalProduct = ep.totalProduct;
       });
     });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
   }
 
   @override
@@ -198,24 +205,20 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 75,
-                    height: 45,
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.black),
-                      ),
-                      onPressed: () async {
-                        if (dateStart.text != null && dateEnd.text != null) {
-                          check = false;
-                        } else {
-                          openSnackbar(context, "Fill date", Colors.red);
-                        }
-                      },
-                      child: Text('Find'),
-                    ),
-                  ),
+                  // Container(
+                  //   width: 75,
+                  //   height: 45,
+                  //   child: ElevatedButton(
+                  //     style: ButtonStyle(
+                  //       backgroundColor:
+                  //           MaterialStateProperty.all(Colors.black),
+                  //     ),
+                  //     onPressed: () async {
+                  //
+                  //     },
+                  //     child: Text('Find'),
+                  //   ),
+                  // ),
                   Container(
                     margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                     width: 120,
@@ -223,16 +226,19 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
                     child: ElevatedButton(
                       style: ButtonStyle(
                         backgroundColor:
-                            MaterialStateProperty.all(Colors.orangeAccent),
+                            MaterialStateProperty.all(Colors.black),
                       ),
                       onPressed: () async {
-                        check = true;
-                        dateEnd.text = "";
-                        dateStart.text = "";
+                        setState(() {
+                          check = true;
+                          dateEnd.text = "";
+                          dateStart.text = "";
+                          t?.cancel();
+                        });
                       },
                       child: Text(
                         'All the time',
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
@@ -270,7 +276,7 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
                                       ));
                                 },
                                 child: Container(
-                                  height: 50,
+                                  height: 80,
                                   margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
@@ -288,16 +294,16 @@ class _MangeReveuneProductState extends State<MangeReveuneProduct> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      Expanded(
-                                          child: Container(
+                                      Container(
                                         child: CircleAvatar(
                                           child: Image.network(p![index].image),
                                           radius: 20,
                                         ),
-                                        width: 20,
+                                        width: 90,
+                                        height: 60,
                                         padding:
                                             EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                      )),
+                                      ),
                                       Expanded(
                                           child: Container(
                                         child: Text(

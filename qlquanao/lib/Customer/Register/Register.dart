@@ -15,6 +15,7 @@ import 'package:qlquanao/utils/emailsender.dart';
 import 'package:qlquanao/utils/next_screen.dart';
 import 'package:qlquanao/utils/snack_bar.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
+import '../../utils/config.dart';
 import '../mainpage.dart';
 
 class Register extends StatefulWidget {
@@ -65,26 +66,27 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(
-            Icons.keyboard_arrow_left,
-            color: Colors.black,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(
+              Icons.keyboard_arrow_left,
+              color: Colors.black,
+            ),
+            // Đổi icon về
+            onPressed: () {
+              Navigator.pop(context);
+              // Xử lý khi người dùng nhấn vào icon trở về
+            },
           ),
-          // Đổi icon về
-          onPressed: () {
-            // Xử lý khi người dùng nhấn vào icon trở về
-          },
+          backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
+          centerTitle: true,
+          title: const Text(
+            'REGISTER',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          ),
         ),
-        backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
-        centerTitle: true,
-        title: const Text(
-          'REGISTER',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
+        body: SingleChildScrollView(
+            child: Container(
           margin: EdgeInsets.fromLTRB(0, 100, 0, 0),
           child: Center(
             child: Form(
@@ -92,6 +94,16 @@ class _RegisterState extends State<Register> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Container(
+                    child: Image(
+                      image: AssetImage(Config.logo),
+                      width: 100,
+                      height: 100,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
                   Container(
                     width: MediaQuery.of(context).size.width,
                     height: 50,
@@ -223,7 +235,7 @@ class _RegisterState extends State<Register> {
                             width: 15,
                           ),
                           Text(
-                            'Sign in with Facebook',
+                            'Register',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 15,
@@ -248,9 +260,7 @@ class _RegisterState extends State<Register> {
               ),
             ),
           ),
-        )
-      )
-    );
+        )));
   }
 
   Future register(BuildContext context, String mobile) async {

@@ -33,8 +33,12 @@ class Orders {
 
   bool? get status => _status;
 
+  String? _confirm;
+
+  String? get confirm => _confirm;
+
   Orders(this._oderID, this._userID, this._orderDate, this._totalamount,
-      this._status);
+      this._confirm, this._userName);
 
   Orders.full(this._oderID, this._userID, this._userName, this._phone,
       this._address, this._orderDate, this._totalamount, this._status);

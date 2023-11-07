@@ -48,6 +48,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(
+            Icons.keyboard_arrow_left,
+            color: Colors.black,
+          ),
+          // Đổi icon về
+          onPressed: () {
+            Navigator.pop(context);
+            // Xử lý khi người dùng nhấn vào icon trở về
+          },
+        ),
         backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
         centerTitle: true,
         title: const Text(
