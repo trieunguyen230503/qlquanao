@@ -1,3 +1,3 @@
 class Config{
-  static final google_icon = "assets/google_logo.png";
+  static final logo = "assets/logo.png";
 }

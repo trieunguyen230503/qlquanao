@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:qlquanao/Admin/fragment/fragment/account/ManageAccountStaff.dart';
 import 'package:qlquanao/Admin/fragment/fragment/Revenue/ManageRevenue.dart';
 import 'package:qlquanao/Admin/fragment/fragment/Revenue/Revenue.dart';
@@ -43,15 +44,18 @@ class _MainPageAdminState extends State<MainPageAdmin> {
         // ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(Icons.shop), label: 'ORDER'),
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'HOME'),
             BottomNavigationBarItem(
-                icon: Icon(Icons.area_chart), label: 'REVENUE'),
+                icon: Icon(Icons.shopping_bag_rounded), label: 'ORDER'),
             BottomNavigationBarItem(
-                icon: Icon(Icons.account_circle), label: 'ACCOUNT'),
+                icon: Icon(
+                  FontAwesomeIcons.tshirt,
+                ),
+                label: 'PRODUCT'),
             BottomNavigationBarItem(
-                icon: Icon(Icons.supervised_user_circle_outlined),
-                label: 'PROFILE'),
+                icon: Icon(Icons.insert_chart), label: 'REVENUE'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.people_alt_sharp), label: 'ACCOUNT'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'PROFILE'),
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.black,

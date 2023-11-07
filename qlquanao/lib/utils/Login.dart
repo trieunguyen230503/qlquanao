@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:qlquanao/Admin/fragment/MainPageAdmin.dart';
+import 'package:qlquanao/Staff/fragment/MainPageStaff.dart';
 import 'package:qlquanao/provider/internet_provider.dart';
 import 'package:qlquanao/provider/signin_provider.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:provider/provider.dart';
 
 import '../Customer/Register/Register.dart';
 import '../database.dart';
+import 'config.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -61,6 +63,7 @@ class _LoginState extends State<Login> {
           // Đổi icon về
           onPressed: () {
             // Xử lý khi người dùng nhấn vào icon trở về
+            Navigator.pop(context);
           },
         ),
         backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
@@ -70,173 +73,189 @@ class _LoginState extends State<Login> {
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ),
-      body: Container(
-        child: Form(
-          key: _scaffoldKey,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 25),
-                  child: TextFormField(
-                    controller: userName,
-                    decoration: InputDecoration(
-                        hintText: "Enter your email",
-                        fillColor: Colors.grey[200],
-                        filled: true),
-                  ),
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 50,
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
-                  child: TextFormField(
-                    obscureText: _obscureText,
-                    controller: password,
-                    decoration: InputDecoration(
-                      suffixIcon: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _obscureText = !_obscureText;
-                          });
-                        },
-                        child: Icon(_obscureText
-                            ? Icons.visibility_off
-                            : Icons.visibility),
-                      ),
-                      hintText: 'Password',
-                      filled: true,
-                      fillColor: Colors.grey[200],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+          child: Form(
+            key: _scaffoldKey,
+            child: Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    child: Image(
+                      image: AssetImage(Config.logo),
+                      height: 100,
+                      width: 100,
                     ),
                   ),
-                ),
-                RoundedLoadingButton(
-                    controller: loginController,
-                    color: Colors.black,
-                    successColor: Colors.black,
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    elevation: 0,
-                    borderRadius: 25,
-                    onPressed: () {
-                      login(context, userName.text.trim());
+                  SizedBox(
+                    height: 50,
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 50,
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    margin: EdgeInsets.fromLTRB(0, 0, 0, 25),
+                    child: TextFormField(
+                      controller: userName,
+                      decoration: InputDecoration(
+                          hintText: "Enter your email",
+                          fillColor: Colors.grey[200],
+                          filled: true),
+                    ),
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 50,
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                    child: TextFormField(
+                      obscureText: _obscureText,
+                      controller: password,
+                      decoration: InputDecoration(
+                        suffixIcon: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _obscureText = !_obscureText;
+                            });
+                          },
+                          child: Icon(_obscureText
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                        ),
+                        hintText: 'Password',
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  RoundedLoadingButton(
+                      controller: loginController,
+                      color: Colors.black,
+                      successColor: Colors.black,
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      elevation: 0,
+                      borderRadius: 25,
+                      onPressed: () {
+                        login(context, userName.text.trim());
+                      },
+                      child: Wrap(
+                        children: const [
+                          Icon(
+                            Icons.login,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                          SizedBox(
+                            width: 15,
+                          ),
+                          Text(
+                            'LOGIN',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500),
+                          )
+                        ],
+                      )),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  RoundedLoadingButton(
+                      controller: googleController,
+                      color: Colors.red,
+                      successColor: Colors.red,
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      elevation: 0,
+                      borderRadius: 25,
+                      onPressed: () {
+                        handleGoogle();
+                      },
+                      child: Wrap(
+                        children: const [
+                          Icon(
+                            FontAwesomeIcons.google,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                          SizedBox(
+                            width: 15,
+                          ),
+                          Text(
+                            'Sign in with google',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500),
+                          )
+                        ],
+                      )),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  RoundedLoadingButton(
+                      controller: facebookController,
+                      successColor: Colors.blue,
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      elevation: 0,
+                      borderRadius: 25,
+                      onPressed: () {
+                        handleFacebook();
+                      },
+                      child: Wrap(
+                        children: const [
+                          Icon(
+                            FontAwesomeIcons.facebook,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                          SizedBox(
+                            width: 15,
+                          ),
+                          Text(
+                            'Sign in with Facebook',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500),
+                          )
+                        ],
+                      )),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Register()));
                     },
-                    child: Wrap(
-                      children: const [
-                        Icon(
-                          Icons.login,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Text(
-                          'LOGIN',
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(0, 15, 0, 15),
+                      child: Text('Do not have account ?',
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500),
-                        )
-                      ],
-                    )),
-                SizedBox(
-                  height: 30,
-                ),
-                RoundedLoadingButton(
-                    controller: googleController,
-                    color: Colors.red,
-                    successColor: Colors.red,
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    elevation: 0,
-                    borderRadius: 25,
-                    onPressed: () {
-                      handleGoogle();
+                            decoration: TextDecoration.underline,
+                          )),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ForgetPassword()));
                     },
-                    child: Wrap(
-                      children: const [
-                        Icon(
-                          FontAwesomeIcons.google,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Text(
-                          'Sign in with google',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500),
-                        )
-                      ],
-                    )),
-                SizedBox(
-                  height: 30,
-                ),
-                RoundedLoadingButton(
-                    controller: facebookController,
-                    successColor: Colors.blue,
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    elevation: 0,
-                    borderRadius: 25,
-                    onPressed: () {
-                      handleFacebook();
-                    },
-                    child: Wrap(
-                      children: const [
-                        Icon(
-                          FontAwesomeIcons.facebook,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Text(
-                          'Sign in with Facebook',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500),
-                        )
-                      ],
-                    )),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => Register()));
-                  },
-                  child: Container(
-                    margin: EdgeInsets.fromLTRB(0, 15, 0, 15),
-                    child: Text('Do not have account ?',
+                    child: Text('Forget your password ?',
                         style: TextStyle(
                           decoration: TextDecoration.underline,
                         )),
                   ),
-                ),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ForgetPassword()));
-                  },
-                  child: Text('Forget your password ?',
-                      style: TextStyle(
-                        decoration: TextDecoration.underline,
-                      )),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      )
     );
   }
 
@@ -363,6 +382,9 @@ class _LoginState extends State<Login> {
         nextScreenReplace(context, const MainPageAdmin());
       });
     } else if (_role == 2) {
+      Future.delayed(const Duration(microseconds: 1000)).then((value) {
+        nextScreenReplace(context, const MainPageStaff());
+      });
     } else {
       Future.delayed(const Duration(microseconds: 1000)).then((value) {
         nextScreenReplace(context, const MainPage());

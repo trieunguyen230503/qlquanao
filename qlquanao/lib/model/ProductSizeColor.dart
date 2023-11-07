@@ -18,7 +18,8 @@ class ProductSizeColor {
       required this.sizeID,
       required this.colorID,
       required this.price,
-      required this.quantity});
+      required this.quantity,
+      required this.url});
 
   String? key;
   ProductSizeColorData? productSizeColorData;

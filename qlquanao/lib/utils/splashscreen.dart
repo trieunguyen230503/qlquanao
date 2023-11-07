@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:provider/provider.dart';
 import 'package:qlquanao/Admin/fragment/MainPageAdmin.dart';
 import 'package:qlquanao/Customer/mainpage.dart';
+import 'package:qlquanao/Staff/fragment/MainPageStaff.dart';
 import 'package:qlquanao/provider/signin_provider.dart';
 import 'package:qlquanao/utils/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final sp = context.read<SignInProvider>();
     sp.getDataFromSharedPreference();
     super.initState();
-    Timer(const Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 3), () {
       // sp.isSignedIn == false
       //     ? nextScreen(context, LoginScreen())
       //     : nextScreen(context, const HomeScreen());
@@ -33,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (sp.role == 1) {
         nextScreenReplace(context, const MainPageAdmin());
       } else if (sp.role == 2) {
+        nextScreenReplace(context, const MainPageStaff());
       } else {
         nextScreenReplace(context, const MainPage());
       }
@@ -42,11 +44,14 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: Center(
-            child: Image(
-      image: AssetImage(Config.google_icon),
-      height: 80,
-      width: 80,
-    )));
+        child: Container(
+            //color: Color.fromRGBO(117, 132, 103, 1),
+            color: Colors.white,
+            child: Center(
+                child: Image(
+              image: AssetImage(Config.logo),
+              height: 80,
+              width: 80,
+            ))));
   }
 }

@@ -14,6 +14,8 @@ import 'package:qlquanao/utils/emailsender.dart';
 import 'package:qlquanao/utils/snack_bar.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
+import '../../utils/config.dart';
+
 class ForgetPassword extends StatefulWidget {
   const ForgetPassword({super.key});
 
@@ -29,6 +31,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       routes: {
         'ConfirmPass': (context) => ConfirmPassword(
               code: '',
@@ -37,6 +40,17 @@ class _ForgetPasswordState extends State<ForgetPassword> {
       },
       home: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(
+              Icons.keyboard_arrow_left,
+              color: Colors.black,
+            ),
+            // Đổi icon về
+            onPressed: () {
+              Navigator.pop(context);
+              // Xử lý khi người dùng nhấn vào icon trở về
+            },
+          ),
           backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
           centerTitle: true,
           title: const Text(
@@ -48,6 +62,16 @@ class _ForgetPasswordState extends State<ForgetPassword> {
           child: Center(
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Container(
+                child: Image(
+                  image: AssetImage(Config.logo),
+                  height: 100,
+                  width: 100,
+                ),
+              ),
+              SizedBox(
+                height: 50,
+              ),
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: 50,

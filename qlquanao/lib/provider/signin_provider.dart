@@ -287,7 +287,7 @@ class SignInProvider extends ChangeNotifier {
       "uid": newUser.key,
       "image_url": _imageUrl,
       "provider": _provider,
-      "password": _dob,
+      "password": _password,
       "phone": _phone,
       "dob": _dob,
       "address": _address,
@@ -520,7 +520,7 @@ class SignInProvider extends ChangeNotifier {
       _email = email;
       _phone = phone;
       //MÃ hóa mật khẩu
-      _password = sha512.convert(utf8.encode(dob)).toString();
+      _password = sha512.convert(utf8.encode(phone)).toString();
       _imageUrl =
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1UNFMhuAA3TLkPbNSGyD8m5lNyDY2LHe3ig&usqp=CAU";
       _provider = "PHONE";
@@ -547,7 +547,7 @@ class SignInProvider extends ChangeNotifier {
       _email = email;
       _phone = phone;
       //MÃ hóa mật khẩu
-      _password = sha512.convert(utf8.encode(dob)).toString();
+      _password = sha512.convert(utf8.encode(phone)).toString();
       _imageUrl = "https://cdn-icons-png.flaticon.com/512/4143/4143099.png";
       _provider = "PHONE";
       _uid = null;
@@ -765,4 +765,6 @@ class SignInProvider extends ChangeNotifier {
     final DatabaseReference ref = FirebaseDatabase.instance.ref("users/$uid");
     await ref.remove();
   }
+
+
 }

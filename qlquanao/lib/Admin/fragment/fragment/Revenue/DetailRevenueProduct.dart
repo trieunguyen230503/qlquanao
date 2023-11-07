@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:qlquanao/Customer/Order/CartPage.dart';
 import 'package:qlquanao/model/OrderItem.dart';
 import 'package:qlquanao/model/ProductSizeColor.dart';
 import '../../../../provider/revenue_provider.dart';
@@ -24,7 +25,6 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
   final TextEditingController dateStart = TextEditingController();
   final TextEditingController dateEnd = TextEditingController();
   DateTime selectedDate = DateTime.now();
-
   List<ProductSizeColor>? productSizeColorlist = <ProductSizeColor>[];
   Timer? t;
 
@@ -56,41 +56,54 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
               context, "Date end must be higher than date start", Colors.red);
           dateEnd.text = "";
         }
+
+        if (dateEnd.text != "" && dateStart.text != "") {
+          final ep = context.read<RevenueProvider>();
+          ep.cleanProductSizeColor();
+          _ShowData();
+          Future.delayed(Duration(seconds: 3), () {
+            setState(() {
+              _ShowData();
+            });
+          });
+          checkDate = false;
+        }
       });
     }
   }
 
   String? productname;
-  bool check = true;
+  bool checkDate = true;
+  bool checkRevenue = true;
   double height = 0;
 
-  Future<void> _ShowData() async {
+  void _ShowData() async {
     final ep = context.read<RevenueProvider>();
     String? pID = await widget.productID;
-    if (check == true) {
-      //Lấy tất cả orderitem để duyệt
-      await ep.getOrderItemAll();
-      await ep.getProductSizeColor(pID);
-      await ep.getProductSizeColorRevenue();
+    await ep.getProductSizeColor(pID);
+    if (checkDate == true) {
+      await ep.getProductSizeColorRevenue(pID);
     } else {
-      await ep.getOrderItemAll();
-      await ep.getProductSizeColor(pID);
-      await ep.getProductSizeColorRevenueByTime(dateStart.text, dateEnd.text);
+      await ep.getProductSizeColorRevenueByTime(
+          dateStart.text, dateEnd.text, pID);
     }
-
-    height = productSizeColorlist!.length * 70;
-    t = Timer(Duration(seconds: 2), () {
-      setState(() {
-        productSizeColorlist = ep.productSizeColorlist;
-      });
-    });
+    productSizeColorlist = ep.productSizeColorlist;
+    height = productSizeColorlist!.length * 120;
   }
 
   @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    t?.cancel();
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final ep = context.read<RevenueProvider>();
+    ep.cleanProductSizeColor();
+    _ShowData();
+    t = Timer(Duration(seconds: 3), () {
+      setState(() {
+        print('object');
+        _ShowData();
+      });
+    });
   }
 
   @override
@@ -166,41 +179,60 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 75,
-                    height: 45,
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.black),
-                      ),
-                      onPressed: () async {
-                        if (dateStart.text != null && dateEnd.text != null) {
-                          check = false;
-                        } else {
-                          openSnackbar(context, "Fill date", Colors.red);
-                        }
-                      },
-                      child: Text('Find'),
-                    ),
-                  ),
+                  // Container(
+                  //   width: 75,
+                  //   height: 45,
+                  //   child: ElevatedButton(
+                  //     style: ButtonStyle(
+                  //       backgroundColor:
+                  //           MaterialStateProperty.all(Colors.black),
+                  //     ),
+                  //     onPressed: () async {
+                  //       if (dateStart.text != null && dateEnd.text != null) {
+                  //         final ep = context.read<RevenueProvider>();
+                  //         ep.cleanProductSizeColor();
+                  //         _ShowData();
+                  //         Future.delayed(Duration(seconds: 3), () {
+                  //           setState(() {
+                  //             _ShowData();
+                  //           });
+                  //         });
+                  //         checkDate = false;
+                  //       } else {
+                  //         openSnackbar(context, "Fill date", Colors.red);
+                  //       }
+                  //     },
+                  //     child: Text('Find'),
+                  //   ),
+                  // ),
                   Container(
                     margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                     width: 120,
                     height: 45,
                     child: ElevatedButton(
                       style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.orangeAccent),
+                        backgroundColor: MaterialStateProperty.all(
+                            Color.fromRGBO(0, 0, 0, 1)),
                       ),
                       onPressed: () async {
-                        check = true;
+                        checkDate = true;
                         dateEnd.text = "";
                         dateStart.text = "";
+                        setState(() {
+                          final ep = context.read<RevenueProvider>();
+                          ep.cleanProductSizeColor();
+                          _ShowData();
+                          Future.delayed(Duration(seconds: 3), () {
+                            setState(() {
+                              _ShowData();
+                            });
+                          });
+                          checkDate = true;
+                        });
                       },
                       child: Text(
                         'All the time',
-                        style: TextStyle(color: Colors.black),
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
@@ -212,85 +244,83 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
               Container(
                 width: MediaQuery.sizeOf(context).width,
                 height: height,
-                child: FutureBuilder(
-                    future: _ShowData(),
-                    builder: (context, snapshot) {
-                      return ListView.builder(
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: productSizeColorlist!.length,
-                          itemBuilder: (context, index) {
-                            return Center(
-                              child: Container(
-                                height: 50,
-                                margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color.fromRGBO(237, 194, 159, 1),
-                                        Color.fromRGBO(248, 159, 146, 1),
-                                      ]),
-                                  borderRadius: BorderRadius.circular(12.0),
+                child: ListView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: productSizeColorlist!.length,
+                    itemBuilder: (context, index) {
+                      //List<ProductSizeColor>? p = snapshot.data;
+                      return Center(
+                        child: Container(
+                          height: 100,
+                          margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Color.fromRGBO(237, 194, 159, 1),
+                                  Color.fromRGBO(248, 159, 146, 1),
+                                ]),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            // Canh giữa theo chiều ngang
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 80,
+                                height: 60,
+                                margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: CircleAvatar(
+                                  child: Image.network(
+                                      productSizeColorlist![index]
+                                          .url
+                                          .toString()),
+                                  radius: 20,
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  // Canh giữa theo chiều ngang
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                        child: Container(
-                                      child: Text(
-                                        widget.nameProduct.toString(),
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      width: 50,
-                                      padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                    )),
-                                    Expanded(
-                                        child: Container(
-                                      child: Text(
-                                        productSizeColorlist![index]
-                                            .sizeID
-                                            .toString(),
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      width: 10,
-                                      padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                    )),
-                                    Expanded(
-                                        child: Container(
-                                      child: Text(
-                                        productSizeColorlist![index]
-                                            .colorID
-                                            .toString(),
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      width: 10,
-                                      padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                    )),
-                                    Expanded(
-                                        child: Container(
-                                      child: Text(
-                                        "${currencyFormatter.format(productSizeColorlist![index].price)}",
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      width: 20,
-                                      padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                    )),
-                                  ],
-                                ),
+                                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
                               ),
-                            );
-                          });
+                              Container(
+                                width: 50,
+                                margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Text(
+                                  productSizeColorlist![index]
+                                      .sizeID
+                                      .toString(),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                              ),
+                              Container(
+                                width: 100,
+                                margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Text(
+                                  productSizeColorlist![index]
+                                      .colorID
+                                      .toString(),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                              ),
+                              Container(
+                                width: 120,
+                                child: Text(
+                                  "${currencyFormatter.format(productSizeColorlist![index].price)}",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     }),
               ),
             ],

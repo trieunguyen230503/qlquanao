@@ -43,7 +43,10 @@ class _UserPageState extends State<UserPage> {
       body: Container(
         color: Color.fromRGBO(247, 247, 247, 1.0),
         child: ListView(
-          children: <Widget>[
+          physics: NeverScrollableScrollPhysics(),
+          // mainAxisAlignment: MainAxisAlignment.center,
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
             SizedBox(
               height: 50,
             ),
@@ -83,7 +86,10 @@ class _UserPageState extends State<UserPage> {
                 ),
                 InkWell(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => OrderHistoryPage()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => OrderHistoryPage()));
                   },
                   child: Container(
                     padding: EdgeInsets.fromLTRB(15, 20, 15, 0),
