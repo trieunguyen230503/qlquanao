@@ -31,30 +31,22 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
   List<Cart> cartList = [];
+  String? uid;
 
   @override
   void initState() {
     super.initState();
+    // Lấy id user đang đăng nhập
+    final sp = context.read<SignInProvider>();
+    sp.getDataFromSharedPreference();
+    uid = sp.uid;
+
     selectedProducts.clear();
     getCartFromFirebase();
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    cartList.clear();
-  }
 
   void getCartFromFirebase() async {
-    // Lấy id user đang đăng nhập
-    final sp = context.read<SignInProvider>();
-    sp.getDataFromSharedPreference();
-    String? uid = sp.uid;
-    if (uid == null) {
-      uid = " ";
-    }
-
     // Khởi tạo tham chiếu đến cơ sở dữ liệu Firebase
     final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
 
@@ -69,7 +61,7 @@ class _CartPageState extends State<CartPage> {
         for (final child in event.snapshot.children) {
           String userID = child.child("userID").value.toString();
 
-          if (userID == "-Nf_mGcgG0xAWGoHfK9J") {
+          if (userID == uid) {
             String idCart = child.child("idCart").value.toString();
             String productID = child.child("productID").value.toString();
             String productName = child.child("productName").value.toString();
@@ -100,24 +92,6 @@ class _CartPageState extends State<CartPage> {
       // Error.
     });
 
-    // final databaseRef = FirebaseDatabase.instance.ref("cart");
-    // databaseRef.onChildAdded.listen((event) {
-    //   for (final child in event.snapshot.children) {
-    //     final price = child.child("totalAmount").value;
-    //     final specificValue = child.child("product").child("name").value;
-    //     print("sản phẩm: " + specificValue.toString());
-    //   }
-    // }, onError: (error) {
-    //   // Error.
-    // });
-    // databaseRef.onChildChanged.listen((event) {
-    //   // A comment has changed; use the key to determine if we are displaying this
-    //   // comment and if so displayed the changed comment.
-    // });
-    // databaseRef.onChildRemoved.listen((event) {
-    //   // A comment has been removed; use the key to determine if we are displaying
-    //   // this comment and if so remove it.
-    // });
   }
 
   @override
@@ -126,6 +100,15 @@ class _CartPageState extends State<CartPage> {
       body: ListView(
         children: [
           CartAppBar(),
+          (uid == null) ?
+          Padding(
+            padding: const EdgeInsets.only(top: 30),
+            child: Center(child: InkWell(
+              onTap: (){
+
+              },
+                child: Text("Please LOG IN", style: TextStyle(fontSize: 20, color: Colors.blue))),),
+          ) :
           Container(
             height: MediaQuery.of(context).size.height - 180,
             padding: EdgeInsets.only(top: 10, bottom: 70),
@@ -267,7 +250,7 @@ class _CartPageState extends State<CartPage> {
                                   ),
                                   Container(
                                     margin:
-                                        EdgeInsets.symmetric(horizontal: 10),
+                                    EdgeInsets.symmetric(horizontal: 10),
                                     child: Text(
                                       cartItem.quantity.toString().trim(),
                                       style: TextStyle(

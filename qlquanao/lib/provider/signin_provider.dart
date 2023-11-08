@@ -481,12 +481,12 @@ class SignInProvider extends ChangeNotifier {
     await googleSignIn.signOut();
     _isSignedIn = false;
     notifyListeners();
-    clearStoredData();
+    await clearStoredData();
   }
 
   Future clearStoredData() async {
     final SharedPreferences s = await SharedPreferences.getInstance();
-    s.clear();
+    await s.clear();
   }
 
   //Crete account
@@ -593,10 +593,10 @@ class SignInProvider extends ChangeNotifier {
     // }
   }
 
-  Future<void> updateProfile(String email, String name, String phone,
-      String adress, PlatformFile? image, String dob) async {
+  Future<void> updateProfile(String uid, String email, String name,
+      String phone, String adress, PlatformFile? image, String dob) async {
     print(dob);
-    DatabaseReference newpostKey = FirebaseDatabase.instance.ref("users/$_uid");
+    DatabaseReference newpostKey = FirebaseDatabase.instance.ref("users/$uid");
 
     Map<String, dynamic> updateData;
     final SharedPreferences s = await SharedPreferences.getInstance();
@@ -642,21 +642,14 @@ class SignInProvider extends ChangeNotifier {
     });
   }
 
-  Future<void> updateAddress(String name, String phone,
-      String adress) async {
+  Future<void> updateAddress(String name, String phone, String adress) async {
     print(dob);
     DatabaseReference newpostKey = FirebaseDatabase.instance.ref("users/$_uid");
 
     Map<String, dynamic> updateData;
     final SharedPreferences s = await SharedPreferences.getInstance();
 
-
-    updateData = {
-        'name': name,
-        'phone': phone,
-        'address': adress,
-        'dob': dob
-    };
+    updateData = {'name': name, 'phone': phone, 'address': adress, 'dob': dob};
 
     //Update lại sharpreces
     await s.setString('name', name!);
@@ -671,7 +664,6 @@ class SignInProvider extends ChangeNotifier {
       print(onError);
     });
   }
-
 
   Future cleanUser() async {
     _userCustomer = [];
@@ -765,6 +757,4 @@ class SignInProvider extends ChangeNotifier {
     final DatabaseReference ref = FirebaseDatabase.instance.ref("users/$uid");
     await ref.remove();
   }
-
-
 }
