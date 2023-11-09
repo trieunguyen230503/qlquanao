@@ -156,8 +156,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         selectedTileColor: Colors.black,
                       ),
                     ),
-                    onTap: () {
-                      sp.userSignout();
+                    onTap: () async {
+                      await sp.userSignout();
                       nextScreenReplace(context, const MainPage());
                     },
                   ),

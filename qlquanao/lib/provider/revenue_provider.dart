@@ -84,7 +84,7 @@ class RevenueProvider extends ChangeNotifier {
                   data["UserID"],
                   data["orderDate"],
                   data["totalamount"],
-                  "Đã duyệt",
+                  "Confirm",
                   data['userName']));
               _countOrder = _countOrder + 1;
               int? t = await data['totalamount'];
@@ -149,7 +149,7 @@ class RevenueProvider extends ChangeNotifier {
             productId: data?["ProductID"],
             name: data?["Name"],
             image: data?["url"],
-            price: data?["Price"],
+            price: data?["PromoPrice"],
             totalRevue: 0));
       }
     });
@@ -184,7 +184,7 @@ class RevenueProvider extends ChangeNotifier {
                       dataOrderItem?["productColor"],
                       dataOrderItem?["productSize"],
                       dataOrderItem?["productID"],
-                      0,
+                      dataOrderItem?["quantity"],
                       dataOrderItem?["subTotal"],
                       dataOrderItem?["orderDate"]));
                 }
@@ -211,9 +211,11 @@ class RevenueProvider extends ChangeNotifier {
               k < productList!.length) {
             _productList?[k].totalRevue =
                 await (_productList?[k].totalRevue ?? 0) +
-                    (_orderItemList?[j].subTotal ?? 0);
+                    (_orderItemList?[j].subTotal ?? 0) *
+                        (_orderItemList?[j].quantity ?? 0);
             print(_productList?[k].totalRevue);
-            _total += _orderItemList![j].subTotal!;
+            _total += _orderItemList![j].subTotal! *
+                (_orderItemList?[j].quantity ?? 0);
           }
         }
         k++;
@@ -243,12 +245,12 @@ class RevenueProvider extends ChangeNotifier {
               (d.isBefore(de) || d.isAtSameMomentAs(de))) {
             if (data?["ProductID"] == _orderItemList?[j].productID &&
                 k < productList!.length) {
-              //print(date[0]);
-
               _productList?[k].totalRevue =
                   await (_productList?[k].totalRevue ?? 0) +
-                      (_orderItemList?[j].subTotal ?? 0);
-              _total += _orderItemList![j].subTotal!;
+                      (_orderItemList?[j].subTotal ?? 0) *
+                          (_orderItemList?[j].quantity ?? 0);
+              _total += _orderItemList![j].subTotal! *
+                  (_orderItemList?[j].quantity ?? 0);
             }
           }
         }
@@ -265,6 +267,7 @@ class RevenueProvider extends ChangeNotifier {
   }
 
   Future getProductSizeColor(productID) async {
+    int count = 0;
     if (_productSizeColorlist == null) {
       _productSizeColorlist = await <ProductSizeColor>[];
       final DatabaseReference myOrder =
@@ -284,6 +287,7 @@ class RevenueProvider extends ChangeNotifier {
                 quantity: data?['Quantity'],
                 url: data?['url']));
           }
+          await count++;
         }
       });
     }
@@ -345,8 +349,10 @@ class RevenueProvider extends ChangeNotifier {
                   // print(getColor);
                   // print(_productSizeColorlist?[k].colorID);
                   int subtotal = await data?['subTotal'] ?? 0;
+                  int quantity = await data?['quantity'] ?? 0;
                   _productSizeColorlist?[k].price =
-                      await ((_productSizeColorlist?[k].price)! + subtotal)!;
+                      await ((_productSizeColorlist?[k].price)! +
+                          subtotal * quantity)!;
                   print(_productSizeColorlist?[k].price);
                 }
                 await k++;
@@ -419,8 +425,10 @@ class RevenueProvider extends ChangeNotifier {
                     // print(getColor);
                     // print(_productSizeColorlist?[k].colorID);
                     int subtotal = await data?['subTotal'] ?? 0;
+                    int quantity = await data?['quantity'] ?? 0;
                     _productSizeColorlist?[k].price =
-                        await ((_productSizeColorlist?[k].price)! + subtotal)!;
+                        await ((_productSizeColorlist?[k].price)! +
+                            subtotal * quantity)!;
                     print(_productSizeColorlist?[k].price);
                   }
                   await k++;

@@ -481,12 +481,12 @@ class SignInProvider extends ChangeNotifier {
     await googleSignIn.signOut();
     _isSignedIn = false;
     notifyListeners();
-    clearStoredData();
+    await clearStoredData();
   }
 
   Future clearStoredData() async {
     final SharedPreferences s = await SharedPreferences.getInstance();
-    s.clear();
+    await s.clear();
   }
 
   //Crete account

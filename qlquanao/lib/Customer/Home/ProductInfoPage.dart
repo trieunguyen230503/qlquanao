@@ -3,11 +3,14 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:qlquanao/utils/Login.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:qlquanao/model/Product.dart';
 
 import '../../model/Cart.dart';
+import '../../provider/signin_provider.dart';
 import '../Order/CartPage.dart';
 
 String formatPrice(int price) {
@@ -28,7 +31,9 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
   final Product product;
   _ProductInfoPageState({required this.product});
 
+  String? uid;
   int quantity = 1;
+  int quantityNew = 0;
   int price = 0;
   String idCart = "";
 
@@ -62,6 +67,12 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
   @override
   void initState() {
     super.initState();
+    quantityNew = 0;
+    // Lấy id user đang đăng nhập
+    final sp = context.read<SignInProvider>();
+    sp.getDataFromSharedPreference();
+    uid = sp.uid;
+
     price = product.price!;
     getProductSizeColorFromFirebase();
   }
@@ -451,7 +462,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                 onTap: () {
                                   setState(() {
                                     quantity++;
-                                    //Nếu người dùng ấn tăng slthì tăng thêm giá tổng
+                                    //Nếu người dùng ấn tăng sl thì tăng thêm giá tổng
                                     price += product.price!;
                                   });
                                 },
@@ -512,46 +523,56 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                     color: Colors.black),
               ),
               ElevatedButton.icon(
-                onPressed: () async {
-                  final ref = FirebaseDatabase.instance.ref();
-                  final snapshotCartItem = ref.child('cart');
-                  bool check = await checkProductIsUnit(product.productId!);
-
-                  // Future.delayed(Duration(seconds: 3),(){}); //delay 3s
-
-                  if(check == false){
-                    String? idCart = snapshotCartItem.push().key;
-                    Cart c = Cart(
-                        idCart: idCart!,
-                        productID: product.productId!,
-                        productName: product.name!,
-                        image: product.image!,
-                        color: selectedColor,
-                        size: selectedSize,
-                        price: product.price!,
-                        quantity: quantity,
-                        userID: "-Nf_mGcgG0xAWGoHfK9J");
-                    snapshotCartItem.child(idCart!).set(c.toJson());
-                    print("thêm ko trùng");
-
+                onPressed: () {
+                  if(uid == null){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
                   }
                   else{
-                    Cart c = Cart(
-                        idCart: idCart,
-                        productID: product.productId!,
-                        productName: product.name!,
-                        image: product.image!,
-                        color: selectedColor,
-                        size: selectedSize,
-                        price: product.price!,
-                        quantity: quantity,
-                        userID: "-Nf_mGcgG0xAWGoHfK9J");
-                    snapshotCartItem.child(idCart).update(c.toJson());
-                    print("thêm trùng");
-                  }
+                    print("Thêm giỏ hàng");
+                    checkProductIsUnit(product.productId!).then((check) {
 
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => CartPage()));
+                      final ref = FirebaseDatabase.instance.ref();
+                      final snapshotCartItem = ref.child('cart');
+
+                      // Future.delayed(Duration(seconds: 3),(){}); //delay 3s
+
+                      if(check == false){
+                        String? idCart = snapshotCartItem.push().key;
+                        Cart c = Cart(
+                            idCart: idCart!,
+                            productID: product.productId!,
+                            productName: product.name!,
+                            image: product.image!,
+                            color: selectedColor,
+                            size: selectedSize,
+                            price: product.price!,
+                            quantity: quantity,
+                            userID: uid!);
+                        snapshotCartItem.child(idCart!).set(c.toJson());
+                        print("thêm ko trùng");
+
+                      }
+                      else{
+                        Cart c = Cart(
+                            idCart: idCart,
+                            productID: product.productId!,
+                            productName: product.name!,
+                            image: product.image!,
+                            color: selectedColor,
+                            size: selectedSize,
+                            price: product.price!,
+                            quantity: quantityNew,
+                            userID: uid!);
+                        snapshotCartItem.child(idCart).set(c.toJson());
+                        print(quantity.toString());
+                        print("thêm trùng");
+                      }
+
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => CartPage()));
+                    });
+
+                  }
                 },
                 icon: Icon(
                   CupertinoIcons.cart_badge_plus,
@@ -586,25 +607,23 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
     bool check = false;
     final ref = FirebaseDatabase.instance.ref();
     final snapshotCartItem = ref.child('cart');
-    await snapshotCartItem.onValue.listen((event){
+    await snapshotCartItem.onValue.first.then((event) {
       for (final child in event.snapshot.children) {
         Cart cart = Cart.fromSnapshot(child);
-        if(cart.productID == productID && cart.color == selectedColor && cart.size == selectedSize){
-          // cart.quantity += quantity;
-          // snapshotCartItem.child(cart.idCart).update(cart.toJson());
-          quantity = cart.quantity++;
+        if (cart.userID == uid && cart.productID == productID && cart.color == selectedColor && cart.size == selectedSize) {
+          quantityNew = quantity + cart.quantity;
           idCart = cart.idCart;
           check = true;
           print("trùng");
-          break;
+          return check;
         }
       }
-    }, onError: (error) {
+    }).catchError((error) {
       print(error);
     });
+    print("trả về kết quả");
     return check;
   }
-
 }
 
 class ItemAppBar extends StatefulWidget {

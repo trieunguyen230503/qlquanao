@@ -3,8 +3,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:provider/provider.dart';
+import 'package:qlquanao/Customer/Search/SearchPage.dart';
+import 'package:qlquanao/model/Cart.dart';
 import 'package:qlquanao/model/Product.dart';
+import 'package:qlquanao/utils/Login.dart';
+import 'package:qlquanao/utils/ProfileCustome.dart';
+import 'package:qlquanao/utils/ProfilePage.dart';
+import 'package:qlquanao/utils/next_screen.dart';
 
+import '../../provider/signin_provider.dart';
 import '../Order/CartPage.dart';
 import 'ProductInfoPage.dart';
 
@@ -20,7 +28,6 @@ class Category {
   Category({required this.idCate, required this.nameCate});
 }
 
-
 class HomePage2 extends StatefulWidget {
   const HomePage2({super.key});
 
@@ -29,10 +36,10 @@ class HomePage2 extends StatefulWidget {
 }
 
 class _HomePage2State extends State<HomePage2> {
+  String? uid;
+  String? avtUser;
   List<Product> productList = [];
-  List<Category> cateList = [
-    Category(idCate: "all", nameCate: "All products")
-  ];
+  List<Category> cateList = [Category(idCate: "all", nameCate: "All products")];
   bool isFavorite = false;
   int quantityInCart = 0;
   String cateSelected = "All products";
@@ -40,34 +47,42 @@ class _HomePage2State extends State<HomePage2> {
   @override
   void initState() {
     super.initState();
+
+    getDataUser();
     getProductsFromFirebase('all');
     getQuantityInCart();
   }
 
+  void getDataUser() async {
+    // Lấy id user đang đăng nhập
+    final sp = context.read<SignInProvider>();
+    await sp.getDataFromSharedPreference();
+    uid = sp.uid;
+    avtUser = sp.imageUrl;
+  }
+
   void getProductsFromFirebase(String category) async {
     final DatabaseReference databaseRef =
-    FirebaseDatabase.instance.ref("Product");
+        FirebaseDatabase.instance.ref("Product");
 
     await databaseRef.onValue.listen((event) {
       if (productList.isNotEmpty) {
         productList.clear();
       }
 
-      if(!mounted)
-        return;
+      if (!mounted) return;
 
-      if(category == "all"){
+      if (category == "all") {
         for (final child in event.snapshot.children) {
           Product p = Product.fromSnapshot(child);
           setState(() {
             productList.add(p);
           });
         }
-      }
-      else{
+      } else {
         for (final child in event.snapshot.children) {
           Product p = Product.fromSnapshot(child);
-          if(p.category == category){
+          if (p.category == category) {
             setState(() {
               productList.add(p);
             });
@@ -75,10 +90,8 @@ class _HomePage2State extends State<HomePage2> {
         }
       }
 
-      if(productList.isEmpty){
-        setState(() {
-
-        });
+      if (productList.isEmpty) {
+        setState(() {});
       }
     }, onError: (error) {
       // Error.
@@ -94,13 +107,15 @@ class _HomePage2State extends State<HomePage2> {
         quantityInCart = 0;
       }
 
-      if(!mounted)
-        return;
+      if (!mounted) return;
 
       for (final child in event.snapshot.children) {
-        setState(() {
-          quantityInCart++;
-        });
+        Cart c = Cart.fromSnapshot(child);
+        if (c.userID == uid) {
+          setState(() {
+            quantityInCart++;
+          });
+        }
       }
     }, onError: (error) {
       // Error.
@@ -112,8 +127,7 @@ class _HomePage2State extends State<HomePage2> {
         cateList.add(Category(idCate: "all", nameCate: "All products"));
       }
 
-      if(!mounted)
-        return;
+      if (!mounted) return;
       for (final child in event.snapshot.children) {
         String idCate = child.child("CateID").value.toString();
         String nameCate = child.child("Name").value.toString();
@@ -137,49 +151,65 @@ class _HomePage2State extends State<HomePage2> {
           slivers: [
             SliverAppBar(
               backgroundColor: Color(0xFFEDECF2),
-              collapsedHeight: 190,
-              expandedHeight: 190,
+              collapsedHeight: 185,
+              expandedHeight: 185,
               floating: false,
               pinned: true,
               flexibleSpace: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                        padding: EdgeInsets.symmetric(horizontal: 15),
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                        child: Image.asset(
+                          "assets/logo.png",
+                          width: 45,
+                          height: 45,
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(left: 5),
-                              height: 50,
-                              width: MediaQuery.of(context).size.width - 160,
-                              child: TextFormField(
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: "Search...",
+                      ),
+                      Spacer(),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SearchPage()));
+                        },
+                        child: Container(
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 15),
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                margin: EdgeInsets.only(left: 5),
+                                height: 50,
+                                width: MediaQuery.of(context).size.width - 280,
+                                child: Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    "Search...",
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
                                 ),
                               ),
-                            ),
-                            InkWell(
-                              onTap: () {},
-                              child: Icon(
+                              Icon(
                                 Icons.search,
-                                size: 28,
+                                size: 26,
                                 color: Colors.black,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(right: 30),
+                        padding: const EdgeInsets.only(right: 10),
                         child: badges.Badge(
                           badgeContent: Text(
                             quantityInCart.toString(),
@@ -193,8 +223,10 @@ class _HomePage2State extends State<HomePage2> {
                           ),
                           child: InkWell(
                             onTap: () {
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (context) => CartPage()));
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => CartPage()));
                             },
                             child: Icon(
                               Icons.shopping_cart,
@@ -204,6 +236,47 @@ class _HomePage2State extends State<HomePage2> {
                           ),
                         ),
                       ),
+                      (uid == null)
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 20, horizontal: 10),
+                              child: Center(
+                                child: InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Login()));
+                                    },
+                                    child: Text("LOGIN",
+                                        style: TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold))),
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 15),
+                              child: InkWell(
+                                onTap: () {
+                                  nextScreen(context, ProfilePage());
+                                },
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage((avtUser != null)
+                                          ? avtUser!
+                                          : "error"), // Thay thế bằng đường dẫn đến hình ảnh của bạn
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
                     ],
                   ),
                   SingleChildScrollView(
@@ -213,18 +286,23 @@ class _HomePage2State extends State<HomePage2> {
                         for (int i = 0; i < cateList.length; i++)
                           InkWell(
                             onTap: () {
-                              getProductsFromFirebase(cateList[i].idCate.toString());
+                              getProductsFromFirebase(
+                                  cateList[i].idCate.toString());
                               cateSelected = cateList[i].nameCate.toString();
                             },
                             child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-                              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 10),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 5, horizontal: 10),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: cateSelected == cateList[i].nameCate ? Colors.black38 : Colors.white.withOpacity(0.5),
+                                    color: cateSelected == cateList[i].nameCate
+                                        ? Colors.black38
+                                        : Colors.white.withOpacity(0.5),
                                     spreadRadius: 1,
                                     blurRadius: 4,
                                   ),
@@ -265,127 +343,140 @@ class _HomePage2State extends State<HomePage2> {
                 ],
               ),
             ),
-            productList.isNotEmpty ?
-            SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, childAspectRatio: 0.6),
-              delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                  final productItem = productList[index];
-                  return Container(
-                    padding: EdgeInsets.only(left: 15, right: 15, top: 10),
-                    margin: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Colors.black,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                "-" +(100 - (productItem.promoPrice!/productItem.price! * 100).toInt()).toString() + "%",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            // InkWell(
-                            //   onTap: () {
-                            //     setState(() {
-                            //       isFavorite = !isFavorite;
-                            //     });
-                            //   },
-                            //   child: Icon(
-                            //     isFavorite
-                            //         ? Icons.favorite
-                            //         : Icons.favorite_border,
-                            //     size: 30,
-                            //     color: Colors.redAccent,
-                            //   ),
-                            // ),
-                          ],
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ProductInfoPage(
-                                        product: productItem)));
-                          },
+            productList.isNotEmpty
+                ? SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, childAspectRatio: 0.6),
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        final productItem = productList[index];
+                        return Container(
+                          padding:
+                              EdgeInsets.only(left: 15, right: 15, top: 10),
+                          margin:
+                              EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           child: Column(
                             children: [
-                              Container(
-                                margin: EdgeInsets.all(10),
-                                child: Image.network(
-                                  productItem.image!,
-                                  height: 120,
-                                  width: 120,
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.only(bottom: 8),
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  productItem.name!,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      "-" +
+                                          (100 -
+                                                  (productItem.promoPrice! /
+                                                          productItem.price! *
+                                                          100)
+                                                      .toInt())
+                                              .toString() +
+                                          "%",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  // InkWell(
+                                  //   onTap: () {
+                                  //     setState(() {
+                                  //       isFavorite = !isFavorite;
+                                  //     });
+                                  //   },
+                                  //   child: Icon(
+                                  //     isFavorite
+                                  //         ? Icons.favorite
+                                  //         : Icons.favorite_border,
+                                  //     size: 30,
+                                  //     color: Colors.redAccent,
+                                  //   ),
+                                  // ),
+                                ],
                               ),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  formatPrice(productItem.price!) + "đ",
-                                  style: TextStyle(
-                                    decoration: TextDecoration.lineThrough,
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                padding: EdgeInsets.only(top: 4),
-                                child: Text(
-                                  formatPrice(productItem.promoPrice!) + "đ",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ProductInfoPage(
+                                              product: productItem)));
+                                },
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      margin: EdgeInsets.all(10),
+                                      child: Image.network(
+                                        productItem.image!,
+                                        height: 120,
+                                        width: 120,
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.only(bottom: 8),
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        productItem.name!,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        formatPrice(productItem.price!) + "đ",
+                                        style: TextStyle(
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 14,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      padding: EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        formatPrice(productItem.promoPrice!) +
+                                            "đ",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                        );
+                      },
+                      childCount: productList.length,
                     ),
-                  );
-                },
-                childCount: productList.length,
-              ),
-            ) :
-            SliverList(
-              delegate: SliverChildListDelegate([
-                Center(
-                  child: Text("The product is out of stock", style: TextStyle(fontSize: 16, color: Colors.grey)),
-                ),
-              ]),
-            ),
+                  )
+                : SliverList(
+                    delegate: SliverChildListDelegate([
+                      Center(
+                        child: Text("The product is out of stock",
+                            style: TextStyle(fontSize: 16, color: Colors.grey)),
+                      ),
+                    ]),
+                  ),
           ],
         ),
       ),

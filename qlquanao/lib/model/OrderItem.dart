@@ -83,6 +83,7 @@ class OrderItem {
       'productColor': _productColor,
       'quantity': quantity,
       'subTotal': subTotal,
+      'orderDate': orderDate,
     };
   }
 }

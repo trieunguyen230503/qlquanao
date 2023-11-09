@@ -34,7 +34,7 @@ class _ProfileCustomeState extends State<ProfileCustome> {
   String? uid;
   final _scaffoldKey = GlobalKey<FormState>();
   final RoundedLoadingButtonController updateController =
-      RoundedLoadingButtonController();
+  RoundedLoadingButtonController();
 
   DateTime selectedDate = DateTime.now();
 
@@ -115,21 +115,21 @@ class _ProfileCustomeState extends State<ProfileCustome> {
                     children: [
                       pickedFile != null
                           ? ClipOval(
-                              child: Container(
-                              width: 120.0,
-                              height: 120.0,
-                              color: Colors.blue,
-                              child: Image.file(
-                                File(pickedFile!.path!),
-                                // Thay đổi đường dẫn hình ảnh của bạn ở đây
-                                fit: BoxFit.cover,
-                              ),
-                            ))
-                          : CircleAvatar(
-                              radius: 64,
-                              backgroundImage:
-                                  NetworkImage(sp.imageUrl.toString()),
+                          child: Container(
+                            width: 120.0,
+                            height: 120.0,
+                            color: Colors.blue,
+                            child: Image.file(
+                              File(pickedFile!.path!),
+                              // Thay đổi đường dẫn hình ảnh của bạn ở đây
+                              fit: BoxFit.cover,
                             ),
+                          ))
+                          : CircleAvatar(
+                        radius: 64,
+                        backgroundImage:
+                        NetworkImage(sp.imageUrl.toString()),
+                      ),
                       Positioned(
                         child: IconButton(
                           onPressed: () async {

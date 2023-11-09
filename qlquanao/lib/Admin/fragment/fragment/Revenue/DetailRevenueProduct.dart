@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,24 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
   final TextEditingController dateStart = TextEditingController();
   final TextEditingController dateEnd = TextEditingController();
   DateTime selectedDate = DateTime.now();
-  List<ProductSizeColor>? productSizeColorlist = <ProductSizeColor>[];
+  List<ProductSizeColor> productSizeColorlist = <ProductSizeColor>[
+    ProductSizeColor(
+        productID: 'ProductID',
+        sizeID: 'getSize',
+        colorID: 'getColor',
+        price: 0,
+        quantity: 2,
+        url:
+            'https://firebasestorage.googleapis.com/v0/b/qlquanao.appspot.com/o/product_size_color_photo%2FM_Xanh%20ng%E1%BB%8Dc%20b%C3%ADch.jpg?alt=media&token=d5925cc4-b258-4017-bebd-03dae6f9f481'),
+    ProductSizeColor(
+        productID: 'ProductID',
+        sizeID: 'getSize',
+        colorID: 'getColor',
+        price: 0,
+        quantity: 2,
+        url:
+            'https://firebasestorage.googleapis.com/v0/b/qlquanao.appspot.com/o/product_size_color_photo%2FM_Xanh%20ng%E1%BB%8Dc%20b%C3%ADch.jpg?alt=media&token=d5925cc4-b258-4017-bebd-03dae6f9f481'),
+  ];
   Timer? t;
 
   Future<void> _selectDate(BuildContext context, int check) async {
@@ -58,15 +76,17 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
         }
 
         if (dateEnd.text != "" && dateStart.text != "") {
-          final ep = context.read<RevenueProvider>();
-          ep.cleanProductSizeColor();
-          _ShowData();
-          Future.delayed(Duration(seconds: 3), () {
-            setState(() {
-              _ShowData();
-            });
-          });
-          checkDate = false;
+          // final ep = context.read<RevenueProvider>();
+          // ep.cleanProductSizeColor();
+          // _ShowData();
+          // Future.delayed(Duration(seconds: 3), () {
+          //   setState(() {
+          //     _ShowData();
+          //   });
+          // });
+          //checkDate = false;
+          getProductSizeColorRevenueByTime(
+              dateStart.text, dateEnd.text, widget.productID);
         }
       });
     }
@@ -77,35 +97,218 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
   bool checkRevenue = true;
   double height = 0;
 
-  void _ShowData() async {
-    final ep = context.read<RevenueProvider>();
-    String? pID = await widget.productID;
-    await ep.getProductSizeColor(pID);
-    if (checkDate == true) {
-      await ep.getProductSizeColorRevenue(pID);
-    } else {
-      await ep.getProductSizeColorRevenueByTime(
-          dateStart.text, dateEnd.text, pID);
-    }
-    height = productSizeColorlist!.length * 120;
-    setState(() {
-      productSizeColorlist = ep.productSizeColorlist;
-    });
-  }
+  // void _ShowData() async {
+  //
+  //   final ep = context.read<RevenueProvider>();
+  //   String? pID = await widget.productID;
+  //   await ep.getProductSizeColor(pID);
+  //   if (checkDate == true) {
+  //     await ep.getProductSizeColorRevenue(pID);
+  //   } else {
+  //     await ep.getProductSizeColorRevenueByTime(
+  //         dateStart.text, dateEnd.text, pID);
+  //   }
+  //   height = productSizeColorlist!.length * 120;
+  //   setState(() {
+  //     productSizeColorlist = ep.productSizeColorlist;
+  //   });
+  // }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    final ep = context.read<RevenueProvider>();
-    ep.cleanProductSizeColor();
-    _ShowData();
-    t = Timer(Duration(seconds: 3), () {
-      setState(() {
-        print('object');
-        _ShowData();
-      });
+    // final ep = context.read<RevenueProvider>();
+    // ep.cleanProductSizeColor();
+
+    //getListSizeColor();
+    getProductSizeColorRevenue(widget.productID);
+    // _ShowData();
+    // t = Timer(Duration(seconds: 3), () {
+    //   setState(() {
+    //     print('object');
+    //     _ShowData();
+    //   });
+    // });
+  }
+
+  Future<String> getNameById(String id, String node) async {
+    DatabaseReference ref = FirebaseDatabase.instance.ref('$node/$id/Name');
+    DatabaseEvent event = await ref.once();
+    String s = event.snapshot.value.toString();
+    return s.toString();
+  }
+
+  Future<void> getListSizeColor() async {
+    final DatabaseReference myOrder =
+        await FirebaseDatabase.instance.ref("ProductSizeColor");
+
+    myOrder.onValue.listen((event) async {
+      if (productSizeColorlist.isNotEmpty) {
+        productSizeColorlist.clear();
+      }
+
+      for (final child in event.snapshot.children) {
+        final Map<dynamic, dynamic>? data = child.value as Map?;
+        if (data?["ProductID"] == widget.productID) {
+          String getSize = await getNameById(data?['SizeID'], 'Size');
+          String getColor = await getNameById(data?['ColorID'], 'Color');
+
+          productSizeColorlist.add(ProductSizeColor(
+              productID: data?['ProductID'],
+              sizeID: getSize,
+              colorID: getColor,
+              price: 0,
+              quantity: data?['Quantity'],
+              url: data?['url']));
+          height = productSizeColorlist!.length * 120;
+        }
+      }
+      setState(() {});
+      print(productSizeColorlist.length.toString() +
+          "mảng chiều dài productsize color");
     });
+  }
+
+  Future getProductSizeColorRevenue(String? pid) async {
+    await getListSizeColor();
+    final Query myOrder = await FirebaseDatabase.instance
+        .ref("orders")
+        .orderByChild('status')
+        .equalTo(true);
+
+    await myOrder.onValue.listen((event) async {
+      for (final child in event.snapshot.children) {
+        final Map<dynamic, dynamic>? dataOrder = child.value as Map?;
+
+        final Query myOrderItem = await FirebaseDatabase.instance
+            .ref("orderItem")
+            .orderByChild('orderID')
+            .equalTo(dataOrder?["orderID"]);
+        await myOrderItem.onValue.listen((event) async {
+          for (final child1 in event.snapshot.children) {
+            final Map<dynamic, dynamic>? data = child1.value as Map?;
+            final Query productSizeColor = await FirebaseDatabase.instance
+                .ref("ProductSizeColor")
+                .orderByChild('ProductID')
+                .equalTo(pid);
+            int k = 0;
+            await productSizeColor.onValue.listen((event) async {
+              for (final child2 in event.snapshot.children) {
+                final Map<dynamic, dynamic>? dataProductSizeColor =
+                    child2.value as Map?;
+                // print(data?['productID']);
+                // print(dataProductSizeColor?['ProductID']);
+                // print(dataProductSizeColor?['SizeID']);
+                // print(dataProductSizeColor?['SizeID']);
+                // print(data?['productColor']);
+                // print(dataProductSizeColor?['ColorID']);
+
+                String getSize =
+                    await getNameById(dataProductSizeColor?['SizeID'], 'Size');
+                String getColor = await getNameById(
+                    dataProductSizeColor?['ColorID'], 'Color');
+                if (k < productSizeColorlist!.length &&
+                    data?['productID'] == dataProductSizeColor?['ProductID'] &&
+                    data?['productSize'] == getSize &&
+                    data?['productColor'] == getColor) {
+                  // print(dataProductSizeColor?['ProductID']);
+                  // print(_productSizeColorlist?[k].productID);
+                  // print(getSize);
+                  // print(_productSizeColorlist?[k].sizeID);
+                  // print(getColor);
+                  // print(_productSizeColorlist?[k].colorID);
+                  int subtotal = await data?['subTotal'] ?? 0;
+                  int quantity = await data?['quantity'] ?? 0;
+                  productSizeColorlist?[k].price =
+                      await ((productSizeColorlist?[k].price)! +
+                          subtotal * quantity)!;
+                  print(productSizeColorlist?[k].price);
+                }
+                await k++;
+              }
+            });
+          }
+        });
+      }
+    });
+    setState(() {});
+  }
+
+  Future getProductSizeColorRevenueByTime(
+      String DateStart, String DateEnd, String? pid) async {
+    DateTime ds = DateFormat("dd/MM/yyyy").parse(DateStart);
+    DateTime de = DateFormat("dd/MM/yyyy").parse(DateEnd);
+    await getListSizeColor();
+
+    final Query myOrder = await FirebaseDatabase.instance
+        .ref("orders")
+        .orderByChild('status')
+        .equalTo(true);
+
+    await myOrder.onValue.listen((event) async {
+      for (final child in event.snapshot.children) {
+        final Map<dynamic, dynamic>? dataOrder = child.value as Map?;
+
+        final Query myOrderItem = await FirebaseDatabase.instance
+            .ref("orderItem")
+            .orderByChild('orderID')
+            .equalTo(dataOrder?["orderID"]);
+        await myOrderItem.onValue.listen((event) async {
+          for (final child1 in event.snapshot.children) {
+            final Map<dynamic, dynamic>? data = child1.value as Map?;
+            List<String>? date = data?['orderDate'].toString().split(" ");
+            DateTime d = DateFormat("yyyy-MM-dd").parse(date![0]);
+
+            if ((d.isAfter(ds) || d.isAtSameMomentAs(ds)) &&
+                (d.isBefore(de) || d.isAtSameMomentAs(de))) {
+              final Query productSizeColor = await FirebaseDatabase.instance
+                  .ref("ProductSizeColor")
+                  .orderByChild('ProductID')
+                  .equalTo(pid);
+              int k = 0;
+              await productSizeColor.onValue.listen((event) async {
+                for (final child2 in event.snapshot.children) {
+                  final Map<dynamic, dynamic>? dataProductSizeColor =
+                      child2.value as Map?;
+                  // print(data?['productID']);
+                  // print(dataProductSizeColor?['ProductID']);
+                  // print(dataProductSizeColor?['SizeID']);
+                  // print(dataProductSizeColor?['SizeID']);
+                  // print(data?['productColor']);
+                  // print(dataProductSizeColor?['ColorID']);
+
+                  String getSize = await getNameById(
+                      dataProductSizeColor?['SizeID'], 'Size');
+                  String getColor = await getNameById(
+                      dataProductSizeColor?['ColorID'], 'Color');
+                  if (k < productSizeColorlist!.length &&
+                      data?['productID'] ==
+                          dataProductSizeColor?['ProductID'] &&
+                      data?['productSize'] == getSize &&
+                      data?['productColor'] == getColor) {
+                    // print(dataProductSizeColor?['ProductID']);
+                    // print(_productSizeColorlist?[k].productID);
+                    // print(getSize);
+                    // print(_productSizeColorlist?[k].sizeID);
+                    // print(getColor);
+                    // print(_productSizeColorlist?[k].colorID);
+                    int subtotal = await data?['subTotal'] ?? 0;
+                    int quantity = await data?['quantity'] ?? 0;
+                    productSizeColorlist?[k].price =
+                        await ((productSizeColorlist?[k].price)! +
+                            subtotal * quantity)!;
+                    print(productSizeColorlist?[k].price);
+                  }
+                  await k++;
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+    setState(() {});
   }
 
   @override
@@ -222,14 +425,15 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
                         dateEnd.text = "";
                         dateStart.text = "";
                         setState(() {
-                          final ep = context.read<RevenueProvider>();
-                          ep.cleanProductSizeColor();
-                          _ShowData();
-                          Future.delayed(Duration(seconds: 3), () {
-                            setState(() {
-                              _ShowData();
-                            });
-                          });
+                          // final ep = context.read<RevenueProvider>();
+                          // ep.cleanProductSizeColor();
+                          // _ShowData();
+                          // Future.delayed(Duration(seconds: 3), () {
+                          //   setState(() {
+                          //     _ShowData();
+                          //   });
+                          // });
+                          getProductSizeColorRevenue(widget.productID);
                           checkDate = true;
                         });
                       },
