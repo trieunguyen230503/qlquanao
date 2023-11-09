@@ -37,22 +37,26 @@ class Orders {
 
   String? get confirm => _confirm;
 
+  bool? _payment = false;
+
+  bool? get payment => _payment;
+
   Orders(this._oderID, this._userID, this._orderDate, this._totalamount,
       this._confirm, this._userName);
 
   Orders.full(this._oderID, this._userID, this._userName, this._phone,
-      this._address, this._orderDate, this._totalamount, this._status);
+      this._address, this._orderDate, this._totalamount, this._status, this._payment);
 
   Orders.fromSnapshot(DataSnapshot snapshot)
       : _oderID = snapshot.child("orderID").value.toString(),
         _userID = snapshot.child("userID").value.toString(),
         _userName = snapshot.child("userName").value.toString(),
         _phone = snapshot.child("userPhone").value.toString(),
-        _address = snapshot.child("address").value.toString(),
+        _address = snapshot.child("userAddress").value.toString(),
         _orderDate = snapshot.child("orderDate").value.toString(),
-        _totalamount =
-            int.parse(snapshot.child("totalamount").value.toString()),
-        _status = bool.parse(snapshot.child("status").value.toString());
+        _totalamount = int.parse(snapshot.child("totalamount").value.toString()),
+        _status = bool.parse(snapshot.child("status").value.toString()),
+        _payment = bool.parse(snapshot.child("status").value.toString()); //// SỬA
 
   toJson() {
     return {
@@ -63,7 +67,8 @@ class Orders {
       'userAddress': address,
       'orderDate': oderDate,
       'totalamount': totalamount,
-      'status': status
+      'status': status,
+      'payment': payment,
     };
   }
 

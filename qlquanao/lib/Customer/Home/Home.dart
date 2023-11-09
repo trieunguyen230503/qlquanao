@@ -16,11 +16,6 @@ import '../../provider/signin_provider.dart';
 import '../Order/CartPage.dart';
 import 'ProductInfoPage.dart';
 
-String formatPrice(int price) {
-  final formatter = NumberFormat("#,###");
-  return formatter.format(price);
-}
-
 class Category {
   String idCate;
   String nameCate;
@@ -143,6 +138,8 @@ class _HomePage2State extends State<HomePage2> {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormatterUSD =
+        NumberFormat.currency(locale: 'en_US', symbol: '\$');
     return Scaffold(
       backgroundColor: Color(0xFFEDECF2),
       body: Padding(
@@ -436,7 +433,8 @@ class _HomePage2State extends State<HomePage2> {
                                     Container(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        formatPrice(productItem.price!) + "đ",
+                                        currencyFormatterUSD
+                                            .format(productItem.price!),
                                         style: TextStyle(
                                           decoration:
                                               TextDecoration.lineThrough,
@@ -450,8 +448,8 @@ class _HomePage2State extends State<HomePage2> {
                                       alignment: Alignment.centerLeft,
                                       padding: EdgeInsets.only(top: 4),
                                       child: Text(
-                                        formatPrice(productItem.promoPrice!) +
-                                            "đ",
+                                        currencyFormatterUSD
+                                            .format(productItem.promoPrice!),
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,

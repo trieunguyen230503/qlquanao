@@ -72,7 +72,6 @@ class _ApprovingPageState extends State<ApprovingPage> {
                             ApprovingInfo(order: orderList[index])));
               },
               child: Container(
-                height: 150,
                 margin: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -105,22 +104,42 @@ class _ApprovingPageState extends State<ApprovingPage> {
                           ),
                         ],
                       ),
-                      Text(
-                        (orderItem.userName!.length > 20)
-                            ? '${orderItem.userName!.substring(0, 20)}...' // Hiển thị 'text...' nếu độ dài vượt quá length
-                            : "Customer: " + orderItem.userName!,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black38,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Text(
+                          (orderItem.userName!.length > 20)
+                              ? '${orderItem.userName!.substring(0, 20)}...' // Hiển thị 'text...' nếu độ dài vượt quá length
+                              : "Customer: " + orderItem.userName!,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.black38,
+                          ),
                         ),
                       ),
-                      Text(
-                        "Address: " + orderItem!.address.toString(),
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black38,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Text(
+                          "Address: " + orderItem!.address.toString(),
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.black38,
+                          ),
                         ),
                       ),
+                      if(orderItem.payment == true)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10, right: 12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Spacer(),
+                              Text("Paid by ",
+                                style: TextStyle(fontSize: 15, color: Colors.black),
+                              ),
+                              Image.asset("assets/paypal_logo.png", width: 50, height: 30),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),

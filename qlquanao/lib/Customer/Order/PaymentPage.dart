@@ -143,27 +143,25 @@ class _PaymentPageState extends State<PaymentPage> {
                       ),
                     ],
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 40),
-                        child: Text(
-                          (tempAddress == false) ? "Name: " + nameDefault! : "Name: " + nameNew,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                          ),
-                        ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 40),
+                    child: Text(
+                      (tempAddress == false) ? "Name: " + nameDefault! : "Name: " + nameNew,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
                       ),
-                      Text(
-                        (tempAddress == false) ? "  |  Phone: " + phoneDefault! : "  |  Phone: " + phoneNew,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black,
-                        ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 40, top: 4, bottom: 4),
+                    child: Text(
+                      (tempAddress == false) ? "Phone: " + phoneDefault! : "Phone: " + phoneNew,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
                       ),
-                    ],
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 40, right: 15),
@@ -373,29 +371,9 @@ class _PaymentPageState extends State<PaymentPage> {
                       else{
                         if(groupValue == 1){
 
-                          final ref = FirebaseDatabase.instance.ref();
+                          _pushOrder(false);
 
-                          //push order lên firebase
-                          final snapshotOrders = ref.child('orders');
-                          String? orderID = snapshotOrders.push().key;
-
-                          String uAddress = detailAddress + ", " + addressNew;
-                          DateTime now = DateTime.now();
-                          String orderDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-
-                          Orders order = Orders.full(orderID, uid, nameNew, phoneNew, uAddress, orderDate, totalAmount, false);
-                          snapshotOrders.child(orderID!).set(order.toJson());
-                          print("orderID: ${orderID}");
-
-
-                          //push orderItem lên firebase
-                          final snapshotOrderItem = ref.child('orderItem');
-                          for(var item in listProduct){
-                            String? orderItemID = snapshotOrders.push().key;
-                            OrderItem o = OrderItem.all(orderItemID, orderID, item.productID, item.productName, item.image, item.size, item.color, orderDate, item.quantity, item.price);
-                            snapshotOrderItem.child(orderItemID!).set(o.toJson());
-                          }
-
+                          _showMyDialog();
                         }
                         else if(groupValue == 2) {
 
@@ -442,6 +420,8 @@ class _PaymentPageState extends State<PaymentPage> {
                               note: "Contact us for any questions on your order.",
                               onSuccess: (Map params) async {
                                 print("onSuccess: $params");
+                                _pushOrder(true);
+                                _showMyDialog();
                               },
                               onError: (error) {
                                 print("onError: $error");
@@ -490,52 +470,80 @@ class _PaymentPageState extends State<PaymentPage> {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Image.asset('assets/order_success.png',
-                  width: 80,
-                  height: 80,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Text('Order Success',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                      ),
+        return Container(
+          color: Colors.white,
+          child: CupertinoAlertDialog(
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Image.asset('assets/order_success.png',
+                    width: 80,
+                    height: 80,
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 15),
-                  child: Text('Thank you for your purchase! You can track your order status on your personal page.',
-                    style: TextStyle(
-                      fontSize: 18,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Text('Order Success',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
                     ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 15),
+                    child: Text('Thank you for your purchase! You can track your order status on your personal page.',
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Yes', style: TextStyle(fontSize: 18),),
-              onPressed: () {
-                final ref = FirebaseDatabase.instance.ref();
-                final snapshotCart = ref.child('cart').get();
-                final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
-                for(var c in listProduct){
-                  databaseRef.child(c.idCart).remove();
-                }
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Return to home page', style: TextStyle(fontSize: 18),),
+                onPressed: () {
+                  final ref = FirebaseDatabase.instance.ref();
+                  final snapshotCart = ref.child('cart').get();
+                  final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
+                  for(var c in listProduct){
+                    databaseRef.child(c.idCart).remove();
+                  }
 
-                Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
-              },
-            ),
-          ],
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
+                },
+              ),
+            ],
+          ),
         );
       },
     );
+  }
+
+  void _pushOrder(bool paymentOnl) async{
+    final ref = FirebaseDatabase.instance.ref();
+
+    //push order lên firebase
+    final snapshotOrders = ref.child('orders');
+    String? orderID = snapshotOrders.push().key;
+
+    String uAddress = detailAddress + ", " + addressNew;
+    DateTime now = DateTime.now();
+    String orderDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+
+    Orders order = Orders.full(orderID, uid, nameNew, phoneNew, uAddress, orderDate, totalAmount, false, paymentOnl);
+    snapshotOrders.child(orderID!).set(order.toJson());
+    print("orderID: ${orderID}");
+
+
+    //push orderItem lên firebase
+    final snapshotOrderItem = ref.child('orderItem');
+    for(var item in listProduct){
+      String? orderItemID = snapshotOrders.push().key;
+      OrderItem o = OrderItem.all(orderItemID, orderID, item.productID, item.productName, item.image, item.size, item.color, orderDate, item.quantity, item.price);
+      snapshotOrderItem.child(orderItemID!).set(o.toJson());
+    }
   }
 }
 
