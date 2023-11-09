@@ -23,11 +23,6 @@ String detailAddress = " ";
 bool tempAddress = false;
 
 
-String formatPrice(int price) {
-  final formatter = NumberFormat("#,###");
-  return formatter.format(price);
-}
-
 int totalAmount = 0;
 
 class PaymentPage extends StatefulWidget {
@@ -85,6 +80,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -143,27 +139,25 @@ class _PaymentPageState extends State<PaymentPage> {
                       ),
                     ],
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 40),
-                        child: Text(
-                          (tempAddress == false) ? "Name: " + nameDefault! : "Name: " + nameNew,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                          ),
-                        ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 40),
+                    child: Text(
+                      (tempAddress == false) ? "Name: " + nameDefault! : "Name: " + nameNew,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
                       ),
-                      Text(
-                        (tempAddress == false) ? "  |  Phone: " + phoneDefault! : "  |  Phone: " + phoneNew,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black,
-                        ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 40, top: 4, bottom: 4),
+                    child: Text(
+                      (tempAddress == false) ? "Phone: " + phoneDefault! : "Phone: " + phoneNew,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
                       ),
-                    ],
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 40, right: 15),
@@ -229,7 +223,9 @@ class _PaymentPageState extends State<PaymentPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  product.productName,
+                                  (product.productName.length > 18)
+                                      ? '${product.productName.substring(0, 18)}...' // Hiển thị 'text...' nếu độ dài vượt quá length
+                                      : product.productName,
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -244,7 +240,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                   ),
                                 ),
                                 Text(
-                                  formatPrice(product.price) + "đ",
+                                  currencyFormatterUSD.format(product.price),
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -349,7 +345,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         ),
                       ),
                       Text(
-                        formatPrice(totalAmount) + "đ",
+                        currencyFormatterUSD.format(totalAmount),
                         style: TextStyle(
                           fontSize: 25,
                           color: Color(0xFF4C53A5),
@@ -373,29 +369,9 @@ class _PaymentPageState extends State<PaymentPage> {
                       else{
                         if(groupValue == 1){
 
-                          final ref = FirebaseDatabase.instance.ref();
+                          _pushOrder(false);
 
-                          //push order lên firebase
-                          final snapshotOrders = ref.child('orders');
-                          String? orderID = snapshotOrders.push().key;
-
-                          String uAddress = detailAddress + ", " + addressNew;
-                          DateTime now = DateTime.now();
-                          String orderDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-
-                          Orders order = Orders.full(orderID, uid, nameNew, phoneNew, uAddress, orderDate, totalAmount, false);
-                          snapshotOrders.child(orderID!).set(order.toJson());
-                          print("orderID: ${orderID}");
-
-
-                          //push orderItem lên firebase
-                          final snapshotOrderItem = ref.child('orderItem');
-                          for(var item in listProduct){
-                            String? orderItemID = snapshotOrders.push().key;
-                            OrderItem o = OrderItem.all(orderItemID, orderID, item.productID, item.productName, item.image, item.size, item.color, orderDate, item.quantity, item.price);
-                            snapshotOrderItem.child(orderItemID!).set(o.toJson());
-                          }
-
+                          _showMyDialog();
                         }
                         else if(groupValue == 2) {
 
@@ -442,6 +418,8 @@ class _PaymentPageState extends State<PaymentPage> {
                               note: "Contact us for any questions on your order.",
                               onSuccess: (Map params) async {
                                 print("onSuccess: $params");
+                                _pushOrder(true);
+                                _showMyDialog();
                               },
                               onError: (error) {
                                 print("onError: $error");
@@ -520,7 +498,7 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Yes', style: TextStyle(fontSize: 18),),
+              child: const Text('Return to home page', style: TextStyle(fontSize: 18),),
               onPressed: () {
                 final ref = FirebaseDatabase.instance.ref();
                 final snapshotCart = ref.child('cart').get();
@@ -536,6 +514,38 @@ class _PaymentPageState extends State<PaymentPage> {
         );
       },
     );
+  }
+
+  void _pushOrder(bool paymentOnl) async{
+    final ref = FirebaseDatabase.instance.ref();
+
+    //push order lên firebase
+    final snapshotOrders = ref.child('orders');
+    String? orderID = snapshotOrders.push().key;
+
+    String uAddress = detailAddress + ", " + addressNew;
+    DateTime now = DateTime.now();
+    String orderDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+    Orders order;
+
+    if(tempAddress == true){
+      order = Orders.full(orderID, uid, nameNew, phoneNew, uAddress, orderDate, totalAmount, false, paymentOnl);
+    }
+    else
+    {
+      order = Orders.full(orderID, uid, nameDefault, phoneDefault, addressDefault, orderDate, totalAmount, false, paymentOnl);
+    }
+    snapshotOrders.child(orderID!).set(order.toJson());
+    print("orderID: ${orderID}");
+
+
+    //push orderItem lên firebase
+    final snapshotOrderItem = ref.child('orderItem');
+    for(var item in listProduct){
+      String? orderItemID = snapshotOrders.push().key;
+      OrderItem o = OrderItem.all(orderItemID, orderID, item.productID, item.productName, item.image, item.size, item.color, orderDate, item.quantity, item.price);
+      snapshotOrderItem.child(orderItemID!).set(o.toJson());
+    }
   }
 }
 
@@ -757,7 +767,7 @@ class _addressPageState extends State<AddressPage> {
                     // phoneNew = _textPhoneController.text.trim();
                     // addressNew = selectedWard + ", " + selectedDistrict + ", " + selectedCity;
                     // detailAddress = _textdetailAddressController.text;
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: listProduct)));
+                    // Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: listProduct)));
                   });
                   print("name: " + nameNew);
                   print("phone: " + phoneNew);

@@ -4,10 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:qlquanao/model/Order.dart';
 import 'package:qlquanao/model/OrderItem.dart';
 
-String formatPrice(int price) {
-  final formatter = NumberFormat("#,###");
-  return formatter.format(price);
-}
 
 class ApprovedInfo extends StatefulWidget {
   final Orders order;
@@ -66,6 +62,7 @@ class _ApprovedInfoState extends State<ApprovedInfo> {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -202,7 +199,7 @@ class _ApprovedInfoState extends State<ApprovedInfo> {
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
                                     Text(
-                                      formatPrice(item.subTotal!) + "đ",
+                                      currencyFormatterUSD.format(item.subTotal!),
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -244,7 +241,7 @@ class _ApprovedInfoState extends State<ApprovedInfo> {
                   ),
                   Spacer(),
                   Text(
-                    formatPrice(totalAmount) + "đ",
+                    currencyFormatterUSD.format(totalAmount),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,

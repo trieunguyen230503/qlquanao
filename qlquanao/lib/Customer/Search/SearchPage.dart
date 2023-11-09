@@ -117,6 +117,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
         elevation: 0,
         toolbarHeight: 80,
@@ -125,38 +126,80 @@ class _SearchPageState extends State<SearchPage> {
           color: Colors.black,
           onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: Colors.white,
-        title: TextFormField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            isDense: true,
-            contentPadding: EdgeInsets.symmetric(
-                vertical: MediaQuery.of(context).size.height * 0.01),
-            prefixIcon: Icon(
-              Icons.search,
-              size: 20,
-            ),
-            suffixIcon: _searchController.text.isEmpty
-                ? null
-                : IconButton(
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onPressed: _searchController.clear,
-                    icon: Icon(CupertinoIcons.clear_circled_solid)),
-            enabledBorder: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              borderSide: BorderSide(color: Colors.transparent),
-            ),
-            focusedBorder: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              borderSide: BorderSide(color: Colors.transparent),
-            ),
-            hintText: 'Search by keyword',
-            hintStyle: TextStyle(
-              fontSize: 13,
-            ),
-            fillColor: Colors.grey[200],
-            filled: true,
+        backgroundColor: Color(0xFFEDECF2),
+        // title: TextFormField(
+        //   controller: _searchController,
+        //   decoration: InputDecoration(
+        //     isDense: true,
+        //     contentPadding: EdgeInsets.symmetric(
+        //         vertical: MediaQuery.of(context).size.height * 0.01),
+        //     prefixIcon: Icon(
+        //       Icons.search,
+        //       size: 20,
+        //     ),
+        //     suffixIcon: _searchController.text.isEmpty
+        //         ? null
+        //         : IconButton(
+        //             splashColor: Colors.transparent,
+        //             highlightColor: Colors.transparent,
+        //             onPressed: _searchController.clear,
+        //             icon: Icon(CupertinoIcons.clear_circled_solid)),
+        //     enabledBorder: const OutlineInputBorder(
+        //       borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        //       borderSide: BorderSide(color: Colors.transparent),
+        //     ),
+        //     focusedBorder: const OutlineInputBorder(
+        //       borderRadius: BorderRadius.all(Radius.circular(8.0)),
+        //       borderSide: BorderSide(color: Colors.transparent),
+        //     ),
+        //     hintText: 'Search by keyword',
+        //     hintStyle: TextStyle(
+        //       fontSize: 13,
+        //     ),
+        //     fillColor: Colors.grey[200],
+        //     filled: true,
+        //   ),
+        // ),
+        title: Container(
+          margin: EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          height: 50,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Row(
+            children: [
+              Container(
+                margin: EdgeInsets.only(left: 5),
+                height: 50,
+                width: MediaQuery.of(context).size.width - 180,
+                child: TextFormField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Search...",
+                  ),
+                ),
+              ),
+              _searchController.text.isEmpty
+                  ? const Icon(
+                Icons.search,
+                size: 28,
+                color: Colors.grey,
+              )
+                  : GestureDetector(
+                onTap: () {
+                  // Clear the search text when delete icon is tapped
+                  _searchController.clear();
+                },
+                child: const Icon(
+                  Icons.clear,
+                  size: 28,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
           ),
         ),
         actions: [
@@ -175,7 +218,7 @@ class _SearchPageState extends State<SearchPage> {
           _searchController.text.isEmpty && _searchHistory.isNotEmpty
               ? _buildSearchHistory()
               : _buildSearchResults(),
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xFFEDECF2),
     );
   }
 
@@ -191,10 +234,12 @@ class _SearchPageState extends State<SearchPage> {
                 style: const TextStyle(color: Colors.black),
               ),
               onTap: () {
-                _searchController.text = _searchHistory[index];
-                _searchController.selection = TextSelection.fromPosition(
-                  TextPosition(offset: _searchController.text.length),
-                );
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ProductInfoPage(
+                            product: _fileteredProductListData[index])));
+
               },
             ),
           ),

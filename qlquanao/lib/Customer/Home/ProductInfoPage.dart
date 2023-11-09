@@ -13,11 +13,6 @@ import '../../model/Cart.dart';
 import '../../provider/signin_provider.dart';
 import '../Order/CartPage.dart';
 
-String formatPrice(int price) {
-  final formatter = NumberFormat("#,###");
-  return formatter.format(price);
-}
-
 class ProductInfoPage extends StatefulWidget {
   final Product product;
   ProductInfoPage({required this.product});
@@ -73,7 +68,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
     sp.getDataFromSharedPreference();
     uid = sp.uid;
 
-    price = product.price!;
+    price = product.promoPrice!;
     getProductSizeColorFromFirebase();
   }
 
@@ -105,9 +100,15 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
           String size = snap.child("SizeID").value.toString();
           String color = snap.child("ColorID").value.toString();
           String image = snap.child("url").value.toString();
-          listSizesId.add(size);
-          listClrsId.add(color);
-          _sliderImages.add(image);
+          if(!listSizesId.contains(size)){
+            listSizesId.add(size);
+          }
+          if(!listClrsId.contains(color)){
+            listClrsId.add(color);
+          }
+          if(!_sliderImages.contains(image)){
+            _sliderImages.add(image);
+          }
         }
       }
 
@@ -148,6 +149,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     final List<Widget> _slider = _sliderImages
         .map((image) => Padding(
               padding: EdgeInsets.symmetric(
@@ -244,20 +246,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 12),
-                          child: Container(
-                            width: double.infinity,
-                            child: Text(
-                              product.description.toString(),
-                              textAlign: TextAlign.justify,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
+
                         Padding(
                           padding: EdgeInsets.only(top: 10, bottom: 12),
                           child: Container(
@@ -406,7 +395,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                         ),
                         Padding(
                           padding:
-                              EdgeInsets.only(top: 18, bottom: 40, right: 10),
+                              EdgeInsets.only(top: 18, right: 10),
                           child: Row(
                             children: [
                               Spacer(),
@@ -487,7 +476,21 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                               ),
                             ],
                           ),
-                        )
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 24, bottom: 40),
+                          child: Container(
+                            width: double.infinity,
+                            child: Text(
+                              product.description.toString(),
+                              textAlign: TextAlign.justify,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -516,7 +519,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                formatPrice(price) + "đ",
+                currencyFormatterUSD.format(price),
                 style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -545,7 +548,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                             image: product.image!,
                             color: selectedColor,
                             size: selectedSize,
-                            price: product.price!,
+                            price: product.promoPrice!,
                             quantity: quantity,
                             userID: uid!);
                         snapshotCartItem.child(idCart!).set(c.toJson());
@@ -560,12 +563,11 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                             image: product.image!,
                             color: selectedColor,
                             size: selectedSize,
-                            price: product.price!,
+                            price: product.promoPrice!,
                             quantity: quantityNew,
                             userID: uid!);
                         snapshotCartItem.child(idCart).set(c.toJson());
                         print(quantity.toString());
-                        print("thêm trùng");
                       }
 
                       Navigator.push(context,
@@ -614,14 +616,12 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
           quantityNew = quantity + cart.quantity;
           idCart = cart.idCart;
           check = true;
-          print("trùng");
           return check;
         }
       }
     }).catchError((error) {
       print(error);
     });
-    print("trả về kết quả");
     return check;
   }
 }
