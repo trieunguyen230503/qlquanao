@@ -23,11 +23,6 @@ String detailAddress = " ";
 bool tempAddress = false;
 
 
-String formatPrice(int price) {
-  final formatter = NumberFormat("#,###");
-  return formatter.format(price);
-}
-
 int totalAmount = 0;
 
 class PaymentPage extends StatefulWidget {
@@ -85,6 +80,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -227,7 +223,9 @@ class _PaymentPageState extends State<PaymentPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  product.productName,
+                                  (product.productName.length > 18)
+                                      ? '${product.productName.substring(0, 18)}...' // Hiển thị 'text...' nếu độ dài vượt quá length
+                                      : product.productName,
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -242,7 +240,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                   ),
                                 ),
                                 Text(
-                                  formatPrice(product.price) + "đ",
+                                  currencyFormatterUSD.format(product.price),
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -347,7 +345,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         ),
                       ),
                       Text(
-                        formatPrice(totalAmount) + "đ",
+                        currencyFormatterUSD.format(totalAmount),
                         style: TextStyle(
                           fontSize: 25,
                           color: Color(0xFF4C53A5),
@@ -470,52 +468,49 @@ class _PaymentPageState extends State<PaymentPage> {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        return Container(
-          color: Colors.white,
-          child: CupertinoAlertDialog(
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Image.asset('assets/order_success.png',
-                    width: 80,
-                    height: 80,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Text('Order Success',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                        ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 15),
-                    child: Text('Thank you for your purchase! You can track your order status on your personal page.',
+        return CupertinoAlertDialog(
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Image.asset('assets/order_success.png',
+                  width: 80,
+                  height: 80,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Text('Order Success',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
                       ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 15),
+                  child: Text('Thank you for your purchase! You can track your order status on your personal page.',
+                    style: TextStyle(
+                      fontSize: 18,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Return to home page', style: TextStyle(fontSize: 18),),
-                onPressed: () {
-                  final ref = FirebaseDatabase.instance.ref();
-                  final snapshotCart = ref.child('cart').get();
-                  final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
-                  for(var c in listProduct){
-                    databaseRef.child(c.idCart).remove();
-                  }
-
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
-                },
-              ),
-            ],
           ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Return to home page', style: TextStyle(fontSize: 18),),
+              onPressed: () {
+                final ref = FirebaseDatabase.instance.ref();
+                final snapshotCart = ref.child('cart').get();
+                final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
+                for(var c in listProduct){
+                  databaseRef.child(c.idCart).remove();
+                }
+
+                Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
+              },
+            ),
+          ],
         );
       },
     );
@@ -531,8 +526,15 @@ class _PaymentPageState extends State<PaymentPage> {
     String uAddress = detailAddress + ", " + addressNew;
     DateTime now = DateTime.now();
     String orderDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+    Orders order;
 
-    Orders order = Orders.full(orderID, uid, nameNew, phoneNew, uAddress, orderDate, totalAmount, false, paymentOnl);
+    if(tempAddress == true){
+      order = Orders.full(orderID, uid, nameNew, phoneNew, uAddress, orderDate, totalAmount, false, paymentOnl);
+    }
+    else
+    {
+      order = Orders.full(orderID, uid, nameDefault, phoneDefault, addressDefault, orderDate, totalAmount, false, paymentOnl);
+    }
     snapshotOrders.child(orderID!).set(order.toJson());
     print("orderID: ${orderID}");
 
@@ -765,7 +767,7 @@ class _addressPageState extends State<AddressPage> {
                     // phoneNew = _textPhoneController.text.trim();
                     // addressNew = selectedWard + ", " + selectedDistrict + ", " + selectedCity;
                     // detailAddress = _textdetailAddressController.text;
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: listProduct)));
+                    // Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: listProduct)));
                   });
                   print("name: " + nameNew);
                   print("phone: " + phoneNew);

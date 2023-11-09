@@ -56,7 +56,7 @@ class Orders {
         _orderDate = snapshot.child("orderDate").value.toString(),
         _totalamount = int.parse(snapshot.child("totalamount").value.toString()),
         _status = bool.parse(snapshot.child("status").value.toString()),
-        _payment = bool.parse(snapshot.child("status").value.toString()); //// SỬA
+        _payment = bool.parse(snapshot.child("payment").value.toString());
 
   toJson() {
     return {

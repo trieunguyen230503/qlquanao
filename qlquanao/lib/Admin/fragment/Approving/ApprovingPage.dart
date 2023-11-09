@@ -5,11 +5,6 @@ import 'package:qlquanao/model/Order.dart';
 
 import 'ApprovingInfo.dart';
 
-String formatPrice(int price) {
-  final formatter = NumberFormat("#,###");
-  return formatter.format(price);
-}
-
 class ApprovingPage extends StatefulWidget {
   const ApprovingPage({super.key});
 
@@ -54,6 +49,7 @@ class _ApprovingPageState extends State<ApprovingPage> {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     Widget myWidget;
 
     if (orderList.isEmpty) {
@@ -96,7 +92,7 @@ class _ApprovingPageState extends State<ApprovingPage> {
                           ),
                           Spacer(),
                           Text(
-                            formatPrice(orderItem.totalamount!) + "đ",
+                            currencyFormatterUSD.format(orderItem.totalamount!),
                             style: TextStyle(
                               fontSize: 18,
                               color: Colors.black,

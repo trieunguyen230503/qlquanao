@@ -11,12 +11,10 @@ import 'package:firebase_database/firebase_database.dart';
 
 import '../../provider/signin_provider.dart';
 
-//Chưa cập nhật lại chỗ kiểm tra user nào đặt hàng
-
-String formatPrice(int price) {
-  final formatter = NumberFormat("#,###");
-  return formatter.format(price);
-}
+// String formatPrice(int price) {
+//   final formatter = NumberFormat("#,###");
+//   return formatter.format(price);
+// }
 
 List<Cart> selectedProducts = [];
 
@@ -96,6 +94,7 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     return Scaffold(
       body: ListView(
         children: [
@@ -187,7 +186,7 @@ class _CartPageState extends State<CartPage> {
                                 ),
                               ),
                               Text(
-                                formatPrice(cartItem.price) + "đ",
+                                currencyFormatterUSD.format(cartItem.price),
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -385,6 +384,7 @@ class _CartAppBarState extends State<CartAppBar> {
 }
 
 class CartBottomNavBar extends StatelessWidget {
+  NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -405,7 +405,7 @@ class CartBottomNavBar extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  formatPrice(totalAmount) + "đ",
+                  currencyFormatterUSD.format(totalAmount),
                   style: TextStyle(
                     fontSize: 25,
                     color: Color(0xFF4C53A5),

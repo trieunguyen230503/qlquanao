@@ -7,10 +7,6 @@ import 'package:qlquanao/model/OrderItem.dart';
 import '../../model/Order.dart';
 import '../../provider/signin_provider.dart';
 
-String formatPrice(int price) {
-  final formatter = NumberFormat("#,###");
-  return formatter.format(price);
-}
 
 class OrderHistoryPage extends StatefulWidget {
   const OrderHistoryPage({super.key});
@@ -87,6 +83,8 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white70,
@@ -206,9 +204,8 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                                                 ),
                                               ),
                                               Text(
-                                                formatPrice(listProductItem[i]
-                                                        .subTotal!) +
-                                                    "đ",
+                                                currencyFormatterUSD.format(listProductItem[i]
+                                                        .subTotal!),
                                                 style: TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.bold,
@@ -237,7 +234,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                                       ],
                                     ),
                                   ),
-                                Text("Total: " + formatPrice(orderItem.totalamount!) + "đ", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),),
+                                Text("Total: " + currencyFormatterUSD.format(orderItem.totalamount!), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),),
                               ],
                             ),
                           ),

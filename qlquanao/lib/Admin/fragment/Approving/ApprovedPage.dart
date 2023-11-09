@@ -1,5 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../model/Order.dart';
 import 'ApprovedInfo.dart';
@@ -48,6 +49,7 @@ class _ApprovedPageState extends State<ApprovedPage> {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     Widget myWidget;
 
     if (orderList.isEmpty) {
@@ -89,7 +91,7 @@ class _ApprovedPageState extends State<ApprovedPage> {
                           ),
                           Spacer(),
                           Text(
-                            formatPrice(orderItem.totalamount!) + "đ",
+                            currencyFormatterUSD.format(orderItem.totalamount!),
                             style: TextStyle(
                               fontSize: 18,
                               color: Colors.black,

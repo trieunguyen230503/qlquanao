@@ -1,14 +1,11 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:qlquanao/Admin/fragment/Approving/adminApproveOrder.dart';
 import 'package:qlquanao/model/Order.dart';
 import 'package:qlquanao/model/OrderItem.dart';
 
-String formatPrice(int price) {
-  final formatter = NumberFormat("#,###");
-  return formatter.format(price);
-}
 
 class ApprovingInfo extends StatefulWidget {
   final Orders order;
@@ -67,6 +64,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
 
   @override
   Widget build(BuildContext context) {
+    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -203,7 +201,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
                                     Text(
-                                      formatPrice(item.subTotal!) + "đ",
+                                      currencyFormatterUSD.format(item.subTotal!),
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -252,7 +250,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                   ),
                   Spacer(),
                   Text(
-                    formatPrice(totalAmount) + "đ",
+                    currencyFormatterUSD.format(totalAmount),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
@@ -308,11 +306,32 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
     final DatabaseReference databaseReference = FirebaseDatabase.instance.ref('orders');
     if(action == true){
       databaseReference.child(orderID).child('status').ref.set(true);
-      await
+
+      await Fluttertoast.showToast(
+          msg: "Successfully",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black45,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
       Navigator.push(context, MaterialPageRoute(builder: (context) => ApproveOrderPage()));
     }
     else{
       databaseReference.child(orderID).ref.remove();
+
+      await Fluttertoast.showToast(
+          msg: "Refused",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black45,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ApproveOrderPage()));
+
     }
 
   }
