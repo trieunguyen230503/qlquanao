@@ -100,9 +100,15 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
           String size = snap.child("SizeID").value.toString();
           String color = snap.child("ColorID").value.toString();
           String image = snap.child("url").value.toString();
-          listSizesId.add(size);
-          listClrsId.add(color);
-          _sliderImages.add(image);
+          if(!listSizesId.contains(size)){
+            listSizesId.add(size);
+          }
+          if(!listClrsId.contains(color)){
+            listClrsId.add(color);
+          }
+          if(!_sliderImages.contains(image)){
+            _sliderImages.add(image);
+          }
         }
       }
 

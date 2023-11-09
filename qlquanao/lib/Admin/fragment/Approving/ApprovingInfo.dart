@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:qlquanao/Admin/fragment/Approving/adminApproveOrder.dart';
 import 'package:qlquanao/model/Order.dart';
 import 'package:qlquanao/model/OrderItem.dart';
 
@@ -266,7 +267,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
               child: Row(
                 children: [
                   ElevatedButton(
-                    onPressed: () => updateStatus(false),
+                    onPressed: () => updateStatus(false, context),
                     style: ButtonStyle(
                       minimumSize: MaterialStateProperty.all(Size(120, 40)),
                       backgroundColor: MaterialStateProperty.all(Colors.white),
@@ -281,7 +282,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
                   ),
                   Spacer(),
                   ElevatedButton(
-                    onPressed: () => updateStatus(true),
+                    onPressed: () => updateStatus(true, context),
                     style: ButtonStyle(
                       minimumSize: MaterialStateProperty.all(Size(120, 40)),
                       backgroundColor: MaterialStateProperty.all(Colors.white),
@@ -303,10 +304,12 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
     );
   }
 
-  void updateStatus(bool action){
+  Future<void> updateStatus(bool action, BuildContext context) async {
     final DatabaseReference databaseReference = FirebaseDatabase.instance.ref('orders');
     if(action == true){
       databaseReference.child(orderID).child('status').ref.set(true);
+      await
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ApproveOrderPage()));
     }
     else{
       databaseReference.child(orderID).ref.remove();

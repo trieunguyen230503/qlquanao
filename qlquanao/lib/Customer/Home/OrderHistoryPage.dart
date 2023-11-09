@@ -1,9 +1,11 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:qlquanao/model/OrderItem.dart';
 
 import '../../model/Order.dart';
+import '../../provider/signin_provider.dart';
 
 String formatPrice(int price) {
   final formatter = NumberFormat("#,###");
@@ -19,12 +21,23 @@ class OrderHistoryPage extends StatefulWidget {
 
 class _OrderHistoryPageState extends State<OrderHistoryPage> {
   List<Orders> orderList = [];
+  String? uid;
+
 
   @override
   void initState() {
     super.initState();
+    getDataUser();
     getOrdersFromFirebase();
   }
+
+  void getDataUser() async {
+    // Lấy id user đang đăng nhập
+    final sp = context.read<SignInProvider>();
+    await sp.getDataFromSharedPreference();
+    uid = sp.uid;
+  }
+
 
   void getOrdersFromFirebase() async {
     final DatabaseReference databaseRef =
@@ -37,7 +50,9 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
 
       for (final child in event.snapshot.children) {
         Orders orders = Orders.fromSnapshot(child);
-        orderList.add(orders);
+        if(orders.userID == uid){
+          orderList.add(orders);
+        }
       }
       if (!mounted) {
         return;
