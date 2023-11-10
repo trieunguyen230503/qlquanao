@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:qlquanao/Admin/fragment/fragment/product/HomePageAdmin.dart';
 
 
 import 'ManageColor.dart';
@@ -28,46 +30,100 @@ class _AddColorState extends State<AddColor> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Thêm màu sắc"),
-        backgroundColor: Colors.indigo[900],
+        leading: IconButton(
+          color: Colors.white,
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Add Color',
+          style: GoogleFonts.getFont(
+            'Montserrat',
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+        backgroundColor: const Color(0xFF758467),
+
       ),
       body: Container(
-        child: Column(
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.height * 0.03, vertical:  MediaQuery.of(context).size.width * 0.05),
+          child: Column(
+            children: [
+              TextFormField(
                 controller: colorName,
+                obscureText: false,
                 decoration: InputDecoration(
-                  hintText: 'Tên màu sắc',
+                  labelText: 'Category',
+                  labelStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16
+                  ),
+                  hintText: 'Enter your category here...',
+                  hintStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Colors.grey,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Colors.grey,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 24, 0, 24),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            MaterialButton(
-              color: Colors.indigo[900],
-              onPressed: () {
-                ref.set({
-                  "ColorID": k,
-                  "Name": colorName.text,
-                }).asStream();
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (_) => ManageColor()));
-              },
-              child: Text(
-                "Save",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.03,
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.height * 0.075,),
+                margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.02,bottom: MediaQuery.of(context).size.height * 0.05,),
+                decoration: BoxDecoration(
+                    color: Color(0xFF758467),
+                    borderRadius: BorderRadius.circular(30.0)),
+                child: TextButton(
+                  //Tắt hiệu ứng splash khi click button
+                  style: TextButton.styleFrom(
+                    splashFactory: NoSplash.splashFactory,
+                  ),
+                  child: Text(
+                    'ADD',
+                    style: GoogleFonts.getFont(
+                      'Montserrat',
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  onPressed: () {
+                    ref.set({
+                      "ColorID": k,
+                      "Name": colorName.text,
+                    }).asStream();
+                    Navigator.pushReplacement(
+                        context, MaterialPageRoute(builder: (_) => HomePageAdmin()));
+                  },
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

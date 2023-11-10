@@ -2,9 +2,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../HomePageAdmin.dart';
 import 'AddProductSizeColor.dart';
 import 'UpdateProductSizeColor.dart';
 
@@ -31,6 +30,34 @@ class _ManageProductSizeColorState extends State<ManageProductSizeColor> {
     GetProductName();
   }
 
+  Future<void> doNothing(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirm Deletion"),
+          content: Text("Are you sure you want to delete this item?"),
+          actions: [
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Delete"),
+              onPressed: () {
+                // Perform the deletion logic here
+                print('hello');
+                Navigator.of(context).pop(); // Close the AlertDialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> GetProductName() async {
     DatabaseReference dbRef2 = FirebaseDatabase.instance
         .ref('Product/${widget.Product_Key}')
@@ -54,7 +81,7 @@ class _ManageProductSizeColorState extends State<ManageProductSizeColor> {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.indigo[900],
+        backgroundColor: Color(0xFF758467),
         onPressed: () {
           Navigator.push(
             context,
@@ -70,24 +97,25 @@ class _ManageProductSizeColorState extends State<ManageProductSizeColor> {
       ),
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            // Add your custom back button behavior here.
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => HomePageAdmin(),
-              ),
-            );
-          },
+          color: Colors.white,
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           productName,
-          style: TextStyle(
+          style: GoogleFonts.getFont(
+            'Montserrat',
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
             fontSize: 20,
           ),
         ),
-        backgroundColor: Colors.indigo[900],
+        backgroundColor: Color(0xFF758467),
+        automaticallyImplyLeading: false,
+        toolbarHeight: MediaQuery.of(context).size.height * 0.1,
+        centerTitle: true,
       ),
       body: FirebaseAnimatedList(
         query: db_Ref2,
@@ -96,22 +124,7 @@ class _ManageProductSizeColorState extends State<ManageProductSizeColor> {
           Map ProductSizeColor = snapshot.value as Map;
           ProductSizeColor['ProductSizeColorID'] = snapshot.key;
 
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => UpdateProductSizeColor(
-                    ProductSizeColor_Key:
-                        ProductSizeColor['ProductSizeColorID'],
-                    ColorUID: ProductSizeColor['ColorID'],
-                    SizeUID: ProductSizeColor['SizeID'],
-                    ProductUID: ProductSizeColor['ProductID'],
-                  ),
-                ),
-              );
-            },
-            child: Container(
+          return Container(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ListTile(
@@ -136,7 +149,7 @@ class _ManageProductSizeColorState extends State<ManageProductSizeColor> {
                             MaterialPageRoute(
                               builder: (_) => UpdateProductSizeColor(
                                 ProductSizeColor_Key:
-                                    ProductSizeColor['ProductSizeColorID'],
+                                ProductSizeColor['ProductSizeColorID'],
                                 ColorUID: ProductSizeColor['ColorID'],
                                 SizeUID: ProductSizeColor['SizeID'],
                                 ProductUID: ProductSizeColor['ProductID'],
@@ -171,7 +184,7 @@ class _ManageProductSizeColorState extends State<ManageProductSizeColor> {
                                       // Perform the deletion logic here
                                       db_Ref
                                           .child(ProductSizeColor[
-                                              'ProductSizeColorID'])
+                                      'ProductSizeColorID'])
                                           .remove();
                                       Navigator.of(context)
                                           .pop(); // Close the AlertDialog
@@ -185,20 +198,18 @@ class _ManageProductSizeColorState extends State<ManageProductSizeColor> {
                       ),
                     ],
                   ),
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(
-                      ProductSizeColor['url'],
-                    ),
+                  leading: ClipRRect(
+                    child: Image.network(ProductSizeColor['url']),
                   ),
                   title: FutureBuilder<String?>(
                     future: getNameById(ProductSizeColor['SizeID'], 'Size'),
                     builder: (context, sizeSnapshot) {
                       return FutureBuilder<String?>(
                         future:
-                            getNameById(ProductSizeColor['ColorID'], 'Color'),
+                        getNameById(ProductSizeColor['ColorID'], 'Color'),
                         builder: (context, colorSnapshot) {
                           if (sizeSnapshot.connectionState ==
-                                  ConnectionState.done &&
+                              ConnectionState.done &&
                               colorSnapshot.connectionState ==
                                   ConnectionState.done) {
                             final sizeName =
@@ -208,8 +219,8 @@ class _ManageProductSizeColorState extends State<ManageProductSizeColor> {
                             return Text(
                               'Size: $sizeName\nColor: $colorName',
                               style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
                               ),
                             );
                           } else {
@@ -221,7 +232,7 @@ class _ManageProductSizeColorState extends State<ManageProductSizeColor> {
                     },
                   ),
                   subtitle: Text(
-                    'Số lượng: ${ProductSizeColor['Quantity'].toString()}\nGiá: ${NumberFormat.currency(locale: 'vi_VN', symbol: 'VNĐ').format(ProductSizeColor['Price'])}',
+                    'Quantity: ${ProductSizeColor['Quantity'].toString()}\nPrice: \$ ${ProductSizeColor['Price'].toString()}',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
@@ -229,10 +240,10 @@ class _ManageProductSizeColorState extends State<ManageProductSizeColor> {
                   ),
                 ),
               ),
-            ),
           );
         },
       ),
     );
   }
 }
+

@@ -2,7 +2,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../productsizecolor/ManageProductSizeColor.dart';
 import 'AddProduct.dart';
 import 'UpdateProduct.dart';
@@ -17,11 +16,10 @@ class ManageProduct extends StatefulWidget {
 class _ManageProductState extends State<ManageProduct> {
   @override
   Widget build(BuildContext context) {
-    DatabaseReference db_Ref =
-    FirebaseDatabase.instance.ref().child('Product');
+    DatabaseReference db_Ref = FirebaseDatabase.instance.ref().child('Product');
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.indigo[900],
+        backgroundColor: Color(0xFF758467),
         onPressed: () {
           Navigator.push(
             context,
@@ -56,26 +54,25 @@ class _ManageProductState extends State<ManageProduct> {
                 padding: const EdgeInsets.all(8.0),
                 child: ListTile(
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                      color: Colors.white,
-                    ),
-                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Colors.grey, width: 2),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  tileColor: Colors.indigo[100],
+                  tileColor: Colors.white,
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
                         icon: Icon(
                           Icons.edit,
-                          color: Colors.blue[900],
+                          color: Colors.grey,
                         ),
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => UpdateProduct(
-                                Product_Key: Product['ProductID'], CategoryUID: Product['Category'],
+                                Product_Key: Product['ProductID'],
+                                CategoryUID: Product['Category'],
                               ),
                             ),
                           );
@@ -83,7 +80,7 @@ class _ManageProductState extends State<ManageProduct> {
                       ),
                       IconButton(
                         icon: Icon(
-                          Icons.delete,
+                          Icons.close,
                           color: Colors.red[900],
                         ),
                         onPressed: () {
@@ -105,8 +102,11 @@ class _ManageProductState extends State<ManageProduct> {
                                     child: Text("Delete"),
                                     onPressed: () {
                                       // Perform the deletion logic here
-                                      db_Ref.child(Product['ProductID']).remove();
-                                      Navigator.of(context).pop(); // Close the AlertDialog
+                                      db_Ref
+                                          .child(Product['ProductID'])
+                                          .remove();
+                                      Navigator.of(context)
+                                          .pop(); // Close the AlertDialog
                                     },
                                   ),
                                 ],
@@ -117,22 +117,20 @@ class _ManageProductState extends State<ManageProduct> {
                       ),
                     ],
                   ),
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(
-                      Product['url'],
-                    ),
+                  leading: ClipRRect(
+                    child: Image.network(Product['url']),
                   ),
                   title: Text(
                     Product['Name'],
                     style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   subtitle: Text(
-                      NumberFormat.currency(locale: 'vi_VN', symbol: 'VNĐ').format(Product['Price']),
+                    '\$ ${Product['PromoPrice'].toString()}',
                     style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

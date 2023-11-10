@@ -68,7 +68,7 @@ dependencies:
   badges: ^3.1.2
   curved_navigation_bar: ^1.0.3
   flutter_paypal_checkout: ^1.0.1
-
+  dropdown_button2: ^2.3.8
 
 dev_dependencies:
   flutter_test:

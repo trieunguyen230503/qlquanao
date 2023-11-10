@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:qlquanao/model/ColorProduct.dart';
 import 'package:qlquanao/model/SizeProduct.dart';
@@ -104,147 +106,299 @@ class _AddProductSizeColorState extends State<AddProductSizeColor> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          color: Colors.white,
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
-          'Add ProductSizeColor',
-          style: TextStyle(
-            fontSize: 30,
+          'Add Product Variant',
+          style: GoogleFonts.getFont(
+            'Montserrat',
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
           ),
         ),
-        backgroundColor: Colors.indigo[900],
+        backgroundColor: const Color(0xFF758467),
+
       ),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Center(
-              child: Container(
-                  height: 200,
-                  width: 200,
-                  child: file == null
-                      ? IconButton(
-                    icon: Icon(
-                      Icons.add_a_photo,
-                      size: 90,
-                      color: Color.fromARGB(255 , 0, 0, 0),
-                    ),
-                    onPressed: () {
-                      getImage();
-                    },
-                  )
-                      : MaterialButton(
-                    height: 100,
-                    child: Image.file(
-                      file!,
-                      fit: BoxFit.fill,
-                    ),
-                    onPressed: () {
-                      getImage();
-                    },
-                  )),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            DropdownButton<String>(
-              isExpanded: true,
-              value: selectedSizeName, // Bind to selectedProductName
-              items: _sizeList.map((size) {
-                return DropdownMenuItem<String>(
-                  value: size.sizeProductData!.name,
-                  child: Text(size.sizeProductData!.name!),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  // Find the selected product in productList
-                  final selectedSize = _sizeList.firstWhere(
-                          (size) =>
-                      size.sizeProductData!.name == value);
-
-                  // Update the selected product's UID and name
-                  selectedSizeUID =
-                      selectedSize.sizeProductData!.uid;
-                  selectedSizeName =
-                      selectedSize.sizeProductData!.name;
-                  print(selectedSizeUID);
-                });
-              },
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            DropdownButton<String>(
-              isExpanded: true,
-              value: selectedColorName, // Bind to selectedProductName
-              items: _colorList.map((color) {
-                return DropdownMenuItem<String>(
-                  value: color.colorProductData!.name,
-                  child: Text(color.colorProductData!.name!),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  // Find the selected product in productList
-                  final selectedColor = _colorList.firstWhere(
-                          (color) =>
-                      color.colorProductData!.name == value);
-
-                  // Update the selected product's UID and name
-                  selectedColorUID =
-                      selectedColor.colorProductData!.uid;
-                  selectedColorName =
-                      selectedColor.colorProductData!.name;
-                });
-              },
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            TextFormField(
-              controller: Price,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: 'Price',
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.height * 0.03, vertical:  MediaQuery.of(context).size.width * 0.05),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Center(
+                child: Container(
+                    height: 200,
+                    width: 200,
+                    child: file == null
+                        ? IconButton(
+                      icon: Icon(
+                        Icons.add_a_photo,
+                        size: 90,
+                        color: Color.fromARGB(255 , 0, 0, 0),
+                      ),
+                      onPressed: () {
+                        getImage();
+                      },
+                    )
+                        : MaterialButton(
+                      height: 100,
+                      child: Image.file(
+                        file!,
+                        fit: BoxFit.fill,
+                      ),
+                      onPressed: () {
+                        getImage();
+                      },
+                    )),
               ),
-              maxLength: 10,
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            TextFormField(
-              controller: Quantity,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: 'Quantity',
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.03,
               ),
-              maxLength: 10,
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            MaterialButton(
-              height: 40,
-              onPressed: () {
-                // getImage();
+              Container(
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton2<String>(
+                    isExpanded: true,
+                    items: _sizeList
+                        .map((size) => DropdownMenuItem<String>(
+                      value: size.sizeProductData!.name,
+                      child: Text(
+                        size.sizeProductData!.name!,
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ))
+                        .toList(),
+                    value: selectedSizeName,
+                    buttonStyleData: ButtonStyleData(
+                      padding: EdgeInsets.only(
+                          left: MediaQuery.of(context).size.width * 0.02),
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: Colors.grey,
+                              width: 2
+                          ),
+                          borderRadius: BorderRadius.circular(8)
+                      ),
+                    ),
+                    menuItemStyleData: MenuItemStyleData(
+                      height: MediaQuery.of(context).size.height * 0.075,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        // Find the selected product in productList
+                        final selectedSize = _sizeList.firstWhere(
+                                (size) =>
+                            size.sizeProductData!.name == value);
 
-                if (file != null) {
-                  uploadFile();
-                }
-              },
-              child: Text(
-                "Add",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 255, 255, 255),
-                  fontSize: 20,
+                        // Update the selected product's UID and name
+                        selectedSizeUID =
+                            selectedSize.sizeProductData!.uid;
+                        selectedSizeName =
+                            selectedSize.sizeProductData!.name;
+                      });
+                    },
+                  ),
                 ),
               ),
-              color: Colors.indigo[900],
-            ),
-          ],
+
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.03,
+              ),
+              Container(
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton2<String>(
+                    isExpanded: true,
+                    items: _colorList
+                        .map((color) => DropdownMenuItem<String>(
+                      value: color.colorProductData!.name,
+                      child: Text(
+                        color.colorProductData!.name!,
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ))
+                        .toList(),
+                    value: selectedColorName,
+                    buttonStyleData: ButtonStyleData(
+                      padding: EdgeInsets.only(
+                          left: MediaQuery.of(context).size.width * 0.02),
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: Colors.grey,
+                              width: 2
+                          ),
+                          borderRadius: BorderRadius.circular(8)
+                      ),
+                    ),
+                    menuItemStyleData: MenuItemStyleData(
+                      height: MediaQuery.of(context).size.height * 0.075,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        // Find the selected product in productList
+                        final selectedColor = _colorList.firstWhere(
+                                (color) =>
+                            color.colorProductData!.name == value);
+
+                        // Update the selected product's UID and name
+                        selectedColorUID =
+                            selectedColor.colorProductData!.uid;
+                        selectedColorName =
+                            selectedColor.colorProductData!.name;
+                      });
+                    },
+                  ),
+                ),
+              ),
+
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.03,
+              ),
+              TextFormField(
+                controller: Price,
+                keyboardType: TextInputType.number,
+                obscureText: false,
+                decoration: InputDecoration(
+                  labelText: 'Price',
+                  labelStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16
+                  ),
+                  hintText: 'Enter your price here...',
+                  hintStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Colors.grey,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Colors.grey,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 24, 0, 24),
+                ),
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.03,
+              ),
+              TextFormField(
+                controller: Quantity,
+                keyboardType: TextInputType.number,
+                obscureText: false,
+                decoration: InputDecoration(
+                  labelText: 'Quantity',
+                  labelStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16
+                  ),
+                  hintText: 'Enter your quantity here...',
+                  hintStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Colors.grey,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Colors.grey,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 24, 0, 24),
+                ),
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.03,
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.height * 0.075,),
+                margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.02,bottom: MediaQuery.of(context).size.height * 0.05,),
+                decoration: BoxDecoration(
+                    color: Color(0xFF758467),
+                    borderRadius: BorderRadius.circular(30.0)),
+                child: TextButton(
+                  //Tắt hiệu ứng splash khi click button
+                  style: TextButton.styleFrom(
+                    splashFactory: NoSplash.splashFactory,
+                  ),
+                  child: Text(
+                    'ADD',
+                    style: GoogleFonts.getFont(
+                      'Montserrat',
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  onPressed: () {
+                    if (file != null) {
+                      uploadFile();
+                    }
+                    else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Row(
+                            children: [
+                              Icon(Icons.info, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                'Please add a photo',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          backgroundColor: Color(0xFF758467),
+                          duration: const Duration(seconds: 3),
+                          action: SnackBarAction(
+                            label: 'Close',
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            },
+                            textColor: Colors.white,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

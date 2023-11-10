@@ -2,7 +2,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'AddCategory.dart';
+import 'package:qlquanao/Admin/fragment/fragment/product/category/AddCategory.dart';
+
 
 class ManageCategory extends StatefulWidget {
   const ManageCategory({super.key});
@@ -12,24 +13,6 @@ class ManageCategory extends StatefulWidget {
 }
 
 class _ManageCategoryState extends State<ManageCategory> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Colors.greenAccent[700],
-      ),
-      home: Home(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class Home extends StatefulWidget {
-  @override
-  _HomeState createState() => _HomeState();
-}
-
-class _HomeState extends State<Home> {
   final fb = FirebaseDatabase.instance;
   TextEditingController cateName = TextEditingController();
 
@@ -42,7 +25,7 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.indigo[900],
+        backgroundColor: Colors.grey,
         onPressed: () {
           Navigator.push(
             context,
@@ -83,11 +66,49 @@ class _HomeState extends State<Home> {
                       controller: cateName,
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
-                        hintText: 'Tên loại',
+                        border: InputBorder.none,
+                        hintText: 'Category Name',
                       ),
                     ),
                   ),
                   actions: <Widget>[
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete,
+                        color: Color.fromARGB(255, 255, 0, 0),
+                      ),
+
+
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Confirm Deletion"),
+                                content: Text("Are you sure you want "
+                                    "to delete this item?"),
+                                actions: [
+                                  TextButton(
+                                    child: Text("Cancel"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: Text("Delete"),
+                                    onPressed: () {
+                                      // Perform the deletion logic here
+                                      ref.child(snapshot.key!).remove();
+                                      Navigator.of(context)
+                                          .pop(); // Close the AlertDialog
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                    ),
                     MaterialButton(
                       onPressed: () {
                         Navigator.of(ctx).pop();
@@ -105,7 +126,7 @@ class _HomeState extends State<Home> {
                         await upd();
                         Navigator.of(ctx).pop();
                       },
-                      color: Color.fromARGB(255, 0, 22, 145),
+                      color: Color(0xFF758467),
                       child: Text(
                         "Update",
                         style: TextStyle(
@@ -123,26 +144,18 @@ class _HomeState extends State<Home> {
                 child: ListTile(
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
-                      color: Colors.white,
+                      color: Color(0xFF758467),
                     ),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  tileColor: Colors.indigo[100],
-                  trailing: IconButton(
-                    icon: Icon(
-                      Icons.delete,
-                      color: Color.fromARGB(255, 255, 0, 0),
-                    ),
-                    onPressed: () {
-                      ref.child(snapshot.key!).remove();
-                    },
-                  ),
+                  tileColor: Color(0xFF758467),
                   title: Text(
                     l[1],
                     // 'dd',
                     style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -164,3 +177,4 @@ class _HomeState extends State<Home> {
     cateName.clear();
   }
 }
+
