@@ -51,87 +51,141 @@ class _ManageProductState extends State<ManageProduct> {
             },
             child: Container(
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.grey, width: 2),
-                    borderRadius: BorderRadius.circular(8),
+                padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width * 0.05,
+                    vertical: MediaQuery.of(context).size.height * 0.02),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey, width: 2),
+                    borderRadius: BorderRadius.circular(8.0),
+
                   ),
-                  tileColor: Colors.white,
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.edit,
-                          color: Colors.grey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          // Set the desired border radius
+                          child: Image.network(
+                            Product['url'],
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit
+                                .cover,
+                          ),
                         ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => UpdateProduct(
-                                Product_Key: Product['ProductID'],
-                                CategoryUID: Product['Category'],
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                Product['Name'],
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.close,
-                          color: Colors.red[900],
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.02,
+                              ),
+                              Text(
+                                '\$ ${Product['PromoPrice'].toString()}',
+                                style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF758467)),
+                              ),
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.01,
+                              ),
+                              Row(children: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => UpdateProduct(
+                                          Product_Key: Product['ProductID'],
+                                          CategoryUID: Product['Category'],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  style: TextButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      side: BorderSide(color: Colors.grey),
+                                    ),
+                                    backgroundColor: Colors.grey,
+                                  ),
+                                  child: Text(
+                                    ' Edit ',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 20,),
+                                TextButton(
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text("Confirm Deletion"),
+                                          content: Text("Are you sure you want "
+                                              "to delete this item?"),
+                                          actions: [
+                                            TextButton(
+                                              child: Text("Cancel"),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                            TextButton(
+                                              child: Text("Delete"),
+                                              onPressed: () {
+                                                // Perform the deletion logic here
+                                                db_Ref
+                                                    .child(Product['ProductID'])
+                                                    .remove();
+                                                Navigator.of(context)
+                                                    .pop(); // Close the AlertDialog
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  style: TextButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      side: BorderSide(color: Colors.grey),
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                  child: Text(
+                                    'Delete',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ],),
+                            ],
+                          ),
                         ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text("Confirm Deletion"),
-                                content: Text("Are you sure you want "
-                                    "to delete this item?"),
-                                actions: [
-                                  TextButton(
-                                    child: Text("Cancel"),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  TextButton(
-                                    child: Text("Delete"),
-                                    onPressed: () {
-                                      // Perform the deletion logic here
-                                      db_Ref
-                                          .child(Product['ProductID'])
-                                          .remove();
-                                      Navigator.of(context)
-                                          .pop(); // Close the AlertDialog
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  leading: ClipRRect(
-                    child: Image.network(Product['url']),
-                  ),
-                  title: Text(
-                    Product['Name'],
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  subtitle: Text(
-                    '\$ ${Product['PromoPrice'].toString()}',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      ],
                     ),
                   ),
                 ),
