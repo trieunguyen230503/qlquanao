@@ -1,4 +1,6 @@
+import 'package:bcrypt/bcrypt.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bcrypt/flutter_bcrypt.dart';
 import 'package:qlquanao/Admin/fragment/MainPageAdmin.dart';
 import 'package:qlquanao/Staff/fragment/MainPageStaff.dart';
 import 'package:qlquanao/provider/internet_provider.dart';
@@ -34,21 +36,25 @@ class _LoginState extends State<Login> {
   late SharedPreferences logindata;
   final _scaffoldKey = GlobalKey<FormState>();
   final RoundedLoadingButtonController googleController =
-  RoundedLoadingButtonController();
+      RoundedLoadingButtonController();
   final RoundedLoadingButtonController loginController =
-  RoundedLoadingButtonController();
+      RoundedLoadingButtonController();
   final RoundedLoadingButtonController facebookController =
-  RoundedLoadingButtonController();
+      RoundedLoadingButtonController();
+
+  String pss = "test";
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
     check();
   }
 
   void check() async {
     logindata = await SharedPreferences.getInstance();
+
   }
 
   @override
@@ -227,8 +233,10 @@ class _LoginState extends State<Login> {
                         )),
                     InkWell(
                       onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => Register()));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Register()));
                       },
                       child: Container(
                         margin: EdgeInsets.fromLTRB(0, 15, 0, 15),
@@ -255,8 +263,7 @@ class _LoginState extends State<Login> {
               ),
             ),
           ),
-        )
-    );
+        ));
   }
 
   Future login(BuildContext context, String mobile) async {
@@ -273,9 +280,9 @@ class _LoginState extends State<Login> {
           await sp
               .saveDataToSharedPreferences()
               .then((value) => sp.setSignIn().then((value) => {
-            loginController.success(),
-            handleAfterSingIn(),
-          }));
+                    loginController.success(),
+                    handleAfterSingIn(),
+                  }));
         } else {
           openSnackbar(context, "Your information is not correct", Colors.red);
           loginController.reset();
@@ -299,35 +306,35 @@ class _LoginState extends State<Login> {
       googleController.reset();
     } else {
       await sp.signInWithGoogle().then((value) => {
-        if (sp.hasError == true)
-          {
-            openSnackbar(context, sp.errorCode, Colors.red),
-            googleController.reset()
-          }
-        else
-          {
-            //checkking whether user exist or not
-            sp.checkUserExists().then((value) async {
-              if (value == true) {
-                //user exists
-                await sp.getUserDataFromFirestore(sp.uid).then((value) => sp
-                    .saveDataToSharedPreferences()
-                    .then((value) => sp.setSignIn().then((value) => {
-                  googleController.success(),
-                  handleAfterSingIn(),
-                })));
-              } else {
-                //user doesn't exist
-                sp.saveDateToFirestore().then((value) => sp
-                    .saveDataToSharedPreferences()
-                    .then((value) => sp.setSignIn().then((value) {
-                  googleController.success();
-                  handleAfterSingIn();
-                })));
+            if (sp.hasError == true)
+              {
+                openSnackbar(context, sp.errorCode, Colors.red),
+                googleController.reset()
               }
-            })
-          }
-      });
+            else
+              {
+                //checkking whether user exist or not
+                sp.checkUserExists().then((value) async {
+                  if (value == true) {
+                    //user exists
+                    await sp.getUserDataFromFirestore(sp.uid).then((value) => sp
+                        .saveDataToSharedPreferences()
+                        .then((value) => sp.setSignIn().then((value) => {
+                              googleController.success(),
+                              handleAfterSingIn(),
+                            })));
+                  } else {
+                    //user doesn't exist
+                    sp.saveDateToFirestore().then((value) => sp
+                        .saveDataToSharedPreferences()
+                        .then((value) => sp.setSignIn().then((value) {
+                              googleController.success();
+                              handleAfterSingIn();
+                            })));
+                  }
+                })
+              }
+          });
     }
   }
 
@@ -341,35 +348,35 @@ class _LoginState extends State<Login> {
       facebookController.reset();
     } else {
       await sp.signInWithFacebook().then((value) => {
-        if (sp.hasError == true)
-          {
-            openSnackbar(context, sp.errorCode, Colors.red),
-            facebookController.reset()
-          }
-        else
-          {
-            //checkking whether user exist or not
-            sp.checkUserExists().then((value) async {
-              if (value == true) {
-                //user exists
-                await sp.getUserDataFromFirestore(sp.uid).then((value) => sp
-                    .saveDataToSharedPreferences()
-                    .then((value) => sp.setSignIn().then((value) => {
-                  facebookController.success(),
-                  handleAfterSingIn(),
-                })));
-              } else {
-                //user doesn't exist
-                sp.saveDateToFirestore().then((value) => sp
-                    .saveDataToSharedPreferences()
-                    .then((value) => sp.setSignIn().then((value) {
-                  facebookController.success();
-                  handleAfterSingIn();
-                })));
+            if (sp.hasError == true)
+              {
+                openSnackbar(context, sp.errorCode, Colors.red),
+                facebookController.reset()
               }
-            })
-          }
-      });
+            else
+              {
+                //checkking whether user exist or not
+                sp.checkUserExists().then((value) async {
+                  if (value == true) {
+                    //user exists
+                    await sp.getUserDataFromFirestore(sp.uid).then((value) => sp
+                        .saveDataToSharedPreferences()
+                        .then((value) => sp.setSignIn().then((value) => {
+                              facebookController.success(),
+                              handleAfterSingIn(),
+                            })));
+                  } else {
+                    //user doesn't exist
+                    sp.saveDateToFirestore().then((value) => sp
+                        .saveDataToSharedPreferences()
+                        .then((value) => sp.setSignIn().then((value) {
+                              facebookController.success();
+                              handleAfterSingIn();
+                            })));
+                  }
+                })
+              }
+          });
     }
   }
 

@@ -86,7 +86,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
 
   void getProductSizeColorFromFirebase() async {
     final DatabaseReference databaseRef =
-        FirebaseDatabase.instance.ref("ProductSizeColor");
+    FirebaseDatabase.instance.ref("ProductSizeColor");
 
     await databaseRef.onValue.listen((event) async {
       if (listProductSizeColor.isNotEmpty) {
@@ -173,19 +173,19 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
     NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     final List<Widget> _slider = _sliderImages
         .map((image) => Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.03),
-              child: Container(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    image,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ))
+      padding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.of(context).size.width * 0.03),
+      child: Container(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: Image.network(
+            image,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    ))
         .toList();
 
     return Scaffold(
@@ -321,14 +321,14 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                              BorderRadius.circular(8),
                                               boxShadow: [
                                                 BoxShadow(
                                                   color:
-                                                      selectedColor == clrs[i]
-                                                          ? Colors.blueAccent
-                                                          : Colors.grey
-                                                              .withOpacity(0.5),
+                                                  selectedColor == clrs[i]
+                                                      ? Colors.blueAccent
+                                                      : Colors.grey
+                                                      .withOpacity(0.5),
                                                   spreadRadius: 2,
                                                   blurRadius: 8,
                                                 ),
@@ -388,14 +388,14 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius:
-                                                  BorderRadius.circular(30),
+                                              BorderRadius.circular(30),
                                               boxShadow: [
                                                 BoxShadow(
                                                   color:
-                                                      selectedSize == sizes[i]
-                                                          ? Colors.blueAccent
-                                                          : Colors.grey
-                                                              .withOpacity(0.5),
+                                                  selectedSize == sizes[i]
+                                                      ? Colors.blueAccent
+                                                      : Colors.grey
+                                                      .withOpacity(0.5),
                                                   spreadRadius: 2,
                                                   blurRadius: 8,
                                                 ),
@@ -447,7 +447,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                         ),
                         Padding(
                           padding:
-                              EdgeInsets.only(top: 14, right: 10),
+                          EdgeInsets.only(top: 14, right: 10),
                           child: Row(
                             children: [
                               Spacer(),
@@ -584,7 +584,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
               ),
               ElevatedButton.icon(
                 onPressed: quantityOfStock != 0
-                  ? () => addToCart(context) : null,
+                    ? () => addToCart(context) : null,
                 icon: Icon(
                   CupertinoIcons.cart_badge_plus,
                   color: Colors.white,

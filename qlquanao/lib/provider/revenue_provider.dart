@@ -123,7 +123,7 @@ class RevenueProvider extends ChangeNotifier {
               data?["UserID"],
               data?["orderDate"],
               data?["totalamount"],
-              "Đã duyệt",
+              "Confirm",
               data?['userName']));
         } else {
           _order?.add(Orders(data?["oderID"], data?["UserID"],
@@ -164,7 +164,7 @@ class RevenueProvider extends ChangeNotifier {
     if (_orderItemList == null) {
       _orderItemList = <OrderItem>[];
       final DatabaseReference myOrderItem =
-          FirebaseDatabase.instance.ref("orderItem");
+      FirebaseDatabase.instance.ref("orderItem");
       final DatabaseReference myOrder = FirebaseDatabase.instance.ref("orders");
 
       await myOrder.onValue.listen((event) async {
@@ -175,7 +175,7 @@ class RevenueProvider extends ChangeNotifier {
             await myOrderItem.onValue.listen((event) async {
               for (final child in event.snapshot.children) {
                 final Map<dynamic, dynamic>? dataOrderItem =
-                    child.value as Map?;
+                child.value as Map?;
                 if (dataOrderItem != null &&
                     dataOrder["orderID"] == dataOrderItem["orderID"]) {
                   _orderItemList?.add(OrderItem(
@@ -239,7 +239,7 @@ class RevenueProvider extends ChangeNotifier {
         final Map<dynamic, dynamic>? data = child.value as Map?;
         for (int j = 0; j < _orderItemList!.length; j++) {
           List<String> date =
-              _orderItemList![j].orderDate.toString().split(" ");
+          _orderItemList![j].orderDate.toString().split(" ");
           DateTime d = DateFormat("yyyy-MM-dd").parse(date[0]);
           if ((d.isAfter(ds) || d.isAtSameMomentAs(ds)) &&
               (d.isBefore(de) || d.isAtSameMomentAs(de))) {
@@ -271,7 +271,7 @@ class RevenueProvider extends ChangeNotifier {
     if (_productSizeColorlist == null) {
       _productSizeColorlist = await <ProductSizeColor>[];
       final DatabaseReference myOrder =
-          await FirebaseDatabase.instance.ref("ProductSizeColor");
+      await FirebaseDatabase.instance.ref("ProductSizeColor");
       print(productID);
       await myOrder.onValue.listen((event) async {
         for (final child in event.snapshot.children) {
@@ -326,7 +326,7 @@ class RevenueProvider extends ChangeNotifier {
             await productSizeColor.onValue.listen((event) async {
               for (final child2 in event.snapshot.children) {
                 final Map<dynamic, dynamic>? dataProductSizeColor =
-                    child2.value as Map?;
+                child2.value as Map?;
                 // print(data?['productID']);
                 // print(dataProductSizeColor?['ProductID']);
                 // print(dataProductSizeColor?['SizeID']);
@@ -335,7 +335,7 @@ class RevenueProvider extends ChangeNotifier {
                 // print(dataProductSizeColor?['ColorID']);
 
                 String getSize =
-                    await getNameById(dataProductSizeColor?['SizeID'], 'Size');
+                await getNameById(dataProductSizeColor?['SizeID'], 'Size');
                 String getColor = await getNameById(
                     dataProductSizeColor?['ColorID'], 'Color');
                 if (k < productSizeColorlist!.length &&
@@ -351,8 +351,8 @@ class RevenueProvider extends ChangeNotifier {
                   int subtotal = await data?['subTotal'] ?? 0;
                   int quantity = await data?['quantity'] ?? 0;
                   _productSizeColorlist?[k].price =
-                      await ((_productSizeColorlist?[k].price)! +
-                          subtotal * quantity)!;
+                  await ((_productSizeColorlist?[k].price)! +
+                      subtotal * quantity)!;
                   print(_productSizeColorlist?[k].price);
                 }
                 await k++;
@@ -364,8 +364,8 @@ class RevenueProvider extends ChangeNotifier {
     });
   }
 
-  Future getProductSizeColorRevenueByTime(
-      String DateStart, String DateEnd, String? pid) async {
+  Future getProductSizeColorRevenueByTime(String DateStart, String DateEnd,
+      String? pid) async {
     DateTime ds = DateFormat("dd/MM/yyyy").parse(DateStart);
     DateTime de = DateFormat("dd/MM/yyyy").parse(DateEnd);
     // for (int i = 0; i < _productSizeColorlist!.length; i++) {
@@ -401,7 +401,7 @@ class RevenueProvider extends ChangeNotifier {
               await productSizeColor.onValue.listen((event) async {
                 for (final child2 in event.snapshot.children) {
                   final Map<dynamic, dynamic>? dataProductSizeColor =
-                      child2.value as Map?;
+                  child2.value as Map?;
                   // print(data?['productID']);
                   // print(dataProductSizeColor?['ProductID']);
                   // print(dataProductSizeColor?['SizeID']);
@@ -427,8 +427,8 @@ class RevenueProvider extends ChangeNotifier {
                     int subtotal = await data?['subTotal'] ?? 0;
                     int quantity = await data?['quantity'] ?? 0;
                     _productSizeColorlist?[k].price =
-                        await ((_productSizeColorlist?[k].price)! +
-                            subtotal * quantity)!;
+                    await ((_productSizeColorlist?[k].price)! +
+                        subtotal * quantity)!;
                     print(_productSizeColorlist?[k].price);
                   }
                   await k++;
