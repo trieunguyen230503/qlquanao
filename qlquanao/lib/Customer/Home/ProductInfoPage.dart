@@ -307,7 +307,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                           setState(() {
                                             selectedColor = clrs[i];
                                             onColorSelected(listClrsId[i]);
-                                            quantityOfStock = sizeQuantityMap[IDselectedSize] ?? 0;
+                                            quantityOfStock = sizeQuantityMap[IDselectedSize] ?? 0 ;
                                             goToPage(i);
                                           });
                                         },
