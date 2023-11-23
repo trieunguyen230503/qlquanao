@@ -157,7 +157,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
           if (sizes.isNotEmpty && clrs.isNotEmpty) {
             selectedSize = sizes[0];
             selectedColor = clrs[0];
-            IDselectedSize = sizes[0];
+            IDselectedSize = listSizesId[0];
             onColorSelected(listClrsId[0]);
             quantityOfStock = sizeQuantityMap[listSizesId[0]] ?? 0;
           }
@@ -560,7 +560,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
       bottomNavigationBar: BottomAppBar(
         child: Container(
           height: 70,
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.only(left: 30, right: 20),
           decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
@@ -578,7 +578,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
               Text(
                 currencyFormatterUSD.format(price),
                 style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 26,
                     fontWeight: FontWeight.bold,
                     color: Colors.black),
               ),

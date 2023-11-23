@@ -66,4 +66,15 @@ class ProductSizeColorData {
     quantity = json["Quantity"];
     url = json["url"];
   }
+
+  toJson(){
+    return {
+      'ProductSizeColorID' : uid,
+      'ProductID' : productID,
+      'SizeID' : sizeID,
+      'ColorID' : colorID,
+      'Price' : price,
+      'Quantity' : quantity,
+      'url' : url};
+  }
 }

@@ -6,6 +6,8 @@ import 'package:qlquanao/Admin/fragment/Approving/adminApproveOrder.dart';
 import 'package:qlquanao/model/Order.dart';
 import 'package:qlquanao/model/OrderItem.dart';
 
+import '../../../model/ProductSizeColor.dart';
+
 
 class ApprovingInfo extends StatefulWidget {
   final Orders order;
@@ -25,11 +27,15 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
   String orderID = "";
   int totalAmount = 0;
 
+  List<ProductSizeColorData> listProductSizeColor = [];
+
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getOrderItemFromFirebase();
+    getProductSizeColorFromFirebase();
   }
 
   void getOrderItemFromFirebase() async {
@@ -59,6 +65,27 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
       }
     }, onError: (error) {
       // Error.
+    });
+  }
+
+  void getProductSizeColorFromFirebase() async {
+    final DatabaseReference databaseRef =
+    FirebaseDatabase.instance.ref("ProductSizeColor");
+
+    databaseRef.onValue.listen((event) {
+      if (listProductSizeColor.isNotEmpty) {
+        listProductSizeColor.clear();
+      }
+      if(!mounted)
+        return;
+
+      for (final snap in event.snapshot.children) {
+        ProductSizeColorData p = ProductSizeColorData.fromSnapshot(snap);
+        listProductSizeColor.add(p);
+      }
+      onError:(error) {
+        // Error.
+      };
     });
   }
 
@@ -327,7 +354,78 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
           backgroundColor: Colors.black45,
           textColor: Colors.white,
           fontSize: 16.0);
+      for(var item in listOrderItem){
+        await _updateQuantity(item);
+      }
       Navigator.push(context, MaterialPageRoute(builder: (context) => ApproveOrderPage()));
+    }
+  }
+
+  Future<void> _updateQuantity(OrderItem product) async {
+    final DatabaseReference databaseRef =
+    FirebaseDatabase.instance.ref("ProductSizeColor");
+
+    String? idColor = await getColorID(product.productColor!);
+    String? idSize = await getSizeID(product.productSize!);
+
+    for(var item in listProductSizeColor){
+      String productID = item.productID.toString();
+      if (productID == product.productID) {
+        String size = item.sizeID.toString();
+        String color = item.colorID.toString();
+        String id  = item.uid.toString();
+
+        // print("size: " + size + "   " + "color: " + color);
+        // print("idSize: " + idSize.toString() + "   " + "idColor: " + idColor.toString());
+
+        if(size == idSize && color == idColor){
+          print("id: " + id.toString());
+          ProductSizeColorData p = ProductSizeColorData(
+            uid: item.uid,
+            productID: item.productID,
+            sizeID: item.sizeID,
+            colorID: item.colorID,
+            price: item.price,
+            quantity: item.quantity! + product.quantity!,
+            url: item.url,
+          );
+          databaseRef.child(id).set(p.toJson());
+        }
+      }
+    }
+  }
+
+  Future<String?> getColorID(String colorName) async {
+    String? color;
+    try {
+      final recentPostsRef = await FirebaseDatabase.instance.ref('Color').orderByChild('Name').equalTo(colorName).once();
+      DataSnapshot snapshot = recentPostsRef.snapshot;
+      if (snapshot.value != null) {
+        color = snapshot.children.first.key.toString();
+      } else {
+        print("No color data found");
+      }
+      return color;
+    } catch (error) {
+      print("Error: $error");
+      return color;
+    }
+  }
+
+  Future<String?> getSizeID(String sizeName) async {
+    String? size;
+    try {
+      final recentPostsRef = await FirebaseDatabase.instance.ref('Size').orderByChild('Name').equalTo(sizeName).once();
+      DataSnapshot snapshot = recentPostsRef.snapshot;
+      if (snapshot.value != null) {
+        size = snapshot.children.first.key.toString();
+      } else {
+        print("No color data found");
+      }
+      return size;
+    } catch (error) {
+      print("Error: $error");
+      return size;
     }
   }
 }

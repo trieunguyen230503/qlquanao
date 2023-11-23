@@ -423,9 +423,9 @@ class _HomePage2State extends State<HomePage2> {
                                       child: Text(
                                         productItem.name!,
                                         style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.black,
+                                          color: Colors.black87,
                                         ),
                                       ),
                                     ),
@@ -438,7 +438,7 @@ class _HomePage2State extends State<HomePage2> {
                                           decoration:
                                               TextDecoration.lineThrough,
                                           fontStyle: FontStyle.italic,
-                                          fontSize: 14,
+                                          fontSize: 15,
                                           color: Colors.grey,
                                         ),
                                       ),
@@ -451,7 +451,7 @@ class _HomePage2State extends State<HomePage2> {
                                             .format(productItem.promoPrice!),
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 16,
+                                          fontSize: 20,
                                           color: Colors.black,
                                         ),
                                       ),

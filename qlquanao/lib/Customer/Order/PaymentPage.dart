@@ -11,6 +11,7 @@ import 'package:qlquanao/Customer/mainpage.dart';
 import 'package:qlquanao/model/Cart.dart';
 import 'package:qlquanao/model/Order.dart';
 import 'package:qlquanao/model/OrderItem.dart';
+import 'package:qlquanao/model/ProductSizeColor.dart';
 
 import '../../provider/signin_provider.dart';
 
@@ -42,7 +43,7 @@ class _PaymentPageState extends State<PaymentPage> {
   String? addressDefault;
 
   List<Map<String, dynamic>> listProductForMap = [];
-  List<String> listIDProductSizeColor = [];
+  List<ProductSizeColorData> listProductSizeColor = [];
 
   int? groupValue = 1;
 
@@ -51,6 +52,7 @@ class _PaymentPageState extends State<PaymentPage> {
     // TODO: implement initState
     super.initState();
     totalAmount = 0;
+    getProductSizeColorFromFirebase();
     for (var p in listProduct) {
       totalAmount += p.price * p.quantity;
     }
@@ -68,6 +70,27 @@ class _PaymentPageState extends State<PaymentPage> {
     addressDefault = (sp.address == null || sp.address!.trim().length == 0)
         ? '<null>'
         : sp.address!;
+  }
+
+  void getProductSizeColorFromFirebase() async {
+    final DatabaseReference databaseRef =
+    FirebaseDatabase.instance.ref("ProductSizeColor");
+
+    databaseRef.onValue.listen((event) {
+      if (listProductSizeColor.isNotEmpty) {
+        listProductSizeColor.clear();
+      }
+      if(!mounted)
+        return;
+
+      for (final snap in event.snapshot.children) {
+        ProductSizeColorData p = ProductSizeColorData.fromSnapshot(snap);
+        listProductSizeColor.add(p);
+      }
+      onError:(error) {
+        // Error.
+      };
+    });
   }
 
   List<Map<String, dynamic>> toMapList(List<Cart> c) {
@@ -518,8 +541,8 @@ class _PaymentPageState extends State<PaymentPage> {
                 padding: const EdgeInsets.only(top: 20, bottom: 20),
                 child: TextButton(
                   onPressed: () {
-                    // Handle button press
-                    Navigator.pop(context);
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => MainPage()));
                   },
                   child: Text(
                     'Return to home page',
@@ -558,7 +581,7 @@ class _PaymentPageState extends State<PaymentPage> {
     //push orderItem lên firebase
     final snapshotOrderItem = ref.child('orderItem');
     for (var item in listProduct) {
-      // _updateQuantity(item);
+      await _updateQuantity(item);
       String? orderItemID = snapshotOrders.push().key;
       OrderItem o = OrderItem.all(
           orderItemID,
@@ -573,6 +596,13 @@ class _PaymentPageState extends State<PaymentPage> {
           item.price);
       snapshotOrderItem.child(orderItemID!).set(o.toJson());
     }
+
+    //Xóa sp khỏi giỏ hàng
+    final DatabaseReference databaseRef =
+    FirebaseDatabase.instance.ref("cart");
+    for (var c in listProduct) {
+      databaseRef.child(c.idCart).remove();
+    }
   }
 
   Future<void> _updateQuantity(Cart productCart) async {
@@ -583,38 +613,43 @@ class _PaymentPageState extends State<PaymentPage> {
     String? idColor = await getColorID(productCart.color);
     String? idSize = await getSizeID(productCart.size);
 
+    for(var item in listProductSizeColor){
+      String productID = item.productID.toString();
+      if (productID == productCart.productID) {
+        String size = item.sizeID.toString();
+        String color = item.colorID.toString();
+        String id  = item.uid.toString();
 
-    databaseRef.onValue.listen((event) async {
-      for (final snap in event.snapshot.children) {
-        String productID = snap.child("ProductID").value.toString();
+        // print("size: " + size + "   " + "color: " + color);
+        // print("idSize: " + idSize.toString() + "   " + "idColor: " + idColor.toString());
 
-
-        if (productID == productCart.productID) {
-          String size = snap.child("SizeID").value.toString();
-          String color = snap.child("SizeID").value.toString();
-          String id  = snap.child("ProductSizeColorID").value.toString();
-
-          print("size: " + size + "   " + "idSize: " + idSize.toString());
-          print("color: " + color + "   " + "idColor: " + idColor.toString());
-
-          if(size == idSize && color == idColor){
-            print("id sizeColor: " + id.toString());
-          }
+        if(size == idSize && color == idColor){
+          print("id: " + id.toString());
+          ProductSizeColorData p = ProductSizeColorData(
+            uid: item.uid,
+            productID: item.productID,
+            sizeID: item.sizeID,
+            colorID: item.colorID,
+            price: item.price,
+            quantity: item.quantity! - productCart.quantity,
+            url: item.url,
+          );
+          databaseRef.child(id).set(p.toJson());
         }
       }
-      onError:(error) {
-        // Error.
-      };
-    });
+    }
   }
 
   Future<String?> getColorID(String colorName) async {
     String? color;
     try {
-      final recentPostsRef = FirebaseDatabase.instance.ref('Color').orderByChild('Name').equalTo(colorName).once();
-      recentPostsRef.then((value) => {
-        color = value.snapshot.children.first.key.toString()
-      });
+      final recentPostsRef = await FirebaseDatabase.instance.ref('Color').orderByChild('Name').equalTo(colorName).once();
+      DataSnapshot snapshot = recentPostsRef.snapshot;
+      if (snapshot.value != null) {
+        color = snapshot.children.first.key.toString();
+      } else {
+        print("No color data found");
+      }
       return color;
     } catch (error) {
       print("Error: $error");
@@ -625,10 +660,13 @@ class _PaymentPageState extends State<PaymentPage> {
   Future<String?> getSizeID(String sizeName) async {
     String? size;
     try {
-      final recentPostsRef = FirebaseDatabase.instance.ref('Size').orderByChild('Name').equalTo(sizeName).once();
-      recentPostsRef.then((value) => {
-        size = value.snapshot.children.first.key.toString()
-      });
+      final recentPostsRef = await FirebaseDatabase.instance.ref('Size').orderByChild('Name').equalTo(sizeName).once();
+      DataSnapshot snapshot = recentPostsRef.snapshot;
+      if (snapshot.value != null) {
+        size = snapshot.children.first.key.toString();
+      } else {
+        print("No color data found");
+      }
       return size;
     } catch (error) {
       print("Error: $error");
