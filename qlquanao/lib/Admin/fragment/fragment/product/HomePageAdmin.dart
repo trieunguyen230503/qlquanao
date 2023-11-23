@@ -6,7 +6,6 @@ import 'package:qlquanao/Admin/fragment/fragment/product/size/ManageSize.dart';
 import 'category/ManageCategory.dart';
 import 'color/ManageColor.dart';
 
-
 class HomePageAdmin extends StatefulWidget {
   const HomePageAdmin({super.key});
 
@@ -27,14 +26,14 @@ class _HomePageAdminState extends State<HomePageAdmin> {
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize:
-            Size.fromHeight(MediaQuery.of(context).size.height * (1 / 8)),
+                Size.fromHeight(MediaQuery.of(context).size.height * (1 / 8)),
             child: AppBar(
               backgroundColor: Color.fromRGBO(247, 247, 247, 1.0),
               centerTitle: true,
               title: const Text(
-                'WELCOME, ADMIN',
+                'PRODUCT',
                 style:
-                TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                    TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
               ),
               bottom: const TabBar(
                 isScrollable: true,

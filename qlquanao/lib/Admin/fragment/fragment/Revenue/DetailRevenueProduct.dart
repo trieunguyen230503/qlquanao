@@ -76,15 +76,6 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
         }
 
         if (dateEnd.text != "" && dateStart.text != "") {
-          // final ep = context.read<RevenueProvider>();
-          // ep.cleanProductSizeColor();
-          // _ShowData();
-          // Future.delayed(Duration(seconds: 3), () {
-          //   setState(() {
-          //     _ShowData();
-          //   });
-          // });
-          //checkDate = false;
           getProductSizeColorRevenueByTime(
               dateStart.text, dateEnd.text, widget.productID);
         }
@@ -96,23 +87,6 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
   bool checkDate = true;
   bool checkRevenue = true;
   double height = 0;
-
-  // void _ShowData() async {
-  //
-  //   final ep = context.read<RevenueProvider>();
-  //   String? pID = await widget.productID;
-  //   await ep.getProductSizeColor(pID);
-  //   if (checkDate == true) {
-  //     await ep.getProductSizeColorRevenue(pID);
-  //   } else {
-  //     await ep.getProductSizeColorRevenueByTime(
-  //         dateStart.text, dateEnd.text, pID);
-  //   }
-  //   height = productSizeColorlist!.length * 120;
-  //   setState(() {
-  //     productSizeColorlist = ep.productSizeColorlist;
-  //   });
-  // }
 
   @override
   void initState() {
@@ -153,20 +127,18 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
         if (data?["ProductID"] == widget.productID) {
           String getSize = await getNameById(data?['SizeID'], 'Size');
           String getColor = await getNameById(data?['ColorID'], 'Color');
-
-          productSizeColorlist.add(ProductSizeColor(
-              productID: data?['ProductID'],
-              sizeID: getSize,
-              colorID: getColor,
-              price: 0,
-              quantity: data?['Quantity'],
-              url: data?['url']));
-          height = productSizeColorlist!.length * 120;
+          setState(() {
+            productSizeColorlist.add(ProductSizeColor(
+                productID: data?['ProductID'],
+                sizeID: getSize,
+                colorID: getColor,
+                price: 0,
+                quantity: data?['Quantity'],
+                url: data?['url']));
+            height = productSizeColorlist!.length * 120;
+          });
         }
       }
-      setState(() {});
-      print(productSizeColorlist.length.toString() +
-          "mảng chiều dài productsize color");
     });
   }
 
@@ -197,13 +169,6 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
               for (final child2 in event.snapshot.children) {
                 final Map<dynamic, dynamic>? dataProductSizeColor =
                     child2.value as Map?;
-                // print(data?['productID']);
-                // print(dataProductSizeColor?['ProductID']);
-                // print(dataProductSizeColor?['SizeID']);
-                // print(dataProductSizeColor?['SizeID']);
-                // print(data?['productColor']);
-                // print(dataProductSizeColor?['ColorID']);
-
                 String getSize =
                     await getNameById(dataProductSizeColor?['SizeID'], 'Size');
                 String getColor = await getNameById(
@@ -212,12 +177,6 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
                     data?['productID'] == dataProductSizeColor?['ProductID'] &&
                     data?['productSize'] == getSize &&
                     data?['productColor'] == getColor) {
-                  // print(dataProductSizeColor?['ProductID']);
-                  // print(_productSizeColorlist?[k].productID);
-                  // print(getSize);
-                  // print(_productSizeColorlist?[k].sizeID);
-                  // print(getColor);
-                  // print(_productSizeColorlist?[k].colorID);
                   int subtotal = await data?['subTotal'] ?? 0;
                   int quantity = await data?['quantity'] ?? 0;
                   productSizeColorlist?[k].price =
@@ -271,13 +230,6 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
                 for (final child2 in event.snapshot.children) {
                   final Map<dynamic, dynamic>? dataProductSizeColor =
                       child2.value as Map?;
-                  // print(data?['productID']);
-                  // print(dataProductSizeColor?['ProductID']);
-                  // print(dataProductSizeColor?['SizeID']);
-                  // print(dataProductSizeColor?['SizeID']);
-                  // print(data?['productColor']);
-                  // print(dataProductSizeColor?['ColorID']);
-
                   String getSize = await getNameById(
                       dataProductSizeColor?['SizeID'], 'Size');
                   String getColor = await getNameById(
@@ -458,6 +410,7 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
                       //List<ProductSizeColor>? p = snapshot.data;
                       return Center(
                         child: Container(
+                          width: MediaQuery.sizeOf(context).width,
                           height: 100,
                           margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
                           decoration: BoxDecoration(
@@ -471,7 +424,7 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             // Canh giữa theo chiều ngang
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -486,10 +439,9 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
                                           .toString()),
                                   radius: 20,
                                 ),
-                                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                padding: EdgeInsets.only(left: 20),
                               ),
                               Container(
-                                width: 50,
                                 margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
                                 child: Text(
                                   productSizeColorlist![index]
@@ -499,10 +451,8 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
                               ),
                               Container(
-                                width: 100,
                                 margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
                                 child: Text(
                                   productSizeColorlist![index]
@@ -512,17 +462,15 @@ class _DetailRevenueProductState extends State<DetailRevenueProduct> {
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
                               ),
                               Container(
-                                width: 120,
                                 child: Text(
                                   "${currencyFormatterUSD.format(productSizeColorlist![index].price)}",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                padding: EdgeInsets.only(right: 45),
                               ),
                             ],
                           ),

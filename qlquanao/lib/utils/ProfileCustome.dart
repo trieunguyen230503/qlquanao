@@ -34,7 +34,7 @@ class _ProfileCustomeState extends State<ProfileCustome> {
   String? uid;
   final _scaffoldKey = GlobalKey<FormState>();
   final RoundedLoadingButtonController updateController =
-  RoundedLoadingButtonController();
+      RoundedLoadingButtonController();
 
   DateTime selectedDate = DateTime.now();
 
@@ -115,21 +115,21 @@ class _ProfileCustomeState extends State<ProfileCustome> {
                     children: [
                       pickedFile != null
                           ? ClipOval(
-                          child: Container(
-                            width: 120.0,
-                            height: 120.0,
-                            color: Colors.blue,
-                            child: Image.file(
-                              File(pickedFile!.path!),
-                              // Thay đổi đường dẫn hình ảnh của bạn ở đây
-                              fit: BoxFit.cover,
-                            ),
-                          ))
+                              child: Container(
+                              width: 120.0,
+                              height: 120.0,
+                              color: Colors.blue,
+                              child: Image.file(
+                                File(pickedFile!.path!),
+                                // Thay đổi đường dẫn hình ảnh của bạn ở đây
+                                fit: BoxFit.cover,
+                              ),
+                            ))
                           : CircleAvatar(
-                        radius: 64,
-                        backgroundImage:
-                        NetworkImage(sp.imageUrl.toString()),
-                      ),
+                              radius: 64,
+                              backgroundImage:
+                                  NetworkImage(sp.imageUrl.toString()),
+                            ),
                       Positioned(
                         child: IconButton(
                           onPressed: () async {
@@ -230,7 +230,7 @@ class _ProfileCustomeState extends State<ProfileCustome> {
                       elevation: 0,
                       borderRadius: 25,
                       onPressed: () async {
-                        await sp.updateProfile(uid!,email.text, name.text,
+                        await sp.updateProfile(uid!, email.text, name.text,
                             phone.text, address.text, pickedFile, dob.text);
                         if (sp.role == 3) {
                           Navigator.pushReplacement(

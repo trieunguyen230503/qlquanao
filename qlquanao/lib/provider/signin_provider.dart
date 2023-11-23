@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:bcrypt/bcrypt.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
@@ -10,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bcrypt/flutter_bcrypt.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 //import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -400,20 +402,6 @@ class SignInProvider extends ChangeNotifier {
       print("New user");
       return false;
     }
-    // QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-    //     .collection("users")
-    //     .where("email", isEqualTo: email)
-    //     .get();
-    // for (int i = 0; i < 10; i++) {
-    //   print(email);
-    // }
-    // if (querySnapshot.docs.isNotEmpty) {
-    //   print("Existing User");
-    //   return true;
-    // } else {
-    //   print("New user");
-    //   return false;
-    // }
   }
 
   //Check phone login
@@ -422,15 +410,13 @@ class SignInProvider extends ChangeNotifier {
 
     // Sử dụng orderByChild để truy vấn theo thuộc tính "email"
     final snapshot = await ref.orderByChild("email").equalTo(email).get();
-    print(snapshot);
     final Map<dynamic, dynamic>? data = snapshot.value as Map?;
 
     final e = data?.values.first['email'];
     //MÃ hóa mật khẩu
     final p = data?.values.first['password'];
     String pass = sha512.convert(utf8.encode(password)).toString();
-    print(p);
-    print(pass);
+
     if (e == email && p == pass) {
       print("Existing User");
       _uid = data?.values.first['uid'];

@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:qlquanao/Customer/Order/PaymentPage.dart';
 import 'package:qlquanao/model/Cart.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:qlquanao/utils/Login.dart';
+import 'package:qlquanao/utils/next_screen.dart';
 
 import '../../provider/signin_provider.dart';
 
@@ -104,7 +106,7 @@ class _CartPageState extends State<CartPage> {
             padding: const EdgeInsets.only(top: 30),
             child: Center(child: InkWell(
               onTap: (){
-
+                nextScreen(context, Login());
               },
                 child: Text("Please LOG IN", style: TextStyle(fontSize: 20, color: Colors.blue))),),
           ) :

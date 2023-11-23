@@ -15,6 +15,7 @@ import '../Order/CartPage.dart';
 
 class ProductInfoPage extends StatefulWidget {
   final Product product;
+
   ProductInfoPage({required this.product});
 
   @override
@@ -24,6 +25,7 @@ class ProductInfoPage extends StatefulWidget {
 
 class _ProductInfoPageState extends State<ProductInfoPage> {
   final Product product;
+
   _ProductInfoPageState({required this.product});
 
   String? uid;
@@ -89,7 +91,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
       if (clrs.isNotEmpty) {
         clrs.clear();
       }
-      if(_sliderImages.isNotEmpty){
+      if (_sliderImages.isNotEmpty) {
         _sliderImages.clear();
       }
 
@@ -100,13 +102,11 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
           String size = snap.child("SizeID").value.toString();
           String color = snap.child("ColorID").value.toString();
           String image = snap.child("url").value.toString();
-          if(!listSizesId.contains(size)){
+          if (!listSizesId.contains(size)) {
             listSizesId.add(size);
           }
-          if(!listClrsId.contains(color)){
+          if (!listClrsId.contains(color)) {
             listClrsId.add(color);
-          }
-          if(!_sliderImages.contains(image)){
             _sliderImages.add(image);
           }
         }
@@ -117,7 +117,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
       for (var c in listClrsId) {
         final snapshot = await ref.child('Color/$c/Name').get();
         String color = snapshot.value.toString();
-        if(mounted){
+        if (mounted) {
           setState(() {
             clrs.add(color);
           });
@@ -127,14 +127,14 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
       for (var s in listSizesId) {
         final snapshot = await ref.child('Size/$s/Name').get();
         String size = snapshot.value.toString();
-        if(mounted){
+        if (mounted) {
           setState(() {
             sizes.add(size);
           });
         }
       }
 
-      if(mounted){
+      if (mounted) {
         setState(() {
           if (sizes.isNotEmpty && clrs.isNotEmpty) {
             selectedSize = sizes[0];
@@ -149,7 +149,8 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
+    NumberFormat currencyFormatterUSD =
+        NumberFormat.currency(locale: 'en_US', symbol: '\$');
     final List<Widget> _slider = _sliderImages
         .map((image) => Padding(
               padding: EdgeInsets.symmetric(
@@ -189,7 +190,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                   child: PageView(
                     controller: _pageController,
                     onPageChanged: (index) {
-                      if(mounted){
+                      if (mounted) {
                         setState(() {
                           _currentPage = index;
                           selectedColor = clrs[index];
@@ -246,7 +247,6 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                             ),
                           ),
                         ),
-
                         Padding(
                           padding: EdgeInsets.only(top: 10, bottom: 12),
                           child: Container(
@@ -394,8 +394,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                           ),
                         ),
                         Padding(
-                          padding:
-                              EdgeInsets.only(top: 18, right: 10),
+                          padding: EdgeInsets.only(top: 18, right: 10),
                           child: Row(
                             children: [
                               Spacer(),
@@ -527,19 +526,18 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
               ),
               ElevatedButton.icon(
                 onPressed: () {
-                  if(uid == null){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
-                  }
-                  else{
+                  if (uid == null) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => Login()));
+                  } else {
                     print("Thêm giỏ hàng");
                     checkProductIsUnit(product.productId!).then((check) {
-
                       final ref = FirebaseDatabase.instance.ref();
                       final snapshotCartItem = ref.child('cart');
 
                       // Future.delayed(Duration(seconds: 3),(){}); //delay 3s
 
-                      if(check == false){
+                      if (check == false) {
                         String? idCart = snapshotCartItem.push().key;
                         Cart c = Cart(
                             idCart: idCart!,
@@ -553,9 +551,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                             userID: uid!);
                         snapshotCartItem.child(idCart!).set(c.toJson());
                         print("thêm ko trùng");
-
-                      }
-                      else{
+                      } else {
                         Cart c = Cart(
                             idCart: idCart,
                             productID: product.productId!,
@@ -573,7 +569,6 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) => CartPage()));
                     });
-
                   }
                 },
                 icon: Icon(
@@ -612,7 +607,10 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
     await snapshotCartItem.onValue.first.then((event) {
       for (final child in event.snapshot.children) {
         Cart cart = Cart.fromSnapshot(child);
-        if (cart.userID == uid && cart.productID == productID && cart.color == selectedColor && cart.size == selectedSize) {
+        if (cart.userID == uid &&
+            cart.productID == productID &&
+            cart.color == selectedColor &&
+            cart.size == selectedSize) {
           quantityNew = quantity + cart.quantity;
           idCart = cart.idCart;
           check = true;
