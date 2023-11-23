@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:qlquanao/model/ProductSizeColor.dart';
 import 'package:qlquanao/utils/Login.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -15,7 +16,6 @@ import '../Order/CartPage.dart';
 
 class ProductInfoPage extends StatefulWidget {
   final Product product;
-
   ProductInfoPage({required this.product});
 
   @override
@@ -25,7 +25,6 @@ class ProductInfoPage extends StatefulWidget {
 
 class _ProductInfoPageState extends State<ProductInfoPage> {
   final Product product;
-
   _ProductInfoPageState({required this.product});
 
   String? uid;
@@ -34,19 +33,30 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
   int price = 0;
   String idCart = "";
 
+  int quantityOfStock = 0;
+
+  Map<String, int> sizeQuantityMap = {};
+
+  List<ProductSizeColorData> listProductSizeColor = [];
+
   List<String> listSizesId = [];
   List<String> listClrsId = [];
 
   List<String> sizes = [];
   String selectedSize = "";
+  String IDselectedSize = "";
 
   List<String> clrs = [];
   String selectedColor = "";
+  String IDselectedColor = "";
 
   PageController _pageController = PageController(initialPage: 0);
   int _currentPage = 0;
 
   List<String> _sliderImages = [];
+
+  List<int> _quantityInStock = [];
+
 
   void goToPage(int pageIndex) {
     setState(() {
@@ -76,9 +86,13 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
 
   void getProductSizeColorFromFirebase() async {
     final DatabaseReference databaseRef =
-        FirebaseDatabase.instance.ref("ProductSizeColor");
+    FirebaseDatabase.instance.ref("ProductSizeColor");
 
     await databaseRef.onValue.listen((event) async {
+      if (listProductSizeColor.isNotEmpty) {
+        listProductSizeColor.clear();
+      }
+
       if (listSizesId.isNotEmpty) {
         listSizesId.clear();
       }
@@ -91,24 +105,28 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
       if (clrs.isNotEmpty) {
         clrs.clear();
       }
-      if (_sliderImages.isNotEmpty) {
+      if(_sliderImages.isNotEmpty){
         _sliderImages.clear();
       }
 
       for (final snap in event.snapshot.children) {
+        ProductSizeColorData p = ProductSizeColorData.fromSnapshot(snap);
+        listProductSizeColor.add(p);
         String productID = snap.child("ProductID").value.toString();
 
         if (productID == product.productId) {
           String size = snap.child("SizeID").value.toString();
           String color = snap.child("ColorID").value.toString();
           String image = snap.child("url").value.toString();
-          if (!listSizesId.contains(size)) {
+          int quantity = int.parse(snap.child("Quantity").value.toString());
+          if(!listSizesId.contains(size)){
             listSizesId.add(size);
           }
-          if (!listClrsId.contains(color)) {
+          if(!listClrsId.contains(color)){
             listClrsId.add(color);
             _sliderImages.add(image);
           }
+          _quantityInStock.add(quantity);
         }
       }
 
@@ -117,7 +135,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
       for (var c in listClrsId) {
         final snapshot = await ref.child('Color/$c/Name').get();
         String color = snapshot.value.toString();
-        if (mounted) {
+        if(mounted){
           setState(() {
             clrs.add(color);
           });
@@ -127,18 +145,21 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
       for (var s in listSizesId) {
         final snapshot = await ref.child('Size/$s/Name').get();
         String size = snapshot.value.toString();
-        if (mounted) {
+        if(mounted){
           setState(() {
             sizes.add(size);
           });
         }
       }
 
-      if (mounted) {
+      if(mounted){
         setState(() {
           if (sizes.isNotEmpty && clrs.isNotEmpty) {
             selectedSize = sizes[0];
             selectedColor = clrs[0];
+            IDselectedSize = sizes[0];
+            onColorSelected(listClrsId[0]);
+            quantityOfStock = sizeQuantityMap[listSizesId[0]] ?? 0;
           }
         });
       }
@@ -149,23 +170,22 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    NumberFormat currencyFormatterUSD =
-        NumberFormat.currency(locale: 'en_US', symbol: '\$');
+    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
     final List<Widget> _slider = _sliderImages
         .map((image) => Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.03),
-              child: Container(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    image,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ))
+      padding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.of(context).size.width * 0.03),
+      child: Container(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: Image.network(
+            image,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    ))
         .toList();
 
     return Scaffold(
@@ -190,7 +210,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                   child: PageView(
                     controller: _pageController,
                     onPageChanged: (index) {
-                      if (mounted) {
+                      if(mounted){
                         setState(() {
                           _currentPage = index;
                           selectedColor = clrs[index];
@@ -247,6 +267,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                             ),
                           ),
                         ),
+
                         Padding(
                           padding: EdgeInsets.only(top: 10, bottom: 12),
                           child: Container(
@@ -285,6 +306,8 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                         onTap: () {
                                           setState(() {
                                             selectedColor = clrs[i];
+                                            onColorSelected(listClrsId[i]);
+                                            quantityOfStock = sizeQuantityMap[IDselectedSize] ?? 0;
                                             goToPage(i);
                                           });
                                         },
@@ -298,14 +321,14 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                              BorderRadius.circular(8),
                                               boxShadow: [
                                                 BoxShadow(
                                                   color:
-                                                      selectedColor == clrs[i]
-                                                          ? Colors.blueAccent
-                                                          : Colors.grey
-                                                              .withOpacity(0.5),
+                                                  selectedColor == clrs[i]
+                                                      ? Colors.blueAccent
+                                                      : Colors.grey
+                                                      .withOpacity(0.5),
                                                   spreadRadius: 2,
                                                   blurRadius: 8,
                                                 ),
@@ -352,6 +375,8 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                         onTap: () {
                                           setState(() {
                                             selectedSize = sizes[i];
+                                            IDselectedSize = listSizesId[i];
+                                            quantityOfStock = sizeQuantityMap[listSizesId[i]] ?? 0;
                                           });
                                         },
                                         child: IntrinsicWidth(
@@ -363,14 +388,14 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                                             decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius:
-                                                  BorderRadius.circular(30),
+                                              BorderRadius.circular(30),
                                               boxShadow: [
                                                 BoxShadow(
                                                   color:
-                                                      selectedSize == sizes[i]
-                                                          ? Colors.blueAccent
-                                                          : Colors.grey
-                                                              .withOpacity(0.5),
+                                                  selectedSize == sizes[i]
+                                                      ? Colors.blueAccent
+                                                      : Colors.grey
+                                                      .withOpacity(0.5),
                                                   spreadRadius: 2,
                                                   blurRadius: 8,
                                                 ),
@@ -394,7 +419,35 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.only(top: 18, right: 10),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Container(
+                            width: double.infinity,
+                            alignment: Alignment.centerLeft,
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Quantity of stock: ',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: quantityOfStock.toString(),
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding:
+                          EdgeInsets.only(top: 14, right: 10),
                           child: Row(
                             children: [
                               Spacer(),
@@ -448,16 +501,21 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  setState(() {
-                                    quantity++;
-                                    //Nếu người dùng ấn tăng sl thì tăng thêm giá tổng
-                                    price += product.price!;
-                                  });
+                                  if(quantity < quantityOfStock){
+                                    setState(() {
+                                      quantity++;
+                                      //Nếu người dùng ấn tăng sl thì tăng thêm giá tổng
+                                      price += product.price!;
+                                    });
+                                  }
+
                                 },
                                 child: Container(
                                   padding: EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: (quantityOfStock != 0 && quantity == quantityOfStock)
+                                        ? Colors.black12
+                                        : Colors.white,
                                     borderRadius: BorderRadius.circular(20),
                                     boxShadow: [
                                       BoxShadow(
@@ -525,52 +583,8 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                     color: Colors.black),
               ),
               ElevatedButton.icon(
-                onPressed: () {
-                  if (uid == null) {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => Login()));
-                  } else {
-                    print("Thêm giỏ hàng");
-                    checkProductIsUnit(product.productId!).then((check) {
-                      final ref = FirebaseDatabase.instance.ref();
-                      final snapshotCartItem = ref.child('cart');
-
-                      // Future.delayed(Duration(seconds: 3),(){}); //delay 3s
-
-                      if (check == false) {
-                        String? idCart = snapshotCartItem.push().key;
-                        Cart c = Cart(
-                            idCart: idCart!,
-                            productID: product.productId!,
-                            productName: product.name!,
-                            image: product.image!,
-                            color: selectedColor,
-                            size: selectedSize,
-                            price: product.promoPrice!,
-                            quantity: quantity,
-                            userID: uid!);
-                        snapshotCartItem.child(idCart!).set(c.toJson());
-                        print("thêm ko trùng");
-                      } else {
-                        Cart c = Cart(
-                            idCart: idCart,
-                            productID: product.productId!,
-                            productName: product.name!,
-                            image: product.image!,
-                            color: selectedColor,
-                            size: selectedSize,
-                            price: product.promoPrice!,
-                            quantity: quantityNew,
-                            userID: uid!);
-                        snapshotCartItem.child(idCart).set(c.toJson());
-                        print(quantity.toString());
-                      }
-
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => CartPage()));
-                    });
-                  }
-                },
+                onPressed: quantityOfStock != 0
+                    ? () => addToCart(context) : null,
                 icon: Icon(
                   CupertinoIcons.cart_badge_plus,
                   color: Colors.white,
@@ -584,7 +598,11 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                   ),
                 ),
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Colors.black),
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                      return states.contains(MaterialState.disabled) ? Colors.grey : Colors.black;
+                    },
+                  ),
                   padding: MaterialStateProperty.all(
                     EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   ),
@@ -600,6 +618,76 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
     );
   }
 
+
+  Future<void> addToCart(BuildContext context) async {
+
+    if(uid == null){
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
+    }
+    else{
+      checkProductIsUnit(product.productId!).then((checkIsUnit) {
+        final ref = FirebaseDatabase.instance.ref();
+        final snapshotCartItem = ref.child('cart');
+        if(checkIsUnit == false){
+          String? idCart = snapshotCartItem.push().key;
+          Cart c = Cart(
+              idCart: idCart!,
+              productID: product.productId!,
+              productName: product.name!,
+              image: product.image!,
+              color: selectedColor,
+              size: selectedSize,
+              price: product.promoPrice!,
+              quantity: quantity,
+              userID: uid!);
+          snapshotCartItem.child(idCart!).set(c.toJson());
+        }
+        else{
+          Cart c = Cart(
+              idCart: idCart,
+              productID: product.productId!,
+              productName: product.name!,
+              image: product.image!,
+              color: selectedColor,
+              size: selectedSize,
+              price: product.promoPrice!,
+              quantity: quantityNew,
+              userID: uid!);
+          snapshotCartItem.child(idCart).set(c.toJson());
+          print(quantity.toString());
+        }
+        Navigator.push(context, MaterialPageRoute(builder: (context) => CartPage()));
+      });
+    }
+  }
+
+  void onColorSelected(String color) {
+    setState(() {
+      IDselectedColor = color;
+      // Clear the sizeQuantityMap
+      sizeQuantityMap.clear();
+      // Populate sizeQuantityMap with quantities for the selected color
+      for (String size in listSizesId) {
+        int quantity = getQuantity(color, size, listProductSizeColor);
+        sizeQuantityMap[size] = quantity; // số lượng của size tương ứng, cách dùng: sizeQuantityMap[listSizesId[i]] ?? 0;
+      }
+    });
+  }
+
+  // Get quantity for a specific color and size
+  int getQuantity(String selectedColor, String selectedSize, List<ProductSizeColorData> lstSizeColor) {
+    List<ProductSizeColorData> filteredList = lstSizeColor
+        .where((item) => item.colorID == selectedColor && item.sizeID == selectedSize)
+        .toList();
+
+    int totalQuantity = 0;
+    for (var item in filteredList) {
+      totalQuantity += item.quantity!;
+    }
+
+    return totalQuantity;
+  }
+
   Future<bool> checkProductIsUnit(String productID) async {
     bool check = false;
     final ref = FirebaseDatabase.instance.ref();
@@ -607,10 +695,7 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
     await snapshotCartItem.onValue.first.then((event) {
       for (final child in event.snapshot.children) {
         Cart cart = Cart.fromSnapshot(child);
-        if (cart.userID == uid &&
-            cart.productID == productID &&
-            cart.color == selectedColor &&
-            cart.size == selectedSize) {
+        if (cart.userID == uid && cart.productID == productID && cart.color == selectedColor && cart.size == selectedSize) {
           quantityNew = quantity + cart.quantity;
           idCart = cart.idCart;
           check = true;

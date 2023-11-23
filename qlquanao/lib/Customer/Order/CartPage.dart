@@ -9,7 +9,6 @@ import 'package:qlquanao/Customer/Order/PaymentPage.dart';
 import 'package:qlquanao/model/Cart.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:qlquanao/utils/Login.dart';
-import 'package:qlquanao/utils/next_screen.dart';
 
 import '../../provider/signin_provider.dart';
 
@@ -45,7 +44,6 @@ class _CartPageState extends State<CartPage> {
     getCartFromFirebase();
   }
 
-
   void getCartFromFirebase() async {
     // Khởi tạo tham chiếu đến cơ sở dữ liệu Firebase
     final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
@@ -54,252 +52,265 @@ class _CartPageState extends State<CartPage> {
       return;
     }
     databaseRef.onValue.listen((event) {
-        if (cartList.isNotEmpty) {
-          cartList.clear();
-        }
+      if (cartList.isNotEmpty) {
+        cartList.clear();
+      }
 
-        for (final child in event.snapshot.children) {
-          String userID = child.child("userID").value.toString();
+      for (final child in event.snapshot.children) {
+        String userID = child.child("userID").value.toString();
 
-          if (userID == uid) {
-            String idCart = child.child("idCart").value.toString();
-            String productID = child.child("productID").value.toString();
-            String productName = child.child("productName").value.toString();
-            String color = child.child("color").value.toString();
-            String size = child.child("size").value.toString();
-            String image = child.child("productImage").value.toString();
-            int price = int.parse(child.child("totalAmount").value.toString());
-            int quantity = int.parse(child.child("quantity").value.toString());
-            Cart p = Cart(
-                idCart: idCart,
-                productID: productID,
-                productName: productName,
-                image: image,
-                color: color,
-                size: size,
-                price: price,
-                quantity: quantity,
-                userID: userID);
-            cartList.add(p);
-          }
+        if (userID == uid) {
+          String idCart = child.child("idCart").value.toString();
+          String productID = child.child("productID").value.toString();
+          String productName = child.child("productName").value.toString();
+          String color = child.child("color").value.toString();
+          String size = child.child("size").value.toString();
+          String image = child.child("productImage").value.toString();
+          int price = int.parse(child.child("totalAmount").value.toString());
+          int quantity = int.parse(child.child("quantity").value.toString());
+          Cart p = Cart(
+              idCart: idCart,
+              productID: productID,
+              productName: productName,
+              image: image,
+              color: color,
+              size: size,
+              price: price,
+              quantity: quantity,
+              userID: userID);
+          cartList.add(p);
         }
-        if(!mounted)
-          return;
-        setState(() {
-          cartList = cartList.reversed.toList();
-        });
+      }
+      if (!mounted) return;
+      setState(() {
+        cartList = cartList.reversed.toList();
+      });
     }, onError: (error) {
       // Error.
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
-    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
+    NumberFormat currencyFormatterUSD =
+        NumberFormat.currency(locale: 'en_US', symbol: '\$');
     return Scaffold(
       body: ListView(
         children: [
           CartAppBar(),
-          (uid == null) ?
-          Padding(
-            padding: const EdgeInsets.only(top: 30),
-            child: Center(child: InkWell(
-              onTap: (){
-                nextScreen(context, Login());
-              },
-                child: Text("Please LOG IN", style: TextStyle(fontSize: 20, color: Colors.blue))),),
-          ) :
-          Container(
-            height: MediaQuery.of(context).size.height - 180,
-            padding: EdgeInsets.only(top: 10, bottom: 70),
-            decoration: BoxDecoration(
-              color: Color(0xFFEDECF2),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(35),
-                topRight: Radius.circular(35),
-              ),
-            ),
-            child: ListView.builder(
-                itemCount: cartList.length,
-                itemBuilder: (context, index) {
-                  final cartItem = cartList[index];
-                  return Container(
-                    height: 110,
-                    margin: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
+          (uid == null)
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 30),
+                  child: Center(
+                    child: InkWell(
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => Login()));
+                        },
+                        child: Text("Please LOG IN",
+                            style:
+                                TextStyle(fontSize: 20, color: Colors.blue))),
+                  ),
+                )
+              : Container(
+                  height: MediaQuery.of(context).size.height - 180,
+                  padding: EdgeInsets.only(top: 10, bottom: 70),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFEDECF2),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(35),
+                      topRight: Radius.circular(35),
                     ),
-                    child: Row(
-                      children: [
-                        Checkbox(
-                          checkColor: Colors.black,
-                          activeColor: Colors.grey,
-                          value: selectedProducts.contains(cartItem),
-                          onChanged: (bool? value) {
-                            if (mounted) {
-                              setState(() {
-                                if (value != null) {
-                                  if (value) {
-                                    if (!selectedProducts.contains(cartItem)) {
-                                      selectedProducts.add(cartItem);
-                                    }
-                                  } else {
-                                    selectedProducts.remove(cartItem);
-                                  }
-                                }
-                                totalAmount = 0;
-                                for (var p in selectedProducts) {
-                                  totalAmount += (p.price * p.quantity);
-                                }
-                              });
-                            }
-                          },
-                        ),
-                        Container(
-                          height: 70,
-                          width: 70,
-                          margin: EdgeInsets.only(right: 10),
-                          child: Image.network(cartItem.image),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                (cartItem.productName.length > 12)
-                                    ? '${cartItem.productName.substring(0, 12)}...' // Hiển thị 'text...' nếu độ dài vượt quá length
-                                    : cartItem.productName,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              Text(
-                                cartItem.color + ", " + cartItem.size,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF4C53A5),
-                                ),
-                              ),
-                              Text(
-                                currencyFormatterUSD.format(cartItem.price),
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
+                  ),
+                  child: ListView.builder(
+                      itemCount: cartList.length,
+                      itemBuilder: (context, index) {
+                        final cartItem = cartList[index];
+                        return Container(
+                          height: 110,
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 10),
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        ),
-                        Spacer(),
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 5),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Row(
                             children: [
-                              GestureDetector(
-                                onTap: () =>
-                                    _deleteItemInCart(context, cartItem),
-                                child: Icon(
-                                  Icons.delete,
-                                  color: Colors.black26,
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      if (cartItem.quantity > 1) {
-                                        setState(() {
-                                          cartItem.quantity--;
-                                          //Nếu người dùng ấn giảm sl trong lúc sp đã chọn thì giảm giá tổng
-                                          if (selectedProducts
+                              Checkbox(
+                                checkColor: Colors.black,
+                                activeColor: Colors.grey,
+                                value: selectedProducts.contains(cartItem),
+                                onChanged: (bool? value) {
+                                  if (mounted) {
+                                    setState(() {
+                                      if (value != null) {
+                                        if (value) {
+                                          if (!selectedProducts
                                               .contains(cartItem)) {
-                                            totalAmount -= cartItem.price;
+                                            selectedProducts.add(cartItem);
                                           }
-                                        });
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: cartItem.quantity == 1
-                                            ? Colors.black12
-                                            : Colors.white,
-                                        borderRadius: BorderRadius.circular(20),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.5),
-                                            spreadRadius: 1,
-                                            blurRadius: 10,
-                                          )
-                                        ],
-                                      ),
-                                      child: Icon(
-                                        CupertinoIcons.minus,
-                                        size: 18,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    margin:
-                                    EdgeInsets.symmetric(horizontal: 10),
-                                    child: Text(
-                                      cartItem.quantity.toString().trim(),
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black),
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        cartItem.quantity++;
-                                        //Nếu người dùng ấn tăng sl trong lúc sp đã chọn thì tăng thêm giá tổng
-                                        if (selectedProducts
-                                            .contains(cartItem)) {
-                                          totalAmount += cartItem.price;
+                                        } else {
+                                          selectedProducts.remove(cartItem);
                                         }
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(20),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.5),
-                                            spreadRadius: 1,
-                                            blurRadius: 10,
-                                          )
-                                        ],
-                                      ),
-                                      child: Icon(
-                                        CupertinoIcons.plus,
-                                        size: 18,
+                                      }
+                                      totalAmount = 0;
+                                      for (var p in selectedProducts) {
+                                        totalAmount += (p.price * p.quantity);
+                                      }
+                                    });
+                                  }
+                                },
+                              ),
+                              Container(
+                                height: 70,
+                                width: 70,
+                                margin: EdgeInsets.only(right: 10),
+                                child: Image.network(cartItem.image),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      (cartItem.productName.length > 12)
+                                          ? '${cartItem.productName.substring(0, 12)}...' // Hiển thị 'text...' nếu độ dài vượt quá length
+                                          : cartItem.productName,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              )
+                                    Text(
+                                      cartItem.color + ", " + cartItem.size,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF4C53A5),
+                                      ),
+                                    ),
+                                    Text(
+                                      currencyFormatterUSD
+                                          .format(cartItem.price),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Spacer(),
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 5),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () =>
+                                          _deleteItemInCart(context, cartItem),
+                                      child: Icon(
+                                        Icons.delete,
+                                        color: Colors.black26,
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (cartItem.quantity > 1) {
+                                              setState(() {
+                                                cartItem.quantity--;
+                                                //Nếu người dùng ấn giảm sl trong lúc sp đã chọn thì giảm giá tổng
+                                                if (selectedProducts
+                                                    .contains(cartItem)) {
+                                                  totalAmount -= cartItem.price;
+                                                }
+                                              });
+                                            }
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              color: cartItem.quantity == 1
+                                                  ? Colors.black12
+                                                  : Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.5),
+                                                  spreadRadius: 1,
+                                                  blurRadius: 10,
+                                                )
+                                              ],
+                                            ),
+                                            child: Icon(
+                                              CupertinoIcons.minus,
+                                              size: 18,
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                          child: Text(
+                                            cartItem.quantity.toString().trim(),
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black),
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              cartItem.quantity++;
+                                              //Nếu người dùng ấn tăng sl trong lúc sp đã chọn thì tăng thêm giá tổng
+                                              if (selectedProducts
+                                                  .contains(cartItem)) {
+                                                totalAmount += cartItem.price;
+                                              }
+                                            });
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey
+                                                      .withOpacity(0.5),
+                                                  spreadRadius: 1,
+                                                  blurRadius: 10,
+                                                )
+                                              ],
+                                            ),
+                                            child: Icon(
+                                              CupertinoIcons.plus,
+                                              size: 18,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-          ),
+                        );
+                      }),
+                ),
         ],
       ),
       bottomNavigationBar: CartBottomNavBar(),
@@ -386,7 +397,9 @@ class _CartAppBarState extends State<CartAppBar> {
 }
 
 class CartBottomNavBar extends StatelessWidget {
-  NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
+  NumberFormat currencyFormatterUSD =
+      NumberFormat.currency(locale: 'en_US', symbol: '\$');
+
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
