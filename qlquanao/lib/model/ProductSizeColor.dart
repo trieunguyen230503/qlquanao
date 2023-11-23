@@ -1,3 +1,5 @@
+import 'package:firebase_database/firebase_database.dart';
+
 class ProductSizeColor {
   String? uid;
 
@@ -45,6 +47,15 @@ class ProductSizeColorData {
       this.price,
       this.quantity,
       this.url});
+
+  ProductSizeColorData.fromSnapshot(DataSnapshot snapshot)
+      : uid = snapshot.child('ProductSizeColorID').value.toString(),
+        productID = snapshot.child('ProductID').value.toString(),
+        sizeID = snapshot.child('SizeID').value.toString(),
+        colorID = snapshot.child('ColorID').value.toString(),
+        price = double.parse(snapshot.child('Price').value.toString()),
+        quantity = int.parse(snapshot.child('Quantity').value.toString()),
+        url = snapshot.child('url').value.toString();
 
   ProductSizeColorData.fromJson(Map<dynamic, dynamic> json) {
     uid = json["ProductSizeColorID"];

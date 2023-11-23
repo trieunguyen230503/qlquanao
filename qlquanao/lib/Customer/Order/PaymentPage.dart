@@ -14,14 +14,11 @@ import 'package:qlquanao/model/OrderItem.dart';
 
 import '../../provider/signin_provider.dart';
 
-
-
 String nameNew = " ";
 String phoneNew = " ";
 String addressNew = " ";
 String detailAddress = " ";
 bool tempAddress = false;
-
 
 int totalAmount = 0;
 
@@ -31,7 +28,8 @@ class PaymentPage extends StatefulWidget {
   PaymentPage({required this.listProduct});
 
   @override
-  State<PaymentPage> createState() => _PaymentPageState(listProduct: listProduct);
+  State<PaymentPage> createState() =>
+      _PaymentPageState(listProduct: listProduct);
 }
 
 class _PaymentPageState extends State<PaymentPage> {
@@ -44,6 +42,7 @@ class _PaymentPageState extends State<PaymentPage> {
   String? addressDefault;
 
   List<Map<String, dynamic>> listProductForMap = [];
+  List<String> listIDProductSizeColor = [];
 
   int? groupValue = 1;
 
@@ -52,7 +51,7 @@ class _PaymentPageState extends State<PaymentPage> {
     // TODO: implement initState
     super.initState();
     totalAmount = 0;
-    for(var p in listProduct){
+    for (var p in listProduct) {
       totalAmount += p.price * p.quantity;
     }
     listProductForMap = toMapList(listProduct);
@@ -61,12 +60,17 @@ class _PaymentPageState extends State<PaymentPage> {
     sp.getDataFromSharedPreference();
     uid = sp.uid;
     // Kiểm tra nếu name = null hoặc = ' ' thì gán = <Trống>
-    nameDefault = (sp.name == null || sp.name!.trim().length == 0) ? '<null>' : sp.name!;
-    phoneDefault = (sp.phone == null || sp.phone!.trim().length == 0) ? '<null>' : sp.phone!;
-    addressDefault = (sp.address == null || sp.address!.trim().length == 0) ? '<null>' : sp.address!;
+    nameDefault =
+        (sp.name == null || sp.name!.trim().length == 0) ? '<null>' : sp.name!;
+    phoneDefault = (sp.phone == null || sp.phone!.trim().length == 0)
+        ? '<null>'
+        : sp.phone!;
+    addressDefault = (sp.address == null || sp.address!.trim().length == 0)
+        ? '<null>'
+        : sp.address!;
   }
 
-  List<Map<String, dynamic>> toMapList (List<Cart> c){
+  List<Map<String, dynamic>> toMapList(List<Cart> c) {
     List<Map<String, dynamic>> productsAsMap = c.map((product) {
       return {
         "name": product.productName,
@@ -80,7 +84,8 @@ class _PaymentPageState extends State<PaymentPage> {
 
   @override
   Widget build(BuildContext context) {
-    NumberFormat currencyFormatterUSD = NumberFormat.currency(locale: 'en_US', symbol: '\$');
+    NumberFormat currencyFormatterUSD =
+        NumberFormat.currency(locale: 'en_US', symbol: '\$');
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -123,7 +128,11 @@ class _PaymentPageState extends State<PaymentPage> {
                       Spacer(),
                       InkWell(
                         onTap: () async {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => AddressPage(listProduct: listProduct)));
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      AddressPage(listProduct: listProduct)));
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(right: 14),
@@ -142,7 +151,9 @@ class _PaymentPageState extends State<PaymentPage> {
                   Padding(
                     padding: const EdgeInsets.only(left: 40),
                     child: Text(
-                      (tempAddress == false) ? "Name: " + nameDefault! : "Name: " + nameNew,
+                      (tempAddress == false)
+                          ? "Name: " + nameDefault!
+                          : "Name: " + nameNew,
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.black,
@@ -152,7 +163,9 @@ class _PaymentPageState extends State<PaymentPage> {
                   Padding(
                     padding: const EdgeInsets.only(left: 40, top: 4, bottom: 4),
                     child: Text(
-                      (tempAddress == false) ? "Phone: " + phoneDefault! : "Phone: " + phoneNew,
+                      (tempAddress == false)
+                          ? "Phone: " + phoneDefault!
+                          : "Phone: " + phoneNew,
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.black,
@@ -162,7 +175,9 @@ class _PaymentPageState extends State<PaymentPage> {
                   Padding(
                     padding: const EdgeInsets.only(left: 40, right: 15),
                     child: Text(
-                      (tempAddress == false) ? "Address: " + addressDefault! : "Address: " + detailAddress + ", " + addressNew,
+                      (tempAddress == false)
+                          ? "Address: " + addressDefault!
+                          : "Address: " + detailAddress + ", " + addressNew,
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.black,
@@ -278,7 +293,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(25, 10, 10, 4),
                   child: Text(
-                      "Select a payment method",
+                    "Select a payment method",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -298,29 +313,26 @@ class _PaymentPageState extends State<PaymentPage> {
                     },
                     title: Text("Payment on delivery"),
                     activeColor: Colors.black45,
-                    secondary: Icon(
-                        Icons.attach_money
-                    ),
+                    secondary: Icon(Icons.attach_money),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 30),
                   child: RadioListTile<int>(
-                    value: 2,
-                    groupValue: groupValue,
-                    onChanged: (int? value) {
-                      setState(() {
-                        groupValue = value;
-                      });
-                    },
-                    title: Text("Payment via Paypal"),
-                    activeColor: Colors.black45,
-                    secondary: Image(
-                      image: AssetImage('assets/paypal_logo.png'),
-                      height: 50,
-                      width: 50,
-                    )
-                  ),
+                      value: 2,
+                      groupValue: groupValue,
+                      onChanged: (int? value) {
+                        setState(() {
+                          groupValue = value;
+                        });
+                      },
+                      title: Text("Payment via Paypal"),
+                      activeColor: Colors.black45,
+                      secondary: Image(
+                        image: AssetImage('assets/paypal_logo.png'),
+                        height: 50,
+                        width: 50,
+                      )),
                 ),
               ],
             ),
@@ -355,7 +367,12 @@ class _PaymentPageState extends State<PaymentPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      if((nameDefault == "<null>" || phoneDefault == "<null>" || addressDefault == "<null>") && (nameNew == " " || phoneNew == " " || addressNew == " ")) {
+                      if ((nameDefault == "<null>" ||
+                              phoneDefault == "<null>" ||
+                              addressDefault == "<null>") &&
+                          (nameNew == " " ||
+                              phoneNew == " " ||
+                              addressNew == " ")) {
                         Fluttertoast.showToast(
                             msg: "Please enter complete personal information!",
                             toastLength: Toast.LENGTH_SHORT,
@@ -363,23 +380,20 @@ class _PaymentPageState extends State<PaymentPage> {
                             timeInSecForIosWeb: 1,
                             backgroundColor: Colors.black45,
                             textColor: Colors.white,
-                            fontSize: 16.0
-                        );
-                        }
-                      else{
-                        if(groupValue == 1){
-
+                            fontSize: 16.0);
+                      } else {
+                        if (groupValue == 1) {
                           _pushOrder(false);
 
-                          _showMyDialog();
-                        }
-                        else if(groupValue == 2) {
-
+                          _showMyDialog(context);
+                        } else if (groupValue == 2) {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (BuildContext context) => PaypalCheckout(
                               sandboxMode: true,
-                              clientId: "AQqddvU4gqYASZShn4Ky2MMHYfI1Vz0c6IoJHJ08qG9QiLg6pzBk-SGZ1TtErD1eZtoiRvgmiyKWpLRY",
-                              secretKey: "ENUgjfPZ2KM-Tfh2_VC1K_UCcJOa8hwgxedM2QmnuYAiowRAOCRBLEFDEum3cBT-ZSJ5WyNoZQGxZtTo",
+                              clientId:
+                                  "AQqddvU4gqYASZShn4Ky2MMHYfI1Vz0c6IoJHJ08qG9QiLg6pzBk-SGZ1TtErD1eZtoiRvgmiyKWpLRY",
+                              secretKey:
+                                  "ENUgjfPZ2KM-Tfh2_VC1K_UCcJOa8hwgxedM2QmnuYAiowRAOCRBLEFDEum3cBT-ZSJ5WyNoZQGxZtTo",
                               returnURL: "success.snippetcoder.com",
                               cancelURL: "cancel.snippetcoder.com",
                               transactions: [
@@ -393,7 +407,8 @@ class _PaymentPageState extends State<PaymentPage> {
                                       "shipping_discount": 0
                                     }
                                   },
-                                  "description": "The payment transaction description.",
+                                  "description":
+                                      "The payment transaction description.",
                                   // "payment_options": {
                                   //   "allowed_payment_method":
                                   //       "INSTANT_FUNDING_SOURCE"
@@ -415,11 +430,12 @@ class _PaymentPageState extends State<PaymentPage> {
                                   }
                                 }
                               ],
-                              note: "Contact us for any questions on your order.",
+                              note:
+                                  "Contact us for any questions on your order.",
                               onSuccess: (Map params) async {
                                 print("onSuccess: $params");
                                 _pushOrder(true);
-                                _showMyDialog();
+                                _showMyDialog(context);
                               },
                               onError: (error) {
                                 print("onError: $error");
@@ -430,10 +446,7 @@ class _PaymentPageState extends State<PaymentPage> {
                               },
                             ),
                           ));
-
                         }
-
-                        // _showMyDialog();
                       }
                     },
                     child: Container(
@@ -463,60 +476,65 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  Future<void> _showMyDialog() async {
+  Future<void> _showMyDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Image.asset('assets/order_success.png',
+        return Dialog(
+          backgroundColor: Colors.white, // Set màu nền của Dialog là màu trắng
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 30),
+                child: Image.asset(
+                  'assets/order_success.png',
                   width: 80,
                   height: 80,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Text('Order Success',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                      ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Text(
+                  'Order Success',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 15),
-                  child: Text('Thank you for your purchase! You can track your order status on your personal page.',
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20, left: 15, right: 15),
+                child: Text(
+                  'Thank you for your purchase! You can track your order status on your personal page.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
                   ),
                 ),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20, bottom: 20),
+                child: TextButton(
+                  onPressed: () {
+                    // Handle button press
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Return to home page',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ),
+            ],
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Return to home page', style: TextStyle(fontSize: 18),),
-              onPressed: () {
-                final ref = FirebaseDatabase.instance.ref();
-                final snapshotCart = ref.child('cart').get();
-                final DatabaseReference databaseRef = FirebaseDatabase.instance.ref("cart");
-                for(var c in listProduct){
-                  databaseRef.child(c.idCart).remove();
-                }
-
-                Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
-              },
-            ),
-          ],
         );
       },
     );
   }
 
-  void _pushOrder(bool paymentOnl) async{
+  void _pushOrder(bool paymentOnl) async {
     final ref = FirebaseDatabase.instance.ref();
 
     //push order lên firebase
@@ -528,26 +546,100 @@ class _PaymentPageState extends State<PaymentPage> {
     String orderDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
     Orders order;
 
-    if(tempAddress == true){
-      order = Orders.full(orderID, uid, nameNew, phoneNew, uAddress, orderDate, totalAmount, false, paymentOnl);
-    }
-    else
-    {
-      order = Orders.full(orderID, uid, nameDefault, phoneDefault, addressDefault, orderDate, totalAmount, false, paymentOnl);
+    if (tempAddress == true) {
+      order = Orders.full(orderID, uid, nameNew, phoneNew, uAddress, orderDate,
+          totalAmount, false, paymentOnl);
+    } else {
+      order = Orders.full(orderID, uid, nameDefault, phoneDefault,
+          addressDefault, orderDate, totalAmount, false, paymentOnl);
     }
     snapshotOrders.child(orderID!).set(order.toJson());
-    print("orderID: ${orderID}");
-
 
     //push orderItem lên firebase
     final snapshotOrderItem = ref.child('orderItem');
-    for(var item in listProduct){
+    for (var item in listProduct) {
+      // _updateQuantity(item);
       String? orderItemID = snapshotOrders.push().key;
-      OrderItem o = OrderItem.all(orderItemID, orderID, item.productID, item.productName, item.image, item.size, item.color, orderDate, item.quantity, item.price);
+      OrderItem o = OrderItem.all(
+          orderItemID,
+          orderID,
+          item.productID,
+          item.productName,
+          item.image,
+          item.size,
+          item.color,
+          orderDate,
+          item.quantity,
+          item.price);
       snapshotOrderItem.child(orderItemID!).set(o.toJson());
     }
   }
+
+  Future<void> _updateQuantity(Cart productCart) async {
+    final DatabaseReference databaseRef =
+    FirebaseDatabase.instance.ref("ProductSizeColor");
+    print("màu: " + productCart.color);
+
+    String? idColor = await getColorID(productCart.color);
+    String? idSize = await getSizeID(productCart.size);
+
+
+    databaseRef.onValue.listen((event) async {
+      for (final snap in event.snapshot.children) {
+        String productID = snap.child("ProductID").value.toString();
+
+
+        if (productID == productCart.productID) {
+          String size = snap.child("SizeID").value.toString();
+          String color = snap.child("SizeID").value.toString();
+          String id  = snap.child("ProductSizeColorID").value.toString();
+
+          print("size: " + size + "   " + "idSize: " + idSize.toString());
+          print("color: " + color + "   " + "idColor: " + idColor.toString());
+
+          if(size == idSize && color == idColor){
+            print("id sizeColor: " + id.toString());
+          }
+        }
+      }
+      onError:(error) {
+        // Error.
+      };
+    });
+  }
+
+  Future<String?> getColorID(String colorName) async {
+    String? color;
+    try {
+      final recentPostsRef = FirebaseDatabase.instance.ref('Color').orderByChild('Name').equalTo(colorName).once();
+      recentPostsRef.then((value) => {
+        color = value.snapshot.children.first.key.toString()
+      });
+      return color;
+    } catch (error) {
+      print("Error: $error");
+      return color;
+    }
+  }
+
+  Future<String?> getSizeID(String sizeName) async {
+    String? size;
+    try {
+      final recentPostsRef = FirebaseDatabase.instance.ref('Size').orderByChild('Name').equalTo(sizeName).once();
+      recentPostsRef.then((value) => {
+        size = value.snapshot.children.first.key.toString()
+      });
+      return size;
+    } catch (error) {
+      print("Error: $error");
+      return size;
+    }
+  }
+
 }
+
+
+
 
 
 
@@ -556,7 +648,8 @@ class AddressPage extends StatefulWidget {
   AddressPage({required this.listProduct});
 
   @override
-  _addressPageState createState() => _addressPageState(listProduct: listProduct);
+  _addressPageState createState() =>
+      _addressPageState(listProduct: listProduct);
 }
 
 class _addressPageState extends State<AddressPage> {
@@ -575,7 +668,6 @@ class _addressPageState extends State<AddressPage> {
   TextEditingController _textNameController = TextEditingController();
   TextEditingController _textPhoneController = TextEditingController();
   TextEditingController _textdetailAddressController = TextEditingController();
-
 
   @override
   void initState() {
@@ -597,7 +689,7 @@ class _addressPageState extends State<AddressPage> {
     }
   }
 
-  void updateDistrictData(String cityCode) async{
+  void updateDistrictData(String cityCode) async {
     callAPI(host + "districts/getByProvince?provinceCode=$cityCode&limit=-1")
         .then((data) {
       setState(() {
@@ -606,7 +698,7 @@ class _addressPageState extends State<AddressPage> {
     });
   }
 
-  void updateWardData(String districtCode) async{
+  void updateWardData(String districtCode) async {
     callAPI(host + "wards/getByDistrict?districtCode=$districtCode&limit=-1")
         .then((data) {
       setState(() {
@@ -637,7 +729,8 @@ class _addressPageState extends State<AddressPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 70),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 70),
                 child: TextField(
                   controller: _textNameController,
                   decoration: InputDecoration(
@@ -646,7 +739,8 @@ class _addressPageState extends State<AddressPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 70),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 70),
                 child: TextField(
                   controller: _textPhoneController,
                   decoration: InputDecoration(
@@ -669,12 +763,13 @@ class _addressPageState extends State<AddressPage> {
 
                         // Tìm đối tượng có tên thành phố tương ứng và lấy giá trị "code"
                         final selectedCityObject = cityData.firstWhere(
-                              (item) => item["name_with_type"] == value,
+                          (item) => item["name_with_type"] == value,
                           orElse: () => null,
                         );
 
                         if (selectedCityObject != null) {
-                          String cityCode = selectedCityObject["code"].toString().trim();
+                          String cityCode =
+                              selectedCityObject["code"].toString().trim();
                           print("Code City: " + cityCode);
                           updateDistrictData(cityCode);
                         }
@@ -700,16 +795,18 @@ class _addressPageState extends State<AddressPage> {
                   onSelected: (value) {
                     setState(() {
                       if (value != null) {
-                        selectedDistrict = value; // Cập nhật giá trị quận/huyện khi người dùng thay đổi
+                        selectedDistrict =
+                            value; // Cập nhật giá trị quận/huyện khi người dùng thay đổi
 
                         // Tìm đối tượng có tên quận/huyện tương ứng và lấy giá trị "code"
                         final selectedDistrictObject = districtData.firstWhere(
-                              (item) => item["name_with_type"] == value,
+                          (item) => item["name_with_type"] == value,
                           orElse: () => null,
                         );
 
                         if (selectedDistrictObject != null) {
-                          String districtCode = selectedDistrictObject["code"].toString().trim();
+                          String districtCode =
+                              selectedDistrictObject["code"].toString().trim();
                           print("Code District: " + districtCode);
                           updateWardData(districtCode);
                         }
@@ -748,7 +845,8 @@ class _addressPageState extends State<AddressPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 70),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 70),
                 child: TextField(
                   controller: _textdetailAddressController,
                   decoration: InputDecoration(
@@ -793,7 +891,8 @@ class _addressPageState extends State<AddressPage> {
           content: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.only(top: 20),
-              child: Text('This information will automatically be updated to your account\'s personal information and set as default for subsequent purchases?',
+              child: Text(
+                'This information will automatically be updated to your account\'s personal information and set as default for subsequent purchases?',
                 style: TextStyle(
                   fontSize: 20,
                 ),
@@ -802,24 +901,51 @@ class _addressPageState extends State<AddressPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Just this time', style: TextStyle(fontSize: 18),),
+              child: const Text(
+                'Just this time',
+                style: TextStyle(fontSize: 18),
+              ),
               onPressed: () {
                 tempAddress = true;
                 nameNew = _textNameController.text;
                 phoneNew = _textPhoneController.text.trim();
-                addressNew = selectedWard + ", " + selectedDistrict + ", " + selectedCity;
+                addressNew = selectedWard +
+                    ", " +
+                    selectedDistrict +
+                    ", " +
+                    selectedCity;
                 detailAddress = _textdetailAddressController.text;
-                Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: listProduct)));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            PaymentPage(listProduct: listProduct)));
               },
             ),
             Spacer(),
             TextButton(
-              child: const Text('Agree', style: TextStyle(fontSize: 18),),
+              child: const Text(
+                'Agree',
+                style: TextStyle(fontSize: 18),
+              ),
               onPressed: () {
                 tempAddress = false;
                 final user = context.read<SignInProvider>();
-                user.updateAddress(_textNameController.text, _textPhoneController.text.trim(), _textdetailAddressController.text + ", " + selectedWard + ", " + selectedDistrict + ", " + selectedCity);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(listProduct: listProduct)));
+                user.updateAddress(
+                    _textNameController.text,
+                    _textPhoneController.text.trim(),
+                    _textdetailAddressController.text +
+                        ", " +
+                        selectedWard +
+                        ", " +
+                        selectedDistrict +
+                        ", " +
+                        selectedCity);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            PaymentPage(listProduct: listProduct)));
               },
             ),
           ],
@@ -828,6 +954,3 @@ class _addressPageState extends State<AddressPage> {
     );
   }
 }
-
-
-

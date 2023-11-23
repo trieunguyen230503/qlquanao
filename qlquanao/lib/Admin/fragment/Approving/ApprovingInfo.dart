@@ -315,12 +315,10 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
           backgroundColor: Colors.black45,
           textColor: Colors.white,
           fontSize: 16.0);
-
       Navigator.push(context, MaterialPageRoute(builder: (context) => ApproveOrderPage()));
     }
     else{
       databaseReference.child(orderID).ref.remove();
-
       await Fluttertoast.showToast(
           msg: "Refused",
           toastLength: Toast.LENGTH_SHORT,
@@ -329,10 +327,7 @@ class _ApprovingInfoState extends State<ApprovingInfo> {
           backgroundColor: Colors.black45,
           textColor: Colors.white,
           fontSize: 16.0);
-
       Navigator.push(context, MaterialPageRoute(builder: (context) => ApproveOrderPage()));
-
     }
-
   }
 }
