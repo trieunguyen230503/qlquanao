@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +8,12 @@ import 'package:qlquanao/model/OrderItem.dart';
 
 import '../../model/Order.dart';
 import '../../provider/signin_provider.dart';
+
+
+class OrderHistory{
+  Orders? orders;
+  List<OrderItem>? orderItems;
+}
 
 
 class OrderHistoryPage extends StatefulWidget {
@@ -17,6 +25,7 @@ class OrderHistoryPage extends StatefulWidget {
 
 class _OrderHistoryPageState extends State<OrderHistoryPage> {
   List<Orders> orderList = [];
+  List<OrderHistory> orderHistoryList = [];
   String? uid;
 
 
@@ -26,6 +35,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
     getDataUser();
     getOrdersFromFirebase();
   }
+
 
   void getDataUser() async {
     // Lấy id user đang đăng nhập
@@ -39,7 +49,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
     final DatabaseReference databaseRef =
         FirebaseDatabase.instance.ref("orders");
 
-    databaseRef.onValue.listen((event) {
+    databaseRef.onValue.listen((event) async {
       if (orderList.isNotEmpty) {
         orderList.clear();
       }
@@ -64,21 +74,31 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
   // Function to fetch a list of OrderItems for a specific order
   Future<List<OrderItem>> fetchOrderItemsForOrder(String orderID) async {
     final DatabaseReference databaseRef =
-        FirebaseDatabase.instance.ref("orderItem");
+    FirebaseDatabase.instance.ref("orderItem");
     List<OrderItem> orderItems = [];
 
-    await databaseRef.onValue.listen((event) {
+    // Sử dụng Completer để giữ track khi sự kiện lắng nghe hoàn thành
+    Completer<List<OrderItem>> completer = Completer<List<OrderItem>>();
+
+    // Lắng nghe sự kiện onValue từ databaseRef
+    databaseRef.onValue.listen((event) {
       for (final child in event.snapshot.children) {
         OrderItem orderItem = OrderItem.fromSnapshot(child);
         if (orderItem.orderID == orderID) {
           orderItems.add(orderItem);
+          print("Đã add 1");
         }
       }
+
+      // Khi sự kiện lắng nghe hoàn thành, hoặc có thể đặt điều kiện nếu cần
+      completer.complete(orderItems);
     }, onError: (error) {
-      // Error.
+      // Xử lý lỗi nếu có
+      completer.completeError(error);
     });
 
-    return orderItems;
+    // Trả về Future từ Completer
+    return completer.future;
   }
 
   @override
@@ -234,7 +254,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                                       ],
                                     ),
                                   ),
-                                Text("Total: " + currencyFormatterUSD.format(orderItem.totalamount!), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),),
+                                Text("Total: " + currencyFormatterUSD.format(orderItem.totalamount!), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF000099)),),
                               ],
                             ),
                           ),

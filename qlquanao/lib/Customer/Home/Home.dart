@@ -418,18 +418,20 @@ class _HomePage2State extends State<HomePage2> {
                                       ),
                                     ),
                                     Container(
+                                      height: 50,
                                       padding: EdgeInsets.only(bottom: 8),
-                                      alignment: Alignment.centerLeft,
+                                      alignment: Alignment.topLeft,
                                       child: Text(
                                         productItem.name!,
                                         style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 17,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black87,
                                         ),
                                       ),
                                     ),
                                     Container(
+                                      padding: EdgeInsets.only(top: 8),
                                       alignment: Alignment.centerLeft,
                                       child: Text(
                                         currencyFormatterUSD
